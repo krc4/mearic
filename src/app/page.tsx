@@ -37,7 +37,7 @@ export default function Home() {
             {/* Main Content */}
             <main className="col-span-12 lg:col-span-6">
               <article className="prose prose-stone dark:prose-invert max-w-none">
-                <Card className="overflow-hidden shadow-lg transition-shadow hover:shadow-xl duration-300">
+                <Card className="overflow-hidden transition-shadow hover:shadow-xl duration-300">
                   <CardContent className="p-0">
                     <div className="relative w-full h-[400px]">
                        <Image
@@ -99,7 +99,7 @@ export default function Home() {
                     ))}
                   </CardContent>
                 </Card>
-                 <Card className="bg-primary/10 border-primary/20 shadow-sm">
+                 <Card className="bg-primary/10 border-primary/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl font-bold text-primary">
                       <Rss className="w-6 h-6"/>
