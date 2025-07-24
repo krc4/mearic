@@ -10,7 +10,7 @@ export interface Post {
 export const mainArticle: Post = {
   id: 1,
   title: 'Kuran\'da Evrenin Genişlemesi Mucizesi',
-  image: 'https://placehold.co/1200x800',
+  image: 'https://images.unsplash.com/photo-1512632578888-169bbbc64f33?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxpc2xhbXxlbnwwfHx8fDE3NTMzODE5NTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
   readTime: 7,
   category: 'Kuran Mucizeleri',
   content: `
