@@ -37,7 +37,7 @@ export default function Home() {
             {/* Main Content */}
             <main className="col-span-12 lg:col-span-6">
               <article className="prose prose-stone dark:prose-invert max-w-none">
-                <Card className="overflow-hidden transition-shadow hover:shadow-xl duration-300">
+                <Card className="overflow-hidden transition-shadow hover:shadow-xl dark:hover:shadow-none duration-300">
                   <CardContent className="p-0">
                     <div className="relative w-full h-[400px]">
                        <Image
@@ -89,7 +89,7 @@ export default function Home() {
             {/* Right Sidebar */}
             <aside className="hidden lg:block lg:col-span-3">
               <div className="sticky top-28 space-y-8">
-                <Card className="shadow-sm">
+                <Card className="shadow-sm dark:shadow-none">
                   <CardHeader>
                     <CardTitle className="text-xl font-bold">Popüler Yazılar</CardTitle>
                   </CardHeader>
