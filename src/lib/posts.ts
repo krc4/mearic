@@ -21,7 +21,7 @@ export const mainArticle: Post = {
         <footer class="text-right not-italic text-base text-muted-foreground mt-2">— Zariyat Suresi, 47. Ayet</footer>
     </blockquote>
     <p>Bu ayette geçen "genişleticiyiz" (lā-mūsi'ūna) ifadesi, Arapça dilbilgisi açısından ism-i fail olup, genişletme eyleminin devam ettiğini ve gelecekte de devam edeceğini ifade eder. Bu, evrenin sadece bir defaya mahsus genişlemediğini, bu eylemin sürekli olduğunu vurgulayan mucizevi bir ifadedir. Bilimin ancak 20. yüzyılda ulaşabildiği bu bilgi, Kuran'ın Allah kelamı olduğunun apaçık bir delilidir.</p>
-    <h3 class="text-2xl font-headline font-semibold mt-8 mb-4">Bilimsel ve Kuranî Perspektifin Uyumu</h3>
+    <h3 class="text-2xl font-bold mt-8 mb-4">Bilimsel ve Kuranî Perspektifin Uyumu</h3>
     <p>Kuran'ın bu ifadesi, o dönemin ilkel astronomi bilgisiyle açıklanabilecek bir durum değildir. O dönemde hakim olan inanış, Aristo ve Batlamyus'un etkisindeki statik evren modeliydi. Kuran, bu yaygın ve yanlış inanışın aksine, dinamik ve genişleyen bir evren tablosu çizmiştir. Bu durum, Kuran'ın insanüstü bir kaynaktan geldiğini ve her çağda insanlığa yol gösteren bir rehber olduğunu kanıtlar niteliktedir.</p>
   `,
 };
@@ -38,7 +38,7 @@ export const mockPosts: Post[] = [
   {
     id: 3,
     title: 'Demirin Gökten İndirilmesi',
-    image: 'https://placehold.co/600x400',
+    image: 'https://placehold.co/300x200',
     readTime: 4,
     category: 'Kuran Mucizeleri',
     content: '',
@@ -46,7 +46,7 @@ export const mockPosts: Post[] = [
   {
     id: 4,
     title: 'Parmak İzindeki Yaratılış Sırrı',
-    image: 'https://placehold.co/600x400',
+    image: 'https://placehold.co/80x80',
     readTime: 3,
     category: 'Kuran Mucizeleri',
     content: '',
@@ -54,7 +54,7 @@ export const mockPosts: Post[] = [
   {
     id: 5,
     title: 'Hadislerde Tıbb-ı Nebevi',
-    image: 'https://placehold.co/600x400',
+    image: 'https://placehold.co/80x80',
     readTime: 8,
     category: 'Hadis Mucizeleri',
     content: '',
@@ -62,7 +62,7 @@ export const mockPosts: Post[] = [
   {
     id: 6,
     title: 'İslam ve Sabır Kavramı',
-    image: 'https://placehold.co/600x400',
+    image: 'https://placehold.co/80x80',
     readTime: 6,
     category: 'İslami Bloglar',
     content: '',

@@ -1,18 +1,13 @@
 import type { Metadata } from 'next';
-import { Alegreya, Source_Code_Pro } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 
-const alegreya = Alegreya({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-alegreya',
-});
-
-const sourceCodePro = Source_Code_Pro({
-  subsets: ['latin'],
-  variable: '--font-source-code-pro',
+  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
@@ -30,9 +25,8 @@ export default function RootLayout({
       <head />
       <body
         className={cn(
-          'min-h-screen bg-background font-body antialiased',
-          alegreya.variable,
-          sourceCodePro.variable
+          'min-h-screen bg-background font-sans antialiased',
+          inter.variable
         )}
       >
         <ThemeProvider

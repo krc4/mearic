@@ -9,12 +9,16 @@ export function ReadingProgressBar() {
     const updateScrollCompletion = () => {
       const currentProgress = window.scrollY;
       const scrollHeight = document.body.scrollHeight - window.innerHeight;
-      if (scrollHeight) {
+      if (scrollHeight > 0) {
         setCompletion(Number((currentProgress / scrollHeight).toFixed(2)) * 100);
+      } else {
+        setCompletion(0);
       }
     };
 
     window.addEventListener('scroll', updateScrollCompletion);
+
+    updateScrollCompletion();
 
     return () => {
       window.removeEventListener('scroll', updateScrollCompletion);
@@ -23,8 +27,8 @@ export function ReadingProgressBar() {
 
   return (
     <div
-      style={{ transform: `translateX(${completion - 100}%)` }}
-      className="fixed top-0 left-0 h-1 w-full bg-primary transition-transform duration-150 z-50"
+      style={{ width: `${completion}%` }}
+      className="fixed top-0 left-0 h-1 bg-primary transition-width duration-150 ease-linear z-50"
     />
   );
 }

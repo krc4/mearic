@@ -18,9 +18,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['var(--font-alegreya)', ...fontFamily.serif],
-        headline: ['var(--font-alegreya)', ...fontFamily.serif],
-        code: ['var(--font-source-code-pro)', ...fontFamily.mono],
+        sans: ['var(--font-sans)', ...fontFamily.sans],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -101,6 +99,9 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      transitionProperty: {
+        'width': 'width',
+      }
     },
   },
   plugins: [require('tailwindcss-animate'), require("@tailwindcss/typography")],

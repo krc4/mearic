@@ -7,28 +7,28 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold text-xl font-headline">Nurunyolu</span>
+            <span className="font-bold text-xl">Nurunyolu</span>
           </Link>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <Link
               href="/"
-              className="transition-colors hover:text-foreground/80 text-foreground"
+              className="transition-colors hover:text-primary text-foreground"
             >
               Kuran Mucizeleri
             </Link>
             <Link
               href="#"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-primary text-foreground/60"
             >
               Hadislerdeki Mucizeler
             </Link>
             <Link
               href="#"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-primary text-foreground/60"
             >
               İslami Bloglar
             </Link>
@@ -41,7 +41,7 @@ export function Header() {
             <Input
               type="search"
               placeholder="Sitede ara..."
-              className="pl-9"
+              className="pl-9 bg-secondary"
             />
           </div>
           <ThemeToggle />

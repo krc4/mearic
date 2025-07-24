@@ -10,6 +10,7 @@ import { SocialShare } from '@/components/social-share';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 
 export default function Home() {
   return (
@@ -17,15 +18,15 @@ export default function Home() {
       <ReadingProgressBar />
       <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex-grow container mx-auto px-4 py-8">
+        <div className="flex-grow container mx-auto px-4 py-8 md:py-12">
           <div className="grid grid-cols-12 gap-8">
             {/* Left Sidebar */}
             <aside className="hidden lg:block lg:col-span-3">
-              <div className="sticky top-24">
-                <h3 className="text-lg font-headline font-semibold mb-4 text-foreground/80">
+              <div className="sticky top-28">
+                <h3 className="text-xl font-bold mb-6 text-foreground">
                   Son Yazılar
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {mockPosts.slice(0, 3).map((post) => (
                     <PostCard key={post.id} post={post} orientation="vertical" />
                   ))}
@@ -36,9 +37,9 @@ export default function Home() {
             {/* Main Content */}
             <main className="col-span-12 lg:col-span-6">
               <article className="prose prose-stone dark:prose-invert max-w-none">
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden shadow-lg transition-shadow hover:shadow-xl duration-300">
                   <CardContent className="p-0">
-                    <div className="relative w-full h-96">
+                    <div className="relative w-full h-[400px]">
                        <Image
                         src={mainArticle.image}
                         alt={mainArticle.title}
@@ -46,19 +47,22 @@ export default function Home() {
                         className="object-cover"
                         data-ai-hint="galaxy stars"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                       <div className="absolute bottom-6 left-6 md:left-8">
+                        <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
+                         <h1 className="text-3xl md:text-4xl font-bold mb-2 leading-tight text-white">
+                          {mainArticle.title}
+                        </h1>
+                         <div className="flex items-center text-sm text-white/80">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                   <div className="p-6 md:p-8">
-                    <h1 className="text-4xl md:text-5xl font-headline font-bold mb-4 leading-tight">
-                      {mainArticle.title}
-                    </h1>
-                    <div className="flex items-center text-sm text-muted-foreground mb-6">
-                      <Clock className="w-4 h-4 mr-2" />
-                      <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
-                    </div>
-
                     <div
-                      className="space-y-6 text-lg text-foreground/90 font-body"
+                      className="space-y-6 text-lg text-foreground/90"
                       dangerouslySetInnerHTML={{ __html: mainArticle.content }}
                     />
                     
@@ -66,8 +70,8 @@ export default function Home() {
 
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                       <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarImage src="https://placehold.co/40x40" alt="Admin" data-ai-hint="man portrait"/>
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src="https://placehold.co/48x48" alt="Admin" data-ai-hint="man portrait"/>
                           <AvatarFallback>A</AvatarFallback>
                         </Avatar>
                         <div>
@@ -84,10 +88,10 @@ export default function Home() {
 
             {/* Right Sidebar */}
             <aside className="hidden lg:block lg:col-span-3">
-              <div className="sticky top-24 space-y-8">
-                <Card>
+              <div className="sticky top-28 space-y-8">
+                <Card className="shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-lg font-headline">Popüler Yazılar</CardTitle>
+                    <CardTitle className="text-xl font-bold">Popüler Yazılar</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                      {mockPosts.slice(3, 6).map((post) => (
@@ -95,18 +99,20 @@ export default function Home() {
                     ))}
                   </CardContent>
                 </Card>
-                 <Card className="bg-secondary/50">
+                 <Card className="bg-primary/10 border-primary/20 shadow-sm">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg font-headline">
-                      <Rss className="w-5 h-5"/>
-                      <span>Bülten</span>
+                    <CardTitle className="flex items-center gap-2 text-xl font-bold text-primary">
+                      <Rss className="w-6 h-6"/>
+                      <span>Bültenimize Katılın</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4">
-                      En son yazılardan ve gelişmelerden haberdar olun.
+                      En son yazılardan ve gelişmelerden haberdar olmak için abone olun.
                     </p>
-                    <Button className="w-full">Abone Ol <ArrowUpRight className="w-4 h-4 ml-2"/></Button>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                      Abone Ol <ArrowUpRight className="w-4 h-4 ml-2"/>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -117,10 +123,10 @@ export default function Home() {
         <footer className="container mx-auto mt-12 py-8 px-4 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <Link href="#" className="hover:text-foreground transition-colors">Anasayfa</Link>
-              <Link href="#" className="hover:text-foreground transition-colors">Hakkımızda</Link>
-              <Link href="#" className="hover:text-foreground transition-colors">İletişim</Link>
+            <div className="flex gap-6 mt-4 md:mt-0">
+              <Link href="#" className="hover:text-primary transition-colors">Anasayfa</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
+              <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
             </div>
           </div>
         </footer>
