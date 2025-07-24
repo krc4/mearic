@@ -13,7 +13,7 @@ interface PostCardProps {
 export function PostCard({ post, orientation = 'vertical', compact = false }: PostCardProps) {
   if (orientation === 'vertical') {
     return (
-      <Link href="#" className="group block bg-card rounded-lg overflow-hidden shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 [transform:rotateX(5deg)_rotateY(5deg)] [transform-style:preserve-3d]">
+      <Link href="#" className="group block bg-card rounded-lg overflow-hidden shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1">
         <div className="overflow-hidden">
           <Image
             src={post.image}
