@@ -30,7 +30,7 @@ export const mockPosts: Post[] = [
   {
     id: 2,
     title: 'Dağların Hareket Halinde Olması',
-    image: 'https://placehold.co/600x400',
+    image: 'https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080',
     readTime: 5,
     category: 'Kuran Mucizeleri',
     content: '',
