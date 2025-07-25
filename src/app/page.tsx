@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight, ArrowDown } from 'lucide-react';
+import { Clock, Rss, ArrowUpRight, Bot } from 'lucide-react';
 import { mockPosts, mainArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
 import { PostCard } from '@/components/post-card';
@@ -9,6 +9,7 @@ import { ReadingProgressBar } from '@/components/reading-progress-bar';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { HeroBackground } from '@/components/hero-background';
 
 export default function Home() {
   return (
@@ -18,24 +19,18 @@ export default function Home() {
         <Header />
 
         {/* Hero Section */}
-        <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center text-center text-white">
-          <Image
-            src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhcmFiaWFuJTIwbmlnaHR8ZW58MHx8fHwxNzUzMzgxODMxfDA&ixlib=rb-4.1.0&q=80&w=1080"
-            alt="İslami Gece Manzarası"
-            fill
-            className="object-cover -z-10 brightness-50"
-            data-ai-hint="arabian night"
-          />
-          <div className="container px-4">
+        <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center text-center text-white overflow-hidden">
+          <HeroBackground />
+          <div className="container px-4 z-10">
             <h1 className="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
-              Kuran'ın Işığında Bilim ve Kâinat
+              İslam'ın Işığında Yapay Zeka
             </h1>
             <p className="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-white/80 drop-shadow-md">
-              İslam'ın mucizelerini modern bilimle keşfedin, inancınızı bilgiyle pekiştirin.
+              İslami konulardaki sorularınızı yanıtlayan, size özel bir yapay zeka asistanı. Merak ettiklerinizi sorun, anında öğrenin.
             </p>
             <Button size="lg" className="mt-8 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20">
-              Keşfetmeye Başla
-              <ArrowDown className="w-5 h-5 ml-2 animate-bounce" />
+              Yapay Zekayı Deneyin
+              <Bot className="w-5 h-5 ml-2" />
             </Button>
           </div>
         </section>
@@ -43,7 +38,7 @@ export default function Home() {
         <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
           {/* Main Article Section */}
           <article className="mb-16 md:mb-24">
-            <Card className="overflow-hidden border-none shadow-none md:shadow-lg dark:md:shadow-none md:grid md:grid-cols-2 md:gap-8 items-center bg-card/50">
+            <Card className="overflow-hidden border-none shadow-none md:shadow-lg dark:md:shadow-none md:grid md:grid-cols-2 md:gap-8 items-center bg-card/50 transition-transform duration-500 ease-in-out hover:scale-[1.02] transform-gpu">
               <div className="relative w-full h-64 md:h-full min-h-[300px]">
                 <Image
                   src={mainArticle.image}
