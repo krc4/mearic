@@ -42,3 +42,46 @@
       transform: rotate(360deg);
     }
   }
+
+
+/* --- Main Article Card Styles --- */
+
+@keyframes bg-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.mainArticleCardWrapper {
+  @apply relative p-1 rounded-xl;
+  background-image: linear-gradient(115deg, hsl(var(--primary)/0.2), hsl(var(--accent)), hsl(var(--primary)/0.2));
+  background-size: 200% 200%;
+  animation: bg-pan 10s linear infinite;
+}
+
+.mainArticleCard {
+  @apply relative rounded-lg overflow-hidden border-none shadow-2xl transition-transform duration-300 ease-in-out;
+  background: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transform-style: preserve-3d;
+}
+
+.mainArticleCardWrapper:hover .mainArticleCard {
+  transform: scale(1.02) rotateX(2deg) rotateY(-2deg);
+}
+
+.cardShine {
+  @apply absolute top-0 left-0 w-full h-full opacity-0 transition-opacity duration-500 rounded-lg;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  pointer-events: none;
+  transform: translateZ(10px);
+}
+
+.mainArticleCardWrapper:hover .cardShine {
+  opacity: 1;
+}
+
+.mainArticleCard > div {
+  transform: translateZ(20px);
+}

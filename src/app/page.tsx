@@ -9,6 +9,8 @@ import { ReadingProgressBar } from '@/components/reading-progress-bar';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { HeroBackground } from '@/components/hero-background';
+import styles from './page.module.css';
+
 
 export default function Home() {
   return (
@@ -37,33 +39,38 @@ export default function Home() {
         <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
           {/* Main Article Section */}
           <article className="mb-16 md:mb-24">
-            <Card className="overflow-hidden border-none shadow-none md:shadow-lg dark:md:shadow-none md:grid md:grid-cols-2 md:gap-8 items-center bg-transparent transition-transform duration-500 ease-in-out hover:scale-[1.02] transform-gpu">
-              <div className="relative w-full h-64 md:h-full min-h-[300px]">
-                <Image
-                  src={mainArticle.image}
-                  alt={mainArticle.title}
-                  fill
-                  className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
-                  data-ai-hint="galaxy stars"
-                />
-              </div>
-              <div className="p-6 md:p-8 bg-card/50 rounded-r-lg">
-                <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
-                <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
-                  {mainArticle.title}
-                </h2>
-                <div className="flex items-center text-sm text-muted-foreground mb-4">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
+            <div className={styles.mainArticleCardWrapper}>
+              <Card className={styles.mainArticleCard}>
+                <div className={styles.cardShine}></div>
+                <div className="md:grid md:grid-cols-2 md:gap-8 items-center h-full">
+                  <div className="relative w-full h-64 md:h-full min-h-[300px]">
+                    <Image
+                      src={mainArticle.image}
+                      alt={mainArticle.title}
+                      fill
+                      className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+                      data-ai-hint="galaxy stars"
+                    />
+                  </div>
+                  <div className="p-6 md:p-8 relative z-10">
+                    <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight text-white">
+                      {mainArticle.title}
+                    </h2>
+                    <div className="flex items-center text-sm text-white/70 mb-4">
+                      <Clock className="w-4 h-4 mr-2" />
+                      <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
+                    </div>
+                    <p className="text-white/70 mb-6">
+                      Modern bilimin evrenin genişlediği keşfi, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde haber verilmiştir. Bu yazıda bu mucizeyi inceliyoruz.
+                    </p>
+                    <Button asChild variant="secondary">
+                      <Link href="#">Yazıyı Oku <ArrowUpRight className="w-4 h-4 ml-2"/></Link>
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-muted-foreground mb-6">
-                  Modern bilimin evrenin genişlediği keşfi, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde haber verilmiştir. Bu yazıda bu mucizeyi inceliyoruz.
-                </p>
-                <Button asChild>
-                  <Link href="#">Yazıyı Oku <ArrowUpRight className="w-4 h-4 ml-2"/></Link>
-                </Button>
-              </div>
-            </Card>
+              </Card>
+            </div>
           </article>
 
           {/* Other Posts */}
