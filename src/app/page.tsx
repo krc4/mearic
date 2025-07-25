@@ -1,17 +1,14 @@
 import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight } from 'lucide-react';
+import { Clock, Rss, ArrowUpRight, ArrowDown } from 'lucide-react';
 import { mockPosts, mainArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
 import { PostCard } from '@/components/post-card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ReadingProgressBar } from '@/components/reading-progress-bar';
-import { SocialShare } from '@/components/social-share';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import styles from './page.module.css';
+import { Input } from '@/components/ui/input';
 
 export default function Home() {
   return (
@@ -19,108 +16,96 @@ export default function Home() {
       <ReadingProgressBar />
       <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex-grow container mx-auto px-4 py-8 md:py-12">
-          <div className="grid grid-cols-12 gap-8">
-            {/* Left Sidebar */}
-            <aside className="hidden lg:block lg:col-span-3">
-              <div className="sticky top-28">
-                <h3 className="text-xl font-bold mb-6 text-foreground">
-                  Son Yazılar
-                </h3>
-                <div className="space-y-6">
-                  {mockPosts.slice(0, 3).map((post) => (
-                    <PostCard key={post.id} post={post} orientation="vertical" />
-                  ))}
-                </div>
-              </div>
-            </aside>
 
-            {/* Main Content */}
-            <main className="col-span-12 lg:col-span-6">
-              <article className="prose prose-stone dark:prose-invert max-w-none">
-                <Card className="overflow-hidden shadow-lg dark:shadow-none transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-none">
-                  <CardContent className="p-0">
-                    <div className="relative w-full h-[400px]">
-                       <Image
-                        src={mainArticle.image}
-                        alt={mainArticle.title}
-                        fill
-                        className="object-cover"
-                        data-ai-hint="galaxy stars"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                       <div className="absolute bottom-6 left-6 md:left-8">
-                        <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
-                         <h1 className="text-3xl md:text-4xl font-bold mb-2 leading-tight text-white">
-                          {mainArticle.title}
-                        </h1>
-                         <div className="flex items-center text-sm text-white/80">
-                          <Clock className="w-4 h-4 mr-2" />
-                          <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <div className="p-6 md:p-8">
-                    <div
-                      className={`${styles.articleContent} space-y-6 text-lg text-foreground/90`}
-                      dangerouslySetInnerHTML={{ __html: mainArticle.content }}
-                    />
-                    
-                    <Separator className="my-8" />
-
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src="https://placehold.co/48x48" alt="Admin" data-ai-hint="man portrait"/>
-                          <AvatarFallback>A</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold">Admin</p>
-                          <p className="text-sm text-muted-foreground">Nurunyolu Editörü</p>
-                        </div>
-                      </div>
-                      <SocialShare />
-                    </div>
-                  </div>
-                </Card>
-              </article>
-            </main>
-
-            {/* Right Sidebar */}
-            <aside className="hidden lg:block lg:col-span-3">
-              <div className="sticky top-28 space-y-8">
-                <Card className="shadow-sm dark:shadow-none">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold">Popüler Yazılar</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                     {mockPosts.slice(3, 6).map((post) => (
-                        <PostCard key={post.id} post={post} orientation="horizontal" compact={true}/>
-                    ))}
-                  </CardContent>
-                </Card>
-                 <Card className="bg-primary/10 border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-xl font-bold text-primary">
-                      <Rss className="w-6 h-6"/>
-                      <span>Bültenimize Katılın</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      En son yazılardan ve gelişmelerden haberdar olmak için abone olun.
-                    </p>
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                      Abone Ol <ArrowUpRight className="w-4 h-4 ml-2"/>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </aside>
+        {/* Hero Section */}
+        <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center text-center text-white">
+          <Image
+            src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhcmFiaWFuJTIwbmlnaHR8ZW58MHx8fHwxNzUzMzgxODMxfDA&ixlib=rb-4.1.0&q=80&w=1080"
+            alt="İslami Gece Manzarası"
+            fill
+            className="object-cover -z-10 brightness-50"
+            data-ai-hint="arabian night"
+          />
+          <div className="container px-4">
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
+              Kuran'ın Işığında Bilim ve Kâinat
+            </h1>
+            <p className="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-white/80 drop-shadow-md">
+              İslam'ın mucizelerini modern bilimle keşfedin, inancınızı bilgiyle pekiştirin.
+            </p>
+            <Button size="lg" className="mt-8 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20">
+              Keşfetmeye Başla
+              <ArrowDown className="w-5 h-5 ml-2 animate-bounce" />
+            </Button>
           </div>
+        </section>
 
-        </div>
+        <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
+          {/* Main Article Section */}
+          <article className="mb-16 md:mb-24">
+            <Card className="overflow-hidden border-none shadow-none md:shadow-lg dark:md:shadow-none md:grid md:grid-cols-2 md:gap-8 items-center bg-card/50">
+              <div className="relative w-full h-64 md:h-full min-h-[300px]">
+                <Image
+                  src={mainArticle.image}
+                  alt={mainArticle.title}
+                  fill
+                  className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+                  data-ai-hint="galaxy stars"
+                />
+              </div>
+              <div className="p-6 md:p-8">
+                <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
+                  {mainArticle.title}
+                </h2>
+                <div className="flex items-center text-sm text-muted-foreground mb-4">
+                  <Clock className="w-4 h-4 mr-2" />
+                  <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
+                </div>
+                <p className="text-muted-foreground mb-6">
+                  Modern bilimin evrenin genişlediği keşfi, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde haber verilmiştir. Bu yazıda bu mucizeyi inceliyoruz.
+                </p>
+                <Button asChild>
+                  <Link href="#">Yazıyı Oku <ArrowUpRight className="w-4 h-4 ml-2"/></Link>
+                </Button>
+              </div>
+            </Card>
+          </article>
+
+          {/* Other Posts */}
+          <section className="mb-16 md:mb-24">
+            <h2 className="text-3xl font-bold text-center mb-12">Öne Çıkan Diğer Yazılar</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {mockPosts.slice(0, 3).map((post) => (
+                <PostCard key={post.id} post={post} orientation="vertical" />
+              ))}
+            </div>
+          </section>
+
+          {/* Newsletter */}
+          <section>
+            <Card className="bg-primary/10 border-primary/20">
+              <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="text-center md:text-left">
+                  <h3 className="flex items-center justify-center md:justify-start gap-3 text-2xl font-bold text-primary">
+                    <Rss className="w-7 h-7"/>
+                    <span>Bültenimize Katılın</span>
+                  </h3>
+                  <p className="text-muted-foreground mt-2 max-w-lg">
+                    En son yazılardan, İslami içeriklerden ve gelişmelerden ilk siz haberdar olun.
+                  </p>
+                </div>
+                <form className="w-full md:w-auto flex items-center gap-2">
+                  <Input type="email" placeholder="E-posta adresiniz" className="flex-grow md:min-w-[300px] bg-background" />
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    Abone Ol
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </section>
+
+        </main>
 
         <footer className="container mx-auto mt-12 py-8 px-4 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
