@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import styles from './page.module.css';
 
 export default function Home() {
   return (
@@ -37,7 +38,7 @@ export default function Home() {
             {/* Main Content */}
             <main className="col-span-12 lg:col-span-6">
               <article className="prose prose-stone dark:prose-invert max-w-none">
-                <Card className="overflow-hidden transition-shadow hover:shadow-xl dark:hover:shadow-none duration-300">
+                <Card className="overflow-hidden shadow-lg dark:shadow-none transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-none">
                   <CardContent className="p-0">
                     <div className="relative w-full h-[400px]">
                        <Image
@@ -62,7 +63,7 @@ export default function Home() {
                   </CardContent>
                   <div className="p-6 md:p-8">
                     <div
-                      className="space-y-6 text-lg text-foreground/90"
+                      className={`${styles.articleContent} space-y-6 text-lg text-foreground/90`}
                       dangerouslySetInnerHTML={{ __html: mainArticle.content }}
                     />
                     
