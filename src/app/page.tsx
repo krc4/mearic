@@ -52,16 +52,16 @@ export default function Home() {
                       data-ai-hint="galaxy stars"
                     />
                   </div>
-                  <div className="p-6 md:p-8 relative z-10">
+                  <div className="p-6 md:p-8">
                     <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight text-white">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
                       {mainArticle.title}
                     </h2>
-                    <div className="flex items-center text-sm text-white/70 mb-4">
+                    <div className="flex items-center text-sm text-muted-foreground mb-4">
                       <Clock className="w-4 h-4 mr-2" />
                       <span>Tahmini okuma süresi: {mainArticle.readTime} dakika</span>
                     </div>
-                    <p className="text-white/70 mb-6">
+                    <p className="text-muted-foreground mb-6">
                       Modern bilimin evrenin genişlediği keşfi, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde haber verilmiştir. Bu yazıda bu mucizeyi inceliyoruz.
                     </p>
                     <Button asChild variant="secondary">
