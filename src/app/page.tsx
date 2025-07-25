@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ReadingProgressBar } from '@/components/reading-progress-bar';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { HeroBackground } from '@/components/hero-background';
 
 export default function Home() {
@@ -38,7 +37,7 @@ export default function Home() {
         <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
           {/* Main Article Section */}
           <article className="mb-16 md:mb-24">
-            <Card className="overflow-hidden border-none shadow-none md:shadow-lg dark:md:shadow-none md:grid md:grid-cols-2 md:gap-8 items-center bg-card/50 transition-transform duration-500 ease-in-out hover:scale-[1.02] transform-gpu">
+            <Card className="overflow-hidden border-none shadow-none md:shadow-lg dark:md:shadow-none md:grid md:grid-cols-2 md:gap-8 items-center bg-transparent transition-transform duration-500 ease-in-out hover:scale-[1.02] transform-gpu">
               <div className="relative w-full h-64 md:h-full min-h-[300px]">
                 <Image
                   src={mainArticle.image}
@@ -48,7 +47,7 @@ export default function Home() {
                   data-ai-hint="galaxy stars"
                 />
               </div>
-              <div className="p-6 md:p-8">
+              <div className="p-6 md:p-8 bg-card/50 rounded-r-lg">
                 <Badge variant="secondary" className="mb-2">{mainArticle.category}</Badge>
                 <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
                   {mainArticle.title}
@@ -91,7 +90,7 @@ export default function Home() {
                   </p>
                 </div>
                 <form className="w-full md:w-auto flex items-center gap-2">
-                  <Input type="email" placeholder="E-posta adresiniz" className="flex-grow md:min-w-[300px] bg-background" />
+                  <input type="email" placeholder="E-posta adresiniz" className="flex-grow md:min-w-[300px] bg-background p-2 rounded-md" />
                   <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     Abone Ol
                   </Button>
