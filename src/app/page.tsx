@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight, Bot } from 'lucide-react';
+import { Clock, Rss, ArrowUpRight, Bot, BookOpen } from 'lucide-react';
 import { mockPosts, mainArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
 import { PostCard } from '@/components/post-card';
@@ -40,6 +40,15 @@ export default function Home() {
         <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
           {/* Main Article Section */}
           <section className="mb-16 md:mb-24">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary flex items-center justify-center gap-3">
+                <BookOpen className="w-8 h-8"/>
+                Kuran Mucizeleri
+              </h2>
+              <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
+                Kuran-ı Kerim'in bilimsel ve edebi mucizelerini keşfedin.
+              </p>
+            </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
                     {/* Image as background */}
@@ -56,7 +65,6 @@ export default function Home() {
                     {/* Content */}
                     <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                       <div>
-                        <Badge variant="secondary" className="mb-3">{mainArticle.category}</Badge>
                         <h2 className="text-2xl font-semibold tracking-tight text-white">
                           {mainArticle.title}
                         </h2>
@@ -98,7 +106,6 @@ export default function Home() {
                     {/* Content */}
                     <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                       <div>
-                        <Badge variant="secondary" className="mb-3">{secondArticle.category}</Badge>
                         <h2 className="text-2xl font-semibold tracking-tight text-white">
                           {secondArticle.title}
                         </h2>
@@ -125,6 +132,14 @@ export default function Home() {
                       <div className="absolute -inset-px rounded-2xl bg-[radial-gradient(65%_65%_at_50%_50%,hsl(var(--accent)/0.15),transparent)] dark:bg-[radial-gradient(65%_65%_at_50%_50%,hsl(var(--accent)/0.3),transparent)]" />
                     </div>
                 </article>
+             </div>
+             <div className="text-center mt-12">
+                <Button asChild variant="outline" size="lg">
+                    <Link href="/kuran-mucizeleri">
+                        Daha Fazlasını Gör
+                        <ArrowUpRight className="ml-2 h-5 w-5" />
+                    </Link>
+                </Button>
              </div>
           </section>
 
