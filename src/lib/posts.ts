@@ -65,4 +65,24 @@ export const mockPosts: Post[] = [
     description: 'Hadislerde övülen ve bilimsel olarak da zengin besin değerleri kanıtlanmış olan hurmanın mucizevi faydaları.',
     content: '',
   },
+  {
+    id: 6,
+    title: 'Sabrın Önemi ve Faziletleri',
+    image: 'https://images.unsplash.com/photo-1597854224215-c63d41f057c3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    readTime: 7,
+    category: 'İslami Bloglar',
+    description: 'Hayatın zorlukları karşısında bir mü\'minin en güçlü sığınağı olan sabrın faziletleri ve hayata yansımaları.',
+    content: '',
+  },
+  {
+    id: 7,
+    title: 'İnfak Kültürü ve Toplumsal Dayanışma',
+    image: 'https://images.unsplash.com/photo-1518623380242-d992d14e073c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    readTime: 5,
+    category: 'İslami Bloglar',
+    description: "İslam'ın toplumsal dayanışma ve yardımlaşma temellerinden biri olan infakın manası ve önemi.",
+    content: '',
+  },
 ];
+
+    
