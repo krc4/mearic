@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight, Bot, BookOpen, HeartPulse } from 'lucide-react';
+import { Clock, Rss, ArrowUpRight, Bot, BookOpen, HeartPulse, Star } from 'lucide-react';
 import { mockPosts, mainArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
 import { PostCard } from '@/components/post-card';
@@ -16,6 +16,7 @@ export default function Home() {
   const secondArticle = mockPosts[0];
   const hadithArticle1 = mockPosts[2];
   const hadithArticle2 = mockPosts[3];
+  const thirdArticle = mockPosts[1];
 
   return (
     <>
@@ -237,6 +238,135 @@ export default function Home() {
                     </Link>
                 </Button>
              </div>
+          </section>
+
+          <section className="relative isolate mb-24 md:mb-32">
+            {/* Arkaplan: çoklu gradyan + noise */}
+            <div
+              className="absolute inset-0 -z-10 h-full w-full opacity-30 dark:opacity-40"
+              style={{
+                backgroundImage: `
+                  radial-gradient(at 40% 20%, hsla(210,100%,55%,.35) 0, transparent 50%),
+                  radial-gradient(at 80% 0%,   hsla(190,100%,55%,.35) 0, transparent 50%),
+                  radial-gradient(at 0% 50%,   hsla(355,85%,93%,.30) 0, transparent 50%),
+                  radial-gradient(at 80% 50%,  hsla(340,100%,76%,.30) 0, transparent 50%)
+                `,
+              }}
+            />
+            
+            {/* Başlık */}
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold font-serif tracking-tight text-foreground">
+                ✨ Popüler Konular
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                Kuran’ın en çok okunan ve tartışılan mucizelerini keşfetmeye hazır mısın?
+              </p>
+            </div>
+
+            {/* Asimetrik 3-lü grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Hero kart (sol üst) */}
+              <div className="md:col-span-2 md:row-span-2 group relative isolate flex aspect-[16/10] overflow-hidden rounded-3xl border border-border/30 bg-background/70 shadow-2xl backdrop-blur-md transition-all duration-500 hover:shadow-[0_0_60px_-15px_hsl(var(--accent)/.7)] dark:border-border/50">
+                <Image
+                  src={mainArticle.image}
+                  alt={mainArticle.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  data-ai-hint="galaxy stars"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                {/* Arapça kalligrafi overlay (sol alt) */}
+                <div className="absolute bottom-4 left-4 text-8xl font-kufi text-white/10 select-none">
+                  ﭑ
+                </div>
+                <div className="relative z-10 flex flex-col justify-end p-8">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 backdrop-blur-sm">
+                    <Star className="w-3.5 h-3.5" />
+                    En Çok Okunan
+                  </span>
+                  <h3 className="mt-3 text-3xl font-bold text-white">
+                    {mainArticle.title}
+                  </h3>
+                  <p className="mt-2 max-w-lg text-sm text-white/80">
+                    Evrenin genişlemesi mucizesi: Kuran 1400 yıl önce Zariyat Suresi’nde
+                    haber verdi.
+                  </p>
+                  <footer className="mt-6 flex items-center gap-4">
+                    <span className="flex items-center gap-1.5 text-xs text-white/70">
+                      <Clock className="h-4 w-4" />
+                      {mainArticle.readTime} dk okuma
+                    </span>
+                    <Button
+                      asChild
+                      size="lg"
+                      className="rounded-full bg-white/10 backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
+                    >
+                      <Link href="#">
+                        Yazıyı Oku
+                        <ArrowUpRight className="ml-2 h-5 w-5" />
+                      </Link>
+                    </Button>
+                  </footer>
+                </div>
+                {/* Parallax shine */}
+                <div className="absolute inset-0 -z-10 translate-y-full bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 transition-all duration-700 group-hover:translate-y-0 group-hover:opacity-100" />
+              </div>
+
+              {/* Kart-2 */}
+              <div className="group relative isolate flex aspect-square overflow-hidden rounded-3xl border border-border/30 bg-background/70 shadow-xl backdrop-blur-md transition-all duration-500 hover:shadow-[0_0_50px_-15px_hsl(var(--accent)/.5)] dark:border-border/50">
+                <Image
+                  src={secondArticle.image}
+                  alt={secondArticle.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  data-ai-hint="mountain range"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="relative z-10 flex flex-col justify-end p-5">
+                  <h4 className="text-xl font-semibold text-white">
+                    Dağların Hareketi
+                  </h4>
+                  <p className="mt-1 text-xs text-white/80">
+                    {secondArticle.readTime} dk okuma
+                  </p>
+                </div>
+              </div>
+
+              {/* Kart-3 */}
+              <div className="group relative isolate flex aspect-square overflow-hidden rounded-3xl border border-border/30 bg-background/70 shadow-xl backdrop-blur-md transition-all duration-500 hover:shadow-[0_0_50px_-15px_hsl(var(--accent)/.5)] dark:border-border/50">
+                <Image
+                  src={thirdArticle.image}
+                  alt={thirdArticle.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  data-ai-hint="embryo"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="relative z-10 flex flex-col justify-end p-5">
+                  <h4 className="text-xl font-semibold text-white">
+                    Embriyo Aşamaları
+                  </h4>
+                  <p className="mt-1 text-xs text-white/80">
+                    {thirdArticle.readTime} dk okuma
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Alt CTA */}
+            <div className="text-center mt-16">
+              <Button
+                asChild
+                size="lg"
+                className="group relative rounded-full bg-gradient-to-r from-emerald-500 to-sky-500 text-white font-semibold shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/50"
+              >
+                <Link href="/kuran-mucizeleri">
+                  Tüm Mucizeleri Keşfet
+                  <ArrowUpRight className="ml-2 h-5 w-5 transition-transform group-hover:rotate-45" />
+                </Link>
+              </Button>
+            </div>
           </section>
 
           {/* Newsletter */}

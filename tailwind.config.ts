@@ -19,6 +19,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],
+        serif: ['"Alegreya"', 'serif'],
+        kufi: ['var(--font-kufi)', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

@@ -40,11 +40,11 @@ export const mockPosts: Post[] = [
   },
   {
     id: 3,
-    title: 'Demirin Gökten İndirilmesi',
-    image: 'https://placehold.co/300x200',
-    readTime: 4,
+    title: 'Embriyo Aşamaları Mucizesi',
+    image: 'https://images.unsplash.com/photo-1604363236113-a8a5f3b7381c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbWJyeW98ZW58MHx8fHwxNzUzMzgzNjgyfDA&ixlib=rb-4.1.0&q=80&w=1080',
+    readTime: 6,
     category: 'Kuran Mucizeleri',
-    description: '',
+    description: 'Kuran, modern embriyolojinin asırlar sonra keşfedeceği insanın anne karnındaki gelişim aşamalarını detaylı olarak bildirmiştir.',
     content: '',
   },
   {
