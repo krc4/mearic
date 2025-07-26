@@ -19,7 +19,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],
-        serif: ['"Alegreya"', 'serif'],
+        serif: ['var(--font-serif)', 'serif'],
         kufi: ['var(--font-kufi)', 'sans-serif'],
       },
       colors: {
