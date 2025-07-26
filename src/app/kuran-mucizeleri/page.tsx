@@ -1,78 +1,201 @@
-
-import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight, Bot, BookOpen, Star, HeartPulse, Edit3 } from 'lucide-react';
-import { mockPosts, mainArticle } from '@/lib/posts';
-import { Header } from '@/components/header';
-import { PostCard } from '@/components/post-card';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ReadingProgressBar } from '@/components/reading-progress-bar';
-import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import styles from '../page.module.css';
+"use client";
+import Image from "next/image";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  Clock,
+  ArrowUpRight,
+  Heart,
+  Share2,
+  Filter,
+  Eye,
+  ChevronRight,
+} from "lucide-react";
+import { mockPosts, mainArticle } from "@/lib/posts";
+import { ReadingProgressBar } from "@/components/reading-progress-bar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/header";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function KuranMucizeleriPage() {
-  const quranPosts = mockPosts.filter(p => p.category === 'Kuran Mucizeleri');
-  quranPosts.unshift(mainArticle);
+  const { toast } = useToast();
+  const [filter, setFilter] = useState<"trending" | "latest">("trending");
+  const [viewed, setViewed] = useState<Set<number>>(new Set());
+
+  const posts = useMemo(() => {
+    const list = [mainArticle, ...mockPosts.filter((p) => p.category === "Kuran Mucizeleri")];
+    return filter === "latest"
+      ? [...list].sort((a, b) => b.id - a.id) // Assuming newer posts have higher IDs
+      : list.sort((a, b) => b.views - a.views);
+  }, [filter]);
+
+  const toggleViewed = (id: number) =>
+    setViewed((v) => new Set(v).add(id));
+
+  const handleShare = async (postTitle: string, postSlug: string) => {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: postTitle,
+                url: `/posts/${postSlug}`,
+            });
+        } catch (error) {
+            console.error('Error sharing:', error);
+        }
+    } else {
+        navigator.clipboard.writeText(`${window.location.origin}/posts/${postSlug}`);
+        toast({ title: "Link panoya kopyalandı!" });
+    }
+  }
 
   return (
     <>
       <ReadingProgressBar />
       <div className="flex flex-col min-h-screen">
         <Header />
+        
+        {/* Parallax Hero */}
+        <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
+          <div
+            className="absolute inset-0 -z-10 scale-125"
+            style={{
+              backgroundImage: `url(${mainArticle.image})`,
+              backgroundAttachment: "fixed",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "brightness(.4)",
+            }}
+          />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="text-center text-white"
+          >
+            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
+              Kuran Mucizeleri
+            </h1>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-white/80">
+              1400 yıl önce bildirilmiş bilimsel, sayısal ve edebi mucizeleri
+              keşfet.
+            </p>
+          </motion.div>
+        </section>
 
-        <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
-          <section>
-            <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary flex items-center justify-center gap-4">
-                <BookOpen className="w-10 h-10"/>
-                Kuran Mucizeleri
-              </h1>
-              <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                Kuran-ı Kerim'in her ayetinde gizli olan bilimsel, matematiksel ve edebi mucizeleri keşfedin. 1400 yıl önce indirilen bu kutsal kitabın, modern bilimin bulgularıyla ne kadar uyumlu olduğuna tanıklık edin.
-              </p>
+        {/* Breadcrumb + Filter */}
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Link href="/" className="hover:text-primary">Anasayfa</Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-foreground">Kuran Mucizeleri</span>
             </div>
-            
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {quranPosts.map(post => (
-                  <article key={post.id} className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={post.image}
-                        alt={post.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        data-ai-hint="quran miracle"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                      <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
-                        <div>
-                          <h2 className="text-xl font-semibold tracking-tight text-white">
-                            {post.title}
-                          </h2>
-                          <p className="mt-2 text-sm text-white/80">
-                            {post.description}
-                          </p>
-                        </div>
-                        <footer className="mt-6 flex items-center justify-between">
-                          <span className="inline-flex items-center gap-1.5 text-xs text-white/70">
-                            <Clock className="h-3.5 w-3.5" />
-                            Tahmini okuma süresi: {post.readTime} dakika
-                          </span>
-                          <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                              <Link href="#">
-                                  Yazıyı Oku
-                                  <ArrowUpRight className="ml-1.5 h-4 w-4" />
-                              </Link>
-                          </Button>
-                        </footer>
-                      </div>
-                      <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                        <div className="absolute -inset-px rounded-2xl bg-[radial-gradient(65%_65%_at_50%_50%,hsl(var(--accent)/0.15),transparent)] dark:bg-[radial-gradient(65%_65%_at_50%_50%,hsl(var(--accent)/0.3),transparent)]" />
-                      </div>
-                  </article>
-                ))}
-             </div>
-          </section>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={filter === "trending" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setFilter("trending")}
+              >
+                <Eye className="mr-1.5 h-4 w-4" />
+                Popüler
+              </Button>
+              <Button
+                variant={filter === "latest" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setFilter("latest")}
+              >
+                <Filter className="mr-1.5 h-4 w-4" />
+                Yeni
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Grid */}
+        <main className="container mx-auto flex-grow px-4 pb-20">
+          <motion.div
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            <AnimatePresence>
+              {posts.map((post) => (
+                <motion.article
+                  key={post.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4 }}
+                  className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
+                >
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
+                    data-ai-hint="quran miracle"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                  {/* Corner tag */}
+                  <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
+                    {post.category}
+                  </Badge>
+
+                  <div className="absolute inset-0 flex flex-col justify-end p-6">
+                    <h3 className="text-xl font-bold text-white leading-tight">
+                      {post.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-white/80 line-clamp-2">
+                      {post.description}
+                    </p>
+
+                    <div className="mt-auto flex items-center justify-between pt-4">
+                      <span className="flex items-center gap-1.5 text-xs text-white/70">
+                        <Clock className="h-3.5 w-3.5" />
+                        {post.readTime} dk
+                      </span>
+                      <Button
+                        asChild
+                        size="sm"
+                        onClick={() => toggleViewed(post.id)}
+                        className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
+                      >
+                        <Link href={`#`}>
+                          Oku
+                          <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                    </div>
+
+                    {/* Hover overlay actions */}
+                    <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-white hover:bg-white/20 hover:text-white"
+                        onClick={() => toast({ title: "Favorilere eklendi!"})}
+                      >
+                        <Heart className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-white hover:bg-white/20 hover:text-white"
+                        onClick={() => handleShare(post.title, post.slug)}
+                      >
+                        <Share2 className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
+                </motion.article>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         </main>
 
         <footer className="container mx-auto mt-12 py-8 px-4 border-t">

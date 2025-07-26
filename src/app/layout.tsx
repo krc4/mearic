@@ -16,7 +16,7 @@ const notoKufiArabic = Noto_Kufi_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: 'Nurunyolu | Kuran Mucizeleri',
+  title: 'Nurunyolu | İslami Blog & Kuran Mucizeleri',
   description: 'İslamın ışığında, Kuran ve Sünnetin rehberliğinde bir yolculuk.',
 };
 
