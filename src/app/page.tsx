@@ -128,17 +128,6 @@ export default function Home() {
              </div>
           </section>
 
-
-          {/* Other Posts */}
-          <section className="mb-16 md:mb-24">
-            <h2 className="text-3xl font-bold text-center mb-12">Öne Çıkan Diğer Yazılar</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {mockPosts.slice(1, 4).map((post) => (
-                <PostCard key={post.id} post={post} orientation="vertical" />
-              ))}
-            </div>
-          </section>
-
           {/* Newsletter */}
           <section>
             <Card className="bg-primary/10 border-primary/20">
