@@ -146,7 +146,27 @@ export default function KuranMucizeleriPage() {
                     {post.category}
                   </Badge>
 
-                  <div className="absolute inset-0 flex flex-col justify-end p-6">
+                  {/* Hover overlay actions */}
+                  <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-white hover:bg-white/20 hover:text-white"
+                        onClick={() => toast({ title: "Favorilere eklendi!"})}
+                      >
+                        <Heart className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-white hover:bg-white/20 hover:text-white"
+                        onClick={() => handleShare(post.title, post.slug)}
+                      >
+                        <Share2 className="h-5 w-5" />
+                      </Button>
+                    </div>
+
+                  <div className="relative z-10 flex flex-col justify-end p-6 h-full">
                     <div className="mt-auto">
                       <h3 className="text-xl font-bold text-white leading-tight">
                         {post.title}
@@ -172,26 +192,6 @@ export default function KuranMucizeleriPage() {
                           </Link>
                         </Button>
                       </div>
-                    </div>
-
-                    {/* Hover overlay actions */}
-                    <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-white hover:bg-white/20 hover:text-white"
-                        onClick={() => toast({ title: "Favorilere eklendi!"})}
-                      >
-                        <Heart className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-white hover:bg-white/20 hover:text-white"
-                        onClick={() => handleShare(post.title, post.slug)}
-                      >
-                        <Share2 className="h-5 w-5" />
-                      </Button>
                     </div>
                   </div>
                 </motion.article>
