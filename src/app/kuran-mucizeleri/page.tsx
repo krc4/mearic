@@ -186,7 +186,7 @@ export default function KuranMucizeleriPage() {
                           onClick={() => toggleViewed(post.id)}
                           className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
                         >
-                          <Link href={`#`}>
+                          <Link href={`/posts/${post.slug}`}>
                             Oku
                             <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                           </Link>

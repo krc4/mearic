@@ -86,7 +86,7 @@ export default function Home() {
                           Tahmini okuma süresi: {mainArticle.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${mainArticle.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -127,7 +127,7 @@ export default function Home() {
                           Tahmini okuma süresi: {secondArticle.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${secondArticle.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -186,7 +186,7 @@ export default function Home() {
                           Tahmini okuma süresi: {hadithArticle1.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${hadithArticle1.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -221,7 +221,7 @@ export default function Home() {
                           Tahmini okuma süresi: {hadithArticle2.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${hadithArticle2.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -256,7 +256,7 @@ export default function Home() {
                           Tahmini okuma süresi: {hadithArticle3.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${hadithArticle3.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -314,7 +314,7 @@ export default function Home() {
                           Tahmini okuma süresi: {blogArticle1.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${blogArticle1.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -349,7 +349,7 @@ export default function Home() {
                           Tahmini okuma süresi: {blogArticle2.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
-                            <Link href="#">
+                            <Link href={`/posts/${blogArticle2.slug}`}>
                                 Yazıyı Oku
                                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
                             </Link>
@@ -421,7 +421,7 @@ export default function Home() {
                       size="lg"
                       className="rounded-full bg-white/10 backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
                     >
-                      <Link href="#">
+                      <Link href={`/posts/${mainArticle.slug}`}>
                         Yazıyı Oku
                         <ArrowUpRight className="ml-2 h-5 w-5" />
                       </Link>
