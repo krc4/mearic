@@ -269,7 +269,7 @@ export default function Home() {
                   ﭑ
                 </div>
                 <div className="relative z-10 flex flex-col justify-end p-8">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 backdrop-blur-sm">
+                  <span className="w-fit inline-flex items-center gap-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 backdrop-blur-sm">
                     <Star className="w-3.5 h-3.5" />
                     En Çok Okunan
                   </span>
