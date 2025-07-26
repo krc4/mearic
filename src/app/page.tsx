@@ -269,7 +269,7 @@ export default function Home() {
                   ﭑ
                 </div>
                 <div className="relative z-10 flex flex-col justify-end p-8">
-                  <span className="w-fit inline-flex items-center gap-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 backdrop-blur-sm">
+                  <span className="w-fit inline-flex items-center gap-2 rounded-full bg-amber-400/20 py-1 text-xs font-semibold text-amber-200 backdrop-blur-sm">
                     <Star className="w-3.5 h-3.5" />
                     En Çok Okunan
                   </span>
@@ -347,7 +347,8 @@ export default function Home() {
               <Button
                 asChild
                 size="lg"
-                className="group relative rounded-full bg-gradient-to-r from-emerald-500 to-sky-500 text-white font-semibold shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/50"
+                variant="default"
+                className="group rounded-full font-semibold shadow-lg hover:shadow-xl transition-shadow"
               >
                 <Link href="/kuran-mucizeleri">
                   Tüm Mucizeleri Keşfet
