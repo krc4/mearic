@@ -45,32 +45,29 @@ export function DidYouKnowSection() {
   const next = () => setIdx((idx + 1) % funFacts.length);
 
   const copy = () => {
-    navigator.clipboard.writeText(`${fact.tr} – ${fact.ref}`);
-    toast({ title: "Panoya kopyalandı!"});
+    if (fact) {
+      navigator.clipboard.writeText(`${fact.tr} – ${fact.ref}`);
+      toast({ title: "Panoya kopyalandı!" });
+    }
   };
 
-  const tweet = () => {
-    const text = encodeURIComponent(
-      `${fact.tr} – ${fact.ref}\n#KuranMucizeleri`
-    );
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
-  };
+  if (!fact) return null;
 
   return (
     <section className="relative isolate mx-auto my-20 max-w-4xl px-4">
       {/* Soft glow in back */}
-      <div className="absolute -top-8 -left-8 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl dark:bg-emerald-500/20" />
-      <div className="absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-sky-400/20 blur-3xl dark:bg-sky-500/20" />
+      <div className="absolute -top-8 -left-8 h-40 w-40 rounded-full bg-primary/10 blur-3xl -z-10" />
+      <div className="absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-accent/10 blur-3xl -z-10" />
 
       {/* Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/30 bg-gradient-to-br from-background/80 via-background/60 to-background/80 p-6 shadow-2xl shadow-black/10 backdrop-blur-xl dark:from-background/60 dark:via-background/40 dark:to-background/60 dark:shadow-white/5">
+      <div className="relative overflow-hidden rounded-3xl border border-border/30 bg-background/70 p-6 shadow-2xl backdrop-blur-xl">
         {/* Arabic ornament */}
-        <span className="absolute -right-4 -top-4 text-[8rem] font-kufi text-foreground/5 dark:text-foreground/10 select-none">
+        <span className="absolute -right-4 -top-4 text-[8rem] font-kufi text-foreground/5 dark:text-foreground/10 select-none -z-10">
           ﷽
         </span>
 
         <header className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 text-white shadow-lg">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
             <RotateCw className="h-5 w-5" />
           </span>
           <h3 className="text-xl font-semibold text-foreground">
@@ -79,7 +76,7 @@ export function DidYouKnowSection() {
         </header>
 
         <div className="mt-4 space-y-2">
-          <p className="text-2xl font-kufi leading-relaxed text-emerald-600 dark:text-emerald-400">
+          <p className="text-2xl font-kufi leading-relaxed text-primary">
             {fact.ar}
           </p>
           <p className="text-base text-foreground/80">{fact.tr}</p>
@@ -92,26 +89,17 @@ export function DidYouKnowSection() {
               variant="outline"
               size="sm"
               onClick={copy}
-              className="rounded-full bg-background/50 backdrop-blur-sm"
+              className="rounded-full"
             >
               <Copy className="h-3.5 w-3.5" />
               Kopyala
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={tweet}
-              className="rounded-full bg-background/50 backdrop-blur-sm"
-            >
-              <Twitter className="h-3.5 w-3.5" />
-              Tweetle
             </Button>
           </div>
 
           <Button
             onClick={next}
             size="sm"
-            className="group/btn rounded-full bg-gradient-to-r from-emerald-500 to-sky-500 font-semibold text-white transition-all hover:gap-2"
+            className="group/btn rounded-full"
           >
             Sonraki
             <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-0.5" />
