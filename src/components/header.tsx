@@ -4,8 +4,11 @@ import { Search, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useForumSoonPopup } from '@/hooks/use-forum-soon-popup';
 
 export function Header() {
+  const { setIsOpen } = useForumSoonPopup();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -32,12 +35,13 @@ export function Header() {
             >
               İslami Bloglar
             </Link>
-            <Link
-              href="#"
-              className="transition-colors hover:text-primary text-foreground/60"
+            <Button
+              variant="link"
+              onClick={() => setIsOpen(true)}
+              className="transition-colors hover:text-primary text-foreground/60 p-0"
             >
               Forum
-            </Link>
+            </Button>
           </nav>
         </div>
 
