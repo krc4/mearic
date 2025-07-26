@@ -4,10 +4,26 @@ import { Search, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useForumSoonPopup } from '@/hooks/use-forum-soon-popup';
+import { useComingSoonPopup } from '@/hooks/use-coming-soon-popup';
 
 export function Header() {
-  const { setIsOpen } = useForumSoonPopup();
+  const { setPopupContent, setIsOpen } = useComingSoonPopup();
+
+  const handleForumClick = () => {
+    setPopupContent({
+      title: "Forum Çok Yakında!",
+      content: "Topluluğumuzla bir araya geleceğiniz, fikir alışverişinde bulunacağınız ve sorularınızı sorabileceğiniz interaktif forum bölümümüzü hazırlıyoruz."
+    });
+    setIsOpen(true);
+  }
+
+  const handleBlogsClick = () => {
+    setPopupContent({
+      title: "Bloglar Çok Yakında!",
+      content: "İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak, güncel ve özgün yazıların yer alacağı blog bölümümüzü hazırlıyoruz."
+    });
+    setIsOpen(true);
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,14 +47,14 @@ export function Header() {
             </Link>
             <Button
               variant="link"
-              onClick={() => setIsOpen(true)}
+              onClick={handleBlogsClick}
               className="transition-colors hover:text-primary text-foreground/60 p-0"
             >
               İslami Bloglar
             </Button>
             <Button
               variant="link"
-              onClick={() => setIsOpen(true)}
+              onClick={handleForumClick}
               className="transition-colors hover:text-primary text-foreground/60 p-0"
             >
               Forum

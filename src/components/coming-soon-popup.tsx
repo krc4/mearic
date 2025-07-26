@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useForumSoonPopup } from "@/hooks/use-forum-soon-popup";
+import { useComingSoonPopup } from "@/hooks/use-coming-soon-popup";
 import { Construction, Sparkles } from "lucide-react";
 
-export function ForumSoonPopup() {
-  const { isOpen, setIsOpen } = useForumSoonPopup();
+export function ComingSoonPopup() {
+  const { isOpen, setIsOpen, popupContent } = useComingSoonPopup();
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -18,12 +18,12 @@ export function ForumSoonPopup() {
             </div>
           </div>
           <DialogTitle className="text-center text-2xl font-bold">
-            Forum Çok Yakında!
+            {popupContent.title}
           </DialogTitle>
         </DialogHeader>
         <div className="text-center text-muted-foreground mt-2 space-y-4">
           <p>
-            Topluluğumuzla bir araya geleceğiniz, fikir alışverişinde bulunacağınız ve sorularınızı sorabileceğiniz interaktif forum bölümümüzü hazırlıyoruz.
+            {popupContent.content}
           </p>
           <p className="flex items-center justify-center gap-2 font-semibold text-primary">
             <Sparkles className="w-4 h-4" />
