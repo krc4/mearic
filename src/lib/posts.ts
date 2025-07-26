@@ -99,4 +99,15 @@ export const mockPosts: Post[] = [
     content: '',
     views: 550,
   },
+  {
+    id: 8,
+    title: 'Parmak İzindeki Mucize',
+    slug: 'parmak-izindeki-mucize',
+    image: 'https://images.unsplash.com/photo-1588508139556-53a7e5a073da?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    readTime: 4,
+    category: 'Hadis Mucizeleri',
+    description: 'Her insanın parmak izinin benzersiz olduğu gerçeği, hadislerde insanın her zerresinin farklı yaratıldığına işaret eder.',
+    content: '',
+    views: 610,
+  },
 ];

@@ -17,6 +17,7 @@ export default function Home() {
   const secondArticle = mockPosts[0];
   const hadithArticle1 = mockPosts[2];
   const hadithArticle2 = mockPosts[3];
+  const hadithArticle3 = mockPosts[6];
   const thirdArticle = mockPosts[1];
   const blogArticle1 = mockPosts[4];
   const blogArticle2 = mockPosts[5];
@@ -160,7 +161,7 @@ export default function Home() {
                 Peygamber Efendimiz'in (S.A.V) hadis-i şeriflerinde asırlar önce işaret ettiği bilimsel gerçekler.
               </p>
             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
                     <Image
                       src={hadithArticle1.image}
@@ -218,6 +219,41 @@ export default function Home() {
                         <span className="inline-flex items-center gap-1.5 text-xs text-white/70">
                           <Clock className="h-3.5 w-3.5" />
                           Tahmini okuma süresi: {hadithArticle2.readTime} dakika
+                        </span>
+                        <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
+                            <Link href="#">
+                                Yazıyı Oku
+                                <ArrowUpRight className="ml-1.5 h-4 w-4" />
+                            </Link>
+                        </Button>
+                      </footer>
+                    </div>
+                    <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                      <div className="absolute -inset-px rounded-2xl bg-[radial-gradient(65%_65%_at_50%_50%,hsl(var(--accent)/0.15),transparent)] dark:bg-[radial-gradient(65%_65%_at_50%_50%,hsl(var(--accent)/0.3),transparent)]" />
+                    </div>
+                </article>
+                <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
+                    <Image
+                      src={hadithArticle3.image}
+                      alt={hadithArticle3.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      data-ai-hint="fingerprint identity"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+                    <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
+                      <div>
+                        <h2 className="text-2xl font-semibold tracking-tight text-white">
+                          {hadithArticle3.title}
+                        </h2>
+                        <p className="mt-2 text-sm text-white/80">
+                           Her insanın parmak izinin benzersiz olduğu gerçeği, hadislerde insanın her zerresinin farklı yaratıldığına işaret eder.
+                        </p>
+                      </div>
+                      <footer className="mt-6 flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-white/70">
+                          <Clock className="h-3.5 w-3.5" />
+                          Tahmini okuma süresi: {hadithArticle3.readTime} dakika
                         </span>
                         <Button asChild size="sm" className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/20 active:scale-95">
                             <Link href="#">
