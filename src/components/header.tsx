@@ -24,8 +24,8 @@ export function Header() {
               Kuran Mucizeleri
             </Link>
             <Link
-              href="#"
-              className="transition-colors hover:text-primary text-foreground/60"
+              href="/hadis-mucizeleri"
+              className="transition-colors hover:text-primary text-foreground"
             >
               Hadislerdeki Mucizeler
             </Link>
