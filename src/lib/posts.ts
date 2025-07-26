@@ -5,6 +5,7 @@ export interface Post {
   readTime: number;
   category: string;
   content: string;
+  description: string;
 }
 
 export const mainArticle: Post = {
@@ -13,6 +14,7 @@ export const mainArticle: Post = {
   image: 'https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080',
   readTime: 7,
   category: 'Kuran Mucizeleri',
+  description: 'Modern bilimin evrenin genişlediği keşfi, Kuran-ı Kerim\'de 1400 yıl önce Zariyat Suresi\'nde haber verilmiştir. Bu yazıda bu mucizeyi inceliyoruz.',
   content: `
     <p class="text-xl leading-relaxed">Modern bilimin en çarpıcı keşiflerinden biri, evrenin sürekli olarak genişlediği gerçeğidir. Bu keşif, 20. yüzyılın başlarında Edwin Hubble'ın gözlemleriyle bilim dünyasına kazandırılmıştır. Ancak, bu kozmolojik gerçek, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde mucizevi bir şekilde haber verilmiştir.</p>
     <p>Hubble, teleskopuyla uzak galaksileri gözlemlerken, bu galaksilerin bizden uzaklaştığını ve bu uzaklaşma hızının mesafeyle doğru orantılı olduğunu keşfetti. Bu, evrenin statik bir yapıda olmadığını, aksine bir balon gibi sürekli şiştiğini gösteriyordu. Bu buluş, "Büyük Patlama" (Big Bang) teorisinin de en güçlü delillerinden biri haline geldi.</p>
@@ -33,6 +35,7 @@ export const mockPosts: Post[] = [
     image: 'https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080',
     readTime: 5,
     category: 'Kuran Mucizeleri',
+    description: 'Kuran\'da dağların sadece sabit yapılar olmadığı, aynı zamanda hareket halinde oldukları bildirilmiştir. Bu olguyu jeolojik kanıtlarla inceliyoruz.',
     content: '',
   },
   {
@@ -41,30 +44,25 @@ export const mockPosts: Post[] = [
     image: 'https://placehold.co/300x200',
     readTime: 4,
     category: 'Kuran Mucizeleri',
+    description: '',
     content: '',
   },
   {
     id: 4,
-    title: 'Parmak İzindeki Yaratılış Sırrı',
-    image: 'https://placehold.co/80x80',
-    readTime: 3,
-    category: 'Kuran Mucizeleri',
+    title: 'Hadislerde Tıbb-ı Nebevi',
+    image: 'https://images.unsplash.com/photo-1576092762791-ddc214d25e3c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    readTime: 8,
+    category: 'Hadis Mucizeleri',
+    description: "Peygamber Efendimiz'in (S.A.V) tavsiye ettiği ve modern tıbbın da faydalarını onayladığı şifalı yöntemler.",
     content: '',
   },
   {
     id: 5,
-    title: 'Hadislerde Tıbb-ı Nebevi',
-    image: 'https://placehold.co/80x80',
-    readTime: 8,
-    category: 'Hadis Mucizeleri',
-    content: '',
-  },
-  {
-    id: 6,
-    title: 'İslam ve Sabır Kavramı',
-    image: 'https://placehold.co/80x80',
+    title: 'Hurmanın Besin Değeri Mucizesi',
+    image: 'https://images.unsplash.com/photo-1598229452289-5b27a17a4a93?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     readTime: 6,
-    category: 'İslami Bloglar',
+    category: 'Hadis Mucizeleri',
+    description: 'Hadislerde övülen ve bilimsel olarak da zengin besin değerleri kanıtlanmış olan hurmanın mucizevi faydaları.',
     content: '',
   },
 ];
