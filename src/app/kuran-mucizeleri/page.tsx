@@ -147,29 +147,31 @@ export default function KuranMucizeleriPage() {
                   </Badge>
 
                   <div className="absolute inset-0 flex flex-col justify-end p-6">
-                    <h3 className="text-xl font-bold text-white leading-tight">
-                      {post.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-white/80 line-clamp-2">
-                      {post.description}
-                    </p>
+                    <div className="mt-auto">
+                      <h3 className="text-xl font-bold text-white leading-tight">
+                        {post.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-white/80 line-clamp-2">
+                        {post.description}
+                      </p>
 
-                    <div className="mt-auto flex items-center justify-between pt-4">
-                      <span className="flex items-center gap-1.5 text-xs text-white/70">
-                        <Clock className="h-3.5 w-3.5" />
-                        {post.readTime} dk
-                      </span>
-                      <Button
-                        asChild
-                        size="sm"
-                        onClick={() => toggleViewed(post.id)}
-                        className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
-                      >
-                        <Link href={`#`}>
-                          Oku
-                          <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                        </Link>
-                      </Button>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-xs text-white/70">
+                          <Clock className="h-3.5 w-3.5" />
+                          {post.readTime} dk
+                        </span>
+                        <Button
+                          asChild
+                          size="sm"
+                          onClick={() => toggleViewed(post.id)}
+                          className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
+                        >
+                          <Link href={`#`}>
+                            Oku
+                            <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Hover overlay actions */}
