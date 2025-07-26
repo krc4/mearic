@@ -29,12 +29,13 @@ export function Header() {
             >
               Hadislerdeki Mucizeler
             </Link>
-            <Link
-              href="#"
-              className="transition-colors hover:text-primary text-foreground/60"
+            <Button
+              variant="link"
+              onClick={() => setIsOpen(true)}
+              className="transition-colors hover:text-primary text-foreground/60 p-0"
             >
               İslami Bloglar
-            </Link>
+            </Button>
             <Button
               variant="link"
               onClick={() => setIsOpen(true)}
