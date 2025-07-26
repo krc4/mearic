@@ -315,6 +315,9 @@ export default function Home() {
                   <h4 className="text-xl font-semibold text-white">
                     Dağların Hareketi
                   </h4>
+                  <p className="mt-2 text-xs text-white/80 leading-relaxed">
+                    Kuran, dağların yeryüzünde sabit kazıklar olmasının yanı sıra, birer bulut gibi hareket ettiklerini de bildirir.
+                  </p>
                   <p className="mt-1 text-xs text-white/80">
                     {secondArticle.readTime} dk okuma
                   </p>
@@ -335,6 +338,9 @@ export default function Home() {
                   <h4 className="text-xl font-semibold text-white">
                     Embriyo Aşamaları
                   </h4>
+                  <p className="mt-2 text-xs text-white/80 leading-relaxed">
+                    Modern bilimin asırlar sonra keşfettiği insanın anne karnındaki gelişim aşamaları, Kuran'da detaylarıyla anlatılır.
+                  </p>
                   <p className="mt-1 text-xs text-white/80">
                     {thirdArticle.readTime} dk okuma
                   </p>
