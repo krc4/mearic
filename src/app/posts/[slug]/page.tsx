@@ -69,7 +69,7 @@ export default function PostPage({ params }: PostPageProps) {
                   <ChevronRight className="h-4 w-4 mx-1" />
                 </li>
                 <li className="flex items-center">
-                  <Link href={`/${post.category.toLowerCase().replace(" ", "-")}`} className="hover:text-primary">
+                  <Link href={`/${post.category.toLowerCase().replace(/ /g, "-")}`} className="hover:text-primary">
                     {post.category}
                   </Link>
                   <ChevronRight className="h-4 w-4 mx-1" />
