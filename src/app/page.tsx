@@ -241,17 +241,6 @@ export default function Home() {
           </section>
 
           <section className="relative isolate mb-24 md:mb-32">
-            {/* Arkaplan: çoklu gradyan + noise */}
-            <div
-              className="absolute inset-0 -z-10 h-full w-full opacity-30 dark:opacity-40"
-              style={{
-                backgroundImage: `
-                radial-gradient(at 20% 80%, hsl(var(--primary) / 0.15), transparent 40%),
-                radial-gradient(at 80% 20%, hsl(var(--accent) / 0.15), transparent 40%),
-                radial-gradient(at 50% 50%, hsl(var(--primary) / 0.1), transparent 30%)
-                `,
-              }}
-            />
             
             {/* Başlık */}
             <div className="text-center mb-16">
