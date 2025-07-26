@@ -15,7 +15,7 @@ export function Header() {
           </Link>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <Link
-              href="/"
+              href="/kuran-mucizeleri"
               className="transition-colors hover:text-primary text-foreground"
             >
               Kuran Mucizeleri
@@ -31,6 +31,12 @@ export function Header() {
               className="transition-colors hover:text-primary text-foreground/60"
             >
               İslami Bloglar
+            </Link>
+            <Link
+              href="#"
+              className="transition-colors hover:text-primary text-foreground/60"
+            >
+              Forum
             </Link>
           </nav>
         </div>
