@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { HeroBackground } from '@/components/hero-background';
 import styles from './page.module.css';
+import { DidYouKnowSection } from '@/components/did-you-know';
 
 
 export default function Home() {
@@ -363,6 +364,8 @@ export default function Home() {
               </Button>
             </div>
           </section>
+
+          <DidYouKnowSection />
 
           {/* Newsletter */}
           <section>
