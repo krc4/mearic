@@ -246,10 +246,9 @@ export default function Home() {
               className="absolute inset-0 -z-10 h-full w-full opacity-30 dark:opacity-40"
               style={{
                 backgroundImage: `
-                  radial-gradient(at 40% 20%, hsla(210,100%,55%,.35) 0, transparent 50%),
-                  radial-gradient(at 80% 0%,   hsla(190,100%,55%,.35) 0, transparent 50%),
-                  radial-gradient(at 0% 50%,   hsla(355,85%,93%,.30) 0, transparent 50%),
-                  radial-gradient(at 80% 50%,  hsla(340,100%,76%,.30) 0, transparent 50%)
+                radial-gradient(at 20% 80%, hsl(var(--primary) / 0.15), transparent 40%),
+                radial-gradient(at 80% 20%, hsl(var(--accent) / 0.15), transparent 40%),
+                radial-gradient(at 50% 50%, hsl(var(--primary) / 0.1), transparent 30%)
                 `,
               }}
             />
