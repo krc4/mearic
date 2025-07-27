@@ -176,9 +176,6 @@ export default function KuranMucizeleriPage() {
                         fill
                         className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
                         data-ai-hint="quran miracle"
-                        onError={(e) => {
-                            e.currentTarget.srcset = 'https://placehold.co/600x800.png';
-                        }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
