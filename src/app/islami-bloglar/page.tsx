@@ -29,6 +29,8 @@ export default function IslamiBloglarPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const mainArticleImage = "https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop";
+
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -56,9 +58,6 @@ export default function IslamiBloglarPage() {
       return (b.views || 0) - (a.views || 0);
     });
   }, [filter, posts, loading]);
-  
-  const mainArticleImage = posts[0]?.image || "https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop";
-
 
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));

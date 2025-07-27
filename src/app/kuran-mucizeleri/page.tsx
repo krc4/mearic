@@ -29,6 +29,8 @@ export default function KuranMucizeleriPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const mainArticleImage = "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
+
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -56,8 +58,6 @@ export default function KuranMucizeleriPage() {
       return (b.views || 0) - (a.views || 0);
     });
   }, [filter, posts, loading]);
-
-  const mainArticleImage = posts[0]?.image || "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
 
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
