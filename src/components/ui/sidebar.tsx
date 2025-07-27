@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -10,7 +11,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -176,6 +177,15 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const sheetTitle = React.Children.toArray(children).find(
+      (child) =>
+        React.isValidElement(child) && child.type === (SheetTitle as any)
+    )
+    const sidebarContent = React.Children.toArray(children).filter(
+        (child) =>
+            React.isValidElement(child) && child.type !== (SheetTitle as any)
+    )
+
 
     if (collapsible === "none") {
       return (
@@ -206,7 +216,8 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
-            <div className="flex h-full w-full flex-col">{children}</div>
+            {sheetTitle}
+            <div className="flex h-full w-full flex-col">{sidebarContent}</div>
           </SheetContent>
         </Sheet>
       )
