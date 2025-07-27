@@ -53,7 +53,6 @@ export default function AdminLayout({
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
         <SidebarHeader>
-          <SheetTitle className="sr-only md:hidden">Admin Paneli Menüsü</SheetTitle>
           <div className="flex items-center gap-2 p-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
