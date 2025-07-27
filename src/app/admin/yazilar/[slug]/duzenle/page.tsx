@@ -32,9 +32,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EditPostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
   const router = useRouter();
   const { toast } = useToast();
+  const { slug } = params;
   
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
