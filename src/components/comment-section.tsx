@@ -3,7 +3,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send } from "lucide-react"
@@ -39,9 +38,8 @@ export function CommentSection() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        const name = formData.get('name');
         const comment = formData.get('comment');
-        if (name && comment) {
+        if (comment) {
             toast({
                 title: "Yorumunuz için teşekkürler!",
                 description: "Yorumunuz başarıyla gönderildi ve incelendikten sonra yayınlanacaktır.",
@@ -50,7 +48,7 @@ export function CommentSection() {
         } else {
             toast({
                 title: "Hata",
-                description: "Lütfen adınızı ve yorumunuzu girin.",
+                description: "Lütfen yorumunuzu girin.",
                 variant: "destructive"
             })
         }
@@ -73,7 +71,6 @@ export function CommentSection() {
                 <AvatarFallback>Y</AvatarFallback>
               </Avatar>
               <div className="w-full space-y-2">
-                <Input name="name" placeholder="Adınız (gerekli)" className="w-full sm:w-1/3"/>
                 <Textarea
                     name="comment"
                     placeholder="Düşüncelerinizi paylaşın..."
