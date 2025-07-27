@@ -55,8 +55,6 @@ export default function IslamiBloglarPage() {
     });
   }, [filter, posts, loading]);
 
-  const mainArticleImage = sortedPosts[0]?.image || "https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop";
-
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
 
@@ -86,12 +84,13 @@ export default function IslamiBloglarPage() {
            <div
             className="absolute inset-0 -z-10 scale-125"
             style={{
-              backgroundImage: `url(${mainArticleImage})`,
+              backgroundImage: `url(https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop)`,
               backgroundAttachment: "fixed",
               backgroundSize: "cover",
               backgroundPosition: "center",
               filter: "brightness(.4)",
             }}
+            data-ai-hint="islamic knowledge"
           />
           <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
           <motion.div

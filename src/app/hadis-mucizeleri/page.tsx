@@ -55,8 +55,6 @@ export default function HadisMucizeleriPage() {
     });
   }, [filter, posts, loading]);
   
-  const mainArticleImage = sortedPosts[0]?.image || "https://images.unsplash.com/photo-1599447462858-a7b5251543e4?q=80&w=2070&auto=format&fit=crop";
-
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
 
@@ -86,12 +84,13 @@ export default function HadisMucizeleriPage() {
            <div
             className="absolute inset-0 -z-10 scale-125"
             style={{
-              backgroundImage: `url(${mainArticleImage})`,
+              backgroundImage: `url(https://images.unsplash.com/photo-1599447462858-a7b5251543e4?q=80&w=2070&auto=format&fit=crop)`,
               backgroundAttachment: "fixed",
               backgroundSize: "cover",
               backgroundPosition: "center",
               filter: "brightness(.4)",
             }}
+            data-ai-hint="hadith desert"
           />
           <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
           <motion.div

@@ -55,8 +55,6 @@ export default function KuranMucizeleriPage() {
     });
   }, [filter, posts, loading]);
 
-  const mainArticleImage = sortedPosts[0]?.image || "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
-
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
 
@@ -86,12 +84,13 @@ export default function KuranMucizeleriPage() {
             <div
               className="absolute inset-0 -z-10 scale-125"
               style={{
-                backgroundImage: `url(${mainArticleImage})`,
+                backgroundImage: `url(https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop)`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 filter: "brightness(.4)",
               }}
+              data-ai-hint="quran universe"
             />
             <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
             <motion.div
