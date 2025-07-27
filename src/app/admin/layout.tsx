@@ -100,7 +100,7 @@ export default function AdminLayout({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Yazılar">
-                <Link href="#">
+                <Link href="/admin/yazilar">
                   <FileText />
                   <span>Yazılar</span>
                 </Link>
@@ -167,6 +167,7 @@ export default function AdminLayout({
       <SidebarInset>
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
+          <SheetTitle className="sr-only">Sidebar</SheetTitle>
           <div className="relative flex-1 md:grow-0">
           </div>
           <div className="flex items-center gap-2">
