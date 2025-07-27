@@ -1,7 +1,7 @@
 
 "use client"
 import Link from "next/link"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import {
   BookOpen,
   PlusCircle,
@@ -32,12 +32,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { mockPosts, mainArticle, type Post } from "@/lib/posts"
+import type { Post } from "@/lib/posts"
+import { getPostsByCategory } from "@/lib/firebase/services"
+import { Skeleton } from "@/components/ui/skeleton"
 
-const allPosts = [mainArticle, ...mockPosts];
-const kuranPosts = allPosts.filter(p => p.category === "Kuran Mucizeleri");
+const PostTable = ({ posts, loading }: { posts: Post[], loading: boolean }) => {
+    if (loading) {
+        return (
+            <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+            </div>
+        )
+    }
 
-const PostTable = ({ posts }: { posts: Post[] }) => (
+    return (
     <Table>
     <TableHeader>
         <TableRow>
@@ -51,12 +61,14 @@ const PostTable = ({ posts }: { posts: Post[] }) => (
     </TableHeader>
     <TableBody>
         {posts.map((post) => (
-        <TableRow key={post.slug}>
+        <TableRow key={post.id}>
             <TableCell className="font-medium">{post.title}</TableCell>
             <TableCell className="hidden md:table-cell">
             <Badge variant="outline">Yayında</Badge>
             </TableCell>
-            <TableCell className="hidden md:table-cell">2024-05-28</TableCell>
+            <TableCell className="hidden md:table-cell">
+                 {post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString() : 'Tarih yok'}
+            </TableCell>
             <TableCell>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -79,9 +91,28 @@ const PostTable = ({ posts }: { posts: Post[] }) => (
     </TableBody>
     </Table>
 );
+}
 
 
 export default function KuranMucizeleriAdminPage() {
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            setLoading(true);
+            const fetchedPosts = await getPostsByCategory("Kuran Mucizeleri");
+            const sortedPosts = fetchedPosts.sort((a, b) => {
+                 const dateA = a.createdAt?.toDate() || 0;
+                 const dateB = b.createdAt?.toDate() || 0;
+                 return dateB.getTime() - dateA.getTime();
+            });
+            setPosts(sortedPosts);
+            setLoading(false);
+        };
+        fetchPosts();
+    }, []);
+
   return (
     <>
       <div className="flex items-center justify-between gap-4 mb-6">
@@ -105,7 +136,7 @@ export default function KuranMucizeleriAdminPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <PostTable posts={kuranPosts} />
+            <PostTable posts={posts} loading={loading} />
         </CardContent>
       </Card>
     </>
