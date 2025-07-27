@@ -33,7 +33,12 @@ export default function KuranMucizeleriPage() {
     const fetchPosts = async () => {
       setLoading(true);
       const fetchedPosts = await getPostsByCategory("Kuran Mucizeleri");
-      setPosts(fetchedPosts);
+      const sortedByDate = [...fetchedPosts].sort((a, b) => {
+        const dateA = a.createdAt?.toDate() || 0;
+        const dateB = b.createdAt?.toDate() || 0;
+        return dateB.getTime() - dateA.getTime();
+      });
+      setPosts(sortedByDate);
       setLoading(false);
     };
     fetchPosts();
@@ -43,7 +48,6 @@ export default function KuranMucizeleriPage() {
     if (loading) return [];
     return [...posts].sort((a, b) => {
       if (filter === "latest") {
-        // Assuming createdAt is available and is a Timestamp
         const dateA = a.createdAt?.toDate() || 0;
         const dateB = b.createdAt?.toDate() || 0;
         return dateB.getTime() - dateA.getTime();
@@ -53,7 +57,7 @@ export default function KuranMucizeleriPage() {
     });
   }, [filter, posts, loading]);
 
-  const mainArticle = sortedPosts[0];
+  const mainArticleImage = "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
 
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
@@ -80,14 +84,11 @@ export default function KuranMucizeleriPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         
-        {loading || !mainArticle ? (
-          <Skeleton className="h-[448px] w-full" />
-        ) : (
-          <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
+        <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
             <div
               className="absolute inset-0 -z-10 scale-125"
               style={{
-                backgroundImage: `url(${mainArticle.image})`,
+                backgroundImage: `url(${mainArticleImage})`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -109,9 +110,8 @@ export default function KuranMucizeleriPage() {
                 keşfet.
               </p>
             </motion.div>
-          </section>
-        )}
-
+        </section>
+        
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -176,6 +176,9 @@ export default function KuranMucizeleriPage() {
                         fill
                         className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
                         data-ai-hint="quran miracle"
+                        onError={(e) => {
+                            e.currentTarget.srcset = 'https://placehold.co/600x800.png';
+                        }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
