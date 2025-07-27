@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/header";
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function KuranMucizeleriPage() {
   const { toast } = useToast();
@@ -45,7 +46,7 @@ export default function KuranMucizeleriPage() {
         // Assuming createdAt is available and is a Timestamp
         const dateA = a.createdAt?.toDate() || 0;
         const dateB = b.createdAt?.toDate() || 0;
-        return dateB - dateA;
+        return dateB.getTime() - dateA.getTime();
       }
       // trending
       return (b.views || 0) - (a.views || 0);
@@ -79,33 +80,37 @@ export default function KuranMucizeleriPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         
-        <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
-          <div
-            className="absolute inset-0 -z-10 scale-125"
-            style={{
-              backgroundImage: `url(${mainArticle?.image || 'https://placehold.co/1920x1080.png'})`,
-              backgroundAttachment: "fixed",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "brightness(.4)",
-            }}
-          />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center text-white"
-          >
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
-              Kuran Mucizeleri
-            </h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-white/80">
-              1400 yıl önce bildirilmiş bilimsel, sayısal ve edebi mucizeleri
-              keşfet.
-            </p>
-          </motion.div>
-        </section>
+        {loading || !mainArticle ? (
+          <Skeleton className="h-[448px] w-full" />
+        ) : (
+          <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
+            <div
+              className="absolute inset-0 -z-10 scale-125"
+              style={{
+                backgroundImage: `url(${mainArticle.image})`,
+                backgroundAttachment: "fixed",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "brightness(.4)",
+              }}
+            />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-center text-white"
+            >
+              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
+                Kuran Mucizeleri
+              </h1>
+              <p className="mt-4 max-w-2xl mx-auto text-lg text-white/80">
+                1400 yıl önce bildirilmiş bilimsel, sayısal ve edebi mucizeleri
+                keşfet.
+              </p>
+            </motion.div>
+          </section>
+        )}
 
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -144,9 +149,15 @@ export default function KuranMucizeleriPage() {
             <AnimatePresence>
               {loading ? (
                  Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 p-6 shadow-xl">
-                        <div className="w-full h-full bg-muted animate-pulse rounded-2xl"></div>
-                    </div>
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 p-6 shadow-xl"
+                    >
+                        <Skeleton className="w-full h-full rounded-2xl"/>
+                    </motion.div>
                  ))
               ) : (
                 sortedPosts.map((post) => (
@@ -199,6 +210,7 @@ export default function KuranMucizeleriPage() {
                         <p className="mt-2 text-sm text-white/80 line-clamp-2">
                             {post.description}
                         </p>
+                        </div>
 
                         <div className="mt-4 flex items-center justify-between">
                             <span className="flex items-center gap-1.5 text-xs text-white/70">
@@ -216,7 +228,6 @@ export default function KuranMucizeleriPage() {
                                 <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                             </Link>
                             </Button>
-                        </div>
                         </div>
                     </div>
                     </motion.article>
