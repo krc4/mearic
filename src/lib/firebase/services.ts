@@ -1,3 +1,4 @@
+
 import { db } from './config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
@@ -74,10 +75,16 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
 export const updatePost = async (postId: string, payload: Partial<PostPayload>) => {
     try {
         const postRef = doc(db, "posts", postId);
-        await updateDoc(postRef, {
-            ...payload,
-            slug: payload.title ? payload.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') : undefined,
-        });
+        
+        const updatePayload: Partial<Post> = { ...payload };
+
+        // Only update the slug if the title has actually changed.
+        if (payload.title) {
+            updatePayload.slug = payload.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        }
+
+        await updateDoc(postRef, updatePayload);
+
         console.log("Document with ID: ", postId, " successfully updated!");
         return true;
     } catch (e) {

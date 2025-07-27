@@ -92,7 +92,10 @@ export default function EditPostPage() {
           "Hadis Mucizeleri": "hadis-mucizeleri",
           "İslami Bloglar": "islami-bloglar"
       }[category] || "kuran-mucizeleri";
-      router.push(`/admin/${categorySlug}`);
+      
+      const newSlug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+      router.push(`/admin/yazilar/${newSlug}/duzenle`); // Navigate to the new slug after update
+      router.refresh(); // Refresh the page to reflect changes
     } else {
        toast({
           title: "Hata!",
@@ -101,6 +104,13 @@ export default function EditPostPage() {
        });
     }
   }
+
+  const categorySlug = {
+    "Kuran Mucizeleri": "kuran-mucizeleri",
+    "Hadis Mucizeleri": "hadis-mucizeleri",
+    "İslami Bloglar": "islami-bloglar"
+  }[post?.category || ""] || "kuran-mucizeleri";
+
 
   if (loading) {
       return (
@@ -157,7 +167,7 @@ export default function EditPostPage() {
     <div className="mx-auto grid max-w-4xl flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" className="h-7 w-7" asChild>
-          <Link href={`/admin/${post.category.toLowerCase().replace(/ /g, '-')}`}>
+          <Link href={`/admin/${categorySlug}`}>
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Geri</span>
           </Link>
