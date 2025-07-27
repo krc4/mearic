@@ -106,12 +106,7 @@ export default function LoginPage() {
                 </form>
               </Form>
             </CardContent>
-            <CardFooter className="flex-col gap-4">
-               <div className="text-center">
-                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
-                    Şifrenizi mi unuttunuz?
-                  </Link>
-               </div>
+            <CardFooter className="flex justify-center">
               <p className="text-sm text-muted-foreground">
                 Hesabınız yok mu?{' '}
                 <Link href="/kayit" className="font-semibold text-primary hover:underline">
