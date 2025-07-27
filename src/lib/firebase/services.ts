@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'content'> & {
@@ -48,3 +48,14 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
         return [];
     }
 };
+
+export const deletePost = async (postId: string) => {
+    try {
+        await deleteDoc(doc(db, "posts", postId));
+        console.log("Document with ID: ", postId, " successfully deleted!");
+        return true;
+    } catch (e) {
+        console.error("Error deleting document: ", e);
+        return false;
+    }
+}
