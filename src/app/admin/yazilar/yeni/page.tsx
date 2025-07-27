@@ -67,7 +67,12 @@ export default function NewPostPage() {
             title: "Yazı Başarıyla Yayınlandı!",
             description: "Yeni yazınız oluşturuldu ve yayınlandı.",
         });
-        router.push(`/admin/${category.toLowerCase().replace(/ /g, '-')}`);
+        const categorySlug = {
+            "Kuran Mucizeleri": "kuran-mucizeleri",
+            "Hadis Mucizeleri": "hadis-mucizeleri",
+            "İslami Bloglar": "islami-bloglar"
+        }[category] || "kuran-mucizeleri";
+        router.push(`/admin/${categorySlug}`);
     } else {
          toast({
             title: "Hata",

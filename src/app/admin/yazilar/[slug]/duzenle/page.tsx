@@ -24,13 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Editor } from "@/components/editor"
-import { mockPosts, mainArticle } from "@/lib/posts";
+import { mockPosts } from "@/lib/posts";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EditPostPage({ params }: { params: { slug: string } }) {
-  const allPosts = [mainArticle, ...mockPosts];
+  const allPosts = [...mockPosts];
   const post = allPosts.find((p) => p.slug === params.slug);
   const router = useRouter();
   const { toast } = useToast();
@@ -50,8 +50,8 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
   }, [post]);
 
   const handlePublish = () => {
-    // TODO: Implement actual database logic here
-    console.log({
+    // TODO: Implement actual database logic here to update the post
+    console.log("Updated Post Data:", {
         title,
         content,
         category,
@@ -61,7 +61,12 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
         title: "Yazı Başarıyla Güncellendi!",
         description: "Değişiklikleriniz kaydedildi.",
     });
-    router.push('/admin');
+    const categorySlug = {
+        "Kuran Mucizeleri": "kuran-mucizeleri",
+        "Hadis Mucizeleri": "hadis-mucizeleri",
+        "İslami Bloglar": "islami-bloglar"
+    }[category] || "kuran-mucizeleri";
+    router.push(`/admin/${categorySlug}`);
   }
 
   if (!post) {
