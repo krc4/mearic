@@ -9,10 +9,7 @@ import {
   MessageSquare,
   Settings,
   PanelLeft,
-  Search,
   LogOut,
-  Moon,
-  Sun,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +24,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarInset,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,20 +36,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useSidebar } from '@/components/ui/sidebar';
-import { SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-
+function AdminSidebar() {
   return (
-    <SidebarProvider>
-      <Sidebar side="left" variant="sidebar" collapsible="icon">
+    <>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-2">
             <svg
@@ -163,11 +153,55 @@ export default function AdminLayout({
               </DropdownMenuContent>
             </DropdownMenu>
         </SidebarFooter>
-      </Sidebar>
+    </>
+  )
+}
+
+function AdminLayoutComponent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { isMobile, openMobile, setOpenMobile } = useSidebar();
+
+  if (isMobile) {
+    return (
+       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+        <SheetContent
+          side="left"
+          className="w-[var(--sidebar-width-mobile)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Sidebar Menu</SheetTitle>
+          </SheetHeader>
+          <div className="flex h-full flex-col">
+            <AdminSidebar />
+          </div>
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  return (
+    <Sidebar side="left" variant="sidebar" collapsible="icon">
+      <AdminSidebar />
+    </Sidebar>
+  );
+}
+
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+
+  return (
+    <SidebarProvider>
+      <AdminLayoutComponent>{children}</AdminLayoutComponent>
       <SidebarInset>
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
-          <SheetTitle className="sr-only">Sidebar</SheetTitle>
           <div className="relative flex-1 md:grow-0">
           </div>
           <div className="flex items-center gap-2">
