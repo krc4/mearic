@@ -22,9 +22,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, ArrowRight } from "lucide-react";
+import { UserPlus, ArrowRight, BookHeart } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(3, { message: "İsim en az 3 karakter olmalıdır." }),
@@ -63,7 +62,12 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-transparent">
-      <Header />
+       <div className="absolute top-4 left-4">
+        <Link href="/" className="flex items-center gap-2 text-primary font-bold">
+          <BookHeart className="w-6 h-6" />
+          Nurunyolu
+        </Link>
+      </div>
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <Card className="bg-background/80 backdrop-blur-lg shadow-2xl">
@@ -143,7 +147,7 @@ export default function RegisterPage() {
             <CardFooter className="flex justify-center">
               <p className="text-sm text-muted-foreground">
                 Zaten bir hesabınız var mı?{' '}
-                <Link href="#" className="font-semibold text-primary hover:underline">
+                <Link href="/giris" className="font-semibold text-primary hover:underline">
                   Giriş Yap
                 </Link>
               </p>
@@ -151,16 +155,6 @@ export default function RegisterPage() {
           </Card>
         </div>
       </main>
-      <footer className="container mx-auto py-8 px-4 border-t">
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/" className="hover:text-primary transition-colors">Anasayfa</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
-              <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
-            </div>
-          </div>
-      </footer>
     </div>
   );
 }
