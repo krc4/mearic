@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/header";
-import { HeroBackground } from "@/components/hero-background";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
 
@@ -63,11 +62,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-transparent">
       <Header />
-      <main className="relative flex-grow flex items-center justify-center p-4 overflow-hidden">
-        <HeroBackground />
-        <div className="relative z-10 w-full max-w-md">
+      <main className="flex-grow flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
           <Card className="bg-background/80 backdrop-blur-lg shadow-2xl">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -153,8 +151,8 @@ export default function RegisterPage() {
           </Card>
         </div>
       </main>
-      <footer className="container mx-auto py-8 px-4 border-t z-10 relative bg-transparent text-muted-foreground">
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm">
+      <footer className="container mx-auto py-8 px-4 border-t">
+        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <Link href="/" className="hover:text-primary transition-colors">Anasayfa</Link>
