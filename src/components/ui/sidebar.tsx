@@ -177,14 +177,13 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
-    const sheetTitle = React.Children.toArray(children).find(
-      (child) =>
+
+    const sheetTitle = React.Children.toArray(children).find((child) =>
         React.isValidElement(child) && child.type === (SheetTitle as any)
-    )
-    const sidebarContent = React.Children.toArray(children).filter(
-        (child) =>
-            React.isValidElement(child) && child.type !== (SheetTitle as any)
-    )
+    );
+    const sidebarContent = React.Children.toArray(children).filter((child) =>
+        React.isValidElement(child) && child.type !== (SheetTitle as any)
+    );
 
 
     if (collapsible === "none") {
@@ -772,3 +771,5 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
+    
