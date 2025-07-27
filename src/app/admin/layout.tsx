@@ -41,6 +41,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useSidebar } from '@/components/ui/sidebar';
+import { SheetTitle } from '@/components/ui/sheet';
 
 export default function AdminLayout({
   children,
@@ -51,6 +52,7 @@ export default function AdminLayout({
   return (
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
+        <SheetTitle className="sr-only">Admin Paneli Menüsü</SheetTitle>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-2">
             <svg
