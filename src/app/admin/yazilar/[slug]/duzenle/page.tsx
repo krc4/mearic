@@ -4,10 +4,8 @@ import Link from "next/link"
 import { notFound } from 'next/navigation';
 import {
   ChevronLeft,
-  Upload,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -28,6 +26,7 @@ import {
 import { Editor } from "@/components/editor"
 import { mockPosts, mainArticle } from "@/lib/posts";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function EditPostPage({ params }: { params: { slug: string } }) {
   const allPosts = [mainArticle, ...mockPosts];
@@ -36,12 +35,14 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
     if (post) {
       setTitle(post.title);
       setContent(post.content);
       setCategory(post.category);
+      setImageUrl(post.image);
     }
   }, [post]);
 
@@ -53,7 +54,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
     <div className="mx-auto grid max-w-4xl flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" className="h-7 w-7" asChild>
-          <Link href="/admin/yazilar">
+          <Link href="/admin">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Geri</span>
           </Link>
@@ -124,19 +125,30 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Başlık Resmi</CardTitle>
+                    <CardDescription>
+                        Yazı için bir resim URL'si girin.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-3">
-                        <Card className="overflow-hidden">
-                            <CardContent className="flex items-center justify-center p-6">
-                                <label htmlFor="cover-image-input" className="flex flex-col items-center gap-2 cursor-pointer text-center">
-                                    <Upload className="h-8 w-8 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">Resim Yükle</span>
-                                    <span className="text-xs text-muted-foreground">PNG, JPG, WEBP (Maks. 2MB)</span>
-                                    <Input id="cover-image-input" type="file" className="sr-only" />
-                                </label>
-                            </CardContent>
-                        </Card>
+                        <Label htmlFor="imageUrl">Resim URL'si</Label>
+                        <Input
+                            id="imageUrl"
+                            type="url"
+                            placeholder="https://ornek.com/resim.jpg"
+                            value={imageUrl}
+                            onChange={(e) => setImageUrl(e.target.value)}
+                        />
+                         {imageUrl && (
+                            <div className="relative aspect-video w-full overflow-hidden rounded-md mt-2">
+                                <Image 
+                                    src={imageUrl} 
+                                    alt="Resim Önizlemesi" 
+                                    fill 
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
