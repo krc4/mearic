@@ -24,41 +24,34 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, ArrowRight } from "lucide-react";
+import { LogIn, ArrowRight } from "lucide-react";
 
-const registerSchema = z.object({
-  name: z.string().min(3, { message: "İsim en az 3 karakter olmalıdır." }),
+const loginSchema = z.object({
   email: z.string().email({ message: "Geçerli bir e-posta adresi girin." }),
-  password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
-  confirmPassword: z.string()
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Şifreler uyuşmuyor.",
-  path: ["confirmPassword"],
+  password: z.string().min(1, { message: "Şifre alanı boş bırakılamaz." }),
 });
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const { toast } = useToast();
 
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
-  const onSubmit = (data: RegisterFormValues) => {
+  const onSubmit = (data: LoginFormValues) => {
     console.log(data);
     toast({
-      title: "Kayıt Başarılı!",
-      description: "Hesabınız başarıyla oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz.",
+      title: "Giriş Başarılı!",
+      description: "Hoş geldiniz! Ana sayfaya yönlendiriliyorsunuz.",
     });
-    // Burada giriş sayfasına yönlendirme yapılabilir.
-    // router.push('/giris');
+    // Burada ana sayfaya yönlendirme yapılabilir.
+    // router.push('/');
   };
 
   return (
@@ -69,30 +62,17 @@ export default function RegisterPage() {
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <UserPlus className="w-8 h-8 text-primary" />
+                  <LogIn className="w-8 h-8 text-primary" />
                 </div>
               </div>
-              <CardTitle className="text-3xl font-bold">Hesap Oluştur</CardTitle>
+              <CardTitle className="text-3xl font-bold">Giriş Yap</CardTitle>
               <CardDescription>
-                Aramıza katılın ve İslam'ı anlama yolculuğuna başlayın.
+                Hesabınıza giriş yaparak yolculuğunuza devam edin.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ad Soyad</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Adınız ve soyadınız" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="email"
@@ -119,31 +99,23 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Şifre Tekrarı</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <Button type="submit" className="w-full !mt-6 group" size="lg">
-                    Kayıt Ol
+                    Giriş Yap
                     <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </form>
               </Form>
             </CardContent>
-            <CardFooter className="flex justify-center">
+            <CardFooter className="flex-col gap-4">
+               <div className="text-center">
+                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
+                    Şifrenizi mi unuttunuz?
+                  </Link>
+               </div>
               <p className="text-sm text-muted-foreground">
-                Zaten bir hesabınız var mı?{' '}
-                <Link href="/giris" className="font-semibold text-primary hover:underline">
-                  Giriş Yap
+                Hesabınız yok mu?{' '}
+                <Link href="/kayit" className="font-semibold text-primary hover:underline">
+                  Kayıt Ol
                 </Link>
               </p>
             </CardFooter>
