@@ -1,9 +1,9 @@
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
 
-export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'content'> & {
-    content: string; // From editor
+export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt'> & {
+    content: string;
 };
 
 export const addPost = async (post: PostPayload) => {
@@ -48,6 +48,43 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
         return [];
     }
 };
+
+export const getPostBySlug = async (slug: string): Promise<Post | null> => {
+    try {
+        const q = query(collection(db, "posts"), where("slug", "==", slug));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            console.log("No matching documents.");
+            return null;
+        }
+        const doc = querySnapshot.docs[0];
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data
+        } as Post;
+    } catch (e) {
+        console.error("Error getting document by slug: ", e);
+        return null;
+    }
+}
+
+
+export const updatePost = async (postId: string, payload: Partial<PostPayload>) => {
+    try {
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, {
+            ...payload,
+            slug: payload.title ? payload.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') : undefined,
+        });
+        console.log("Document with ID: ", postId, " successfully updated!");
+        return true;
+    } catch (e) {
+        console.error("Error updating document: ", e);
+        return false;
+    }
+};
+
 
 export const deletePost = async (postId: string) => {
     try {

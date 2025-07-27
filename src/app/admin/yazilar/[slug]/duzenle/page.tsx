@@ -24,53 +24,131 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Editor } from "@/components/editor"
-import { mockPosts, mainArticle } from "@/lib/posts";
+import { type Post } from "@/lib/posts";
+import { getPostBySlug, updatePost, PostPayload } from "@/lib/firebase/services"
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EditPostPage({ params }: { params: { slug: string } }) {
-  const allPosts = [mainArticle, ...mockPosts];
-  const post = allPosts.find((p) => p.slug === params.slug);
+  const { slug } = params;
   const router = useRouter();
   const { toast } = useToast();
   
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [readTime, setReadTime] = useState(0);
 
   useEffect(() => {
-    if (post) {
-      setTitle(post.title);
-      setContent(post.content);
-      setCategory(post.category);
-      setImageUrl(post.image);
-    }
-  }, [post]);
+    const fetchPost = async () => {
+      setLoading(true);
+      const fetchedPost = await getPostBySlug(slug);
+      if (fetchedPost) {
+        setPost(fetchedPost);
+        setTitle(fetchedPost.title);
+        setContent(fetchedPost.content);
+        setCategory(fetchedPost.category);
+        setImageUrl(fetchedPost.image);
+        setDescription(fetchedPost.description);
+        setReadTime(fetchedPost.readTime);
+      } else {
+        notFound();
+      }
+      setLoading(false);
+    };
+    fetchPost();
+  }, [slug]);
 
-  const handlePublish = () => {
-    // TODO: Implement actual database logic here to update the post
-    console.log("Updated Post Data:", {
+  const handlePublish = async () => {
+    if (!post) return;
+
+    const updatedPayload: Partial<PostPayload> = {
         title,
         content,
         category,
-        imageUrl,
-    });
-    toast({
-        title: "Yazı Başarıyla Güncellendi!",
-        description: "Değişiklikleriniz kaydedildi.",
-    });
-    const categorySlug = {
-        "Kuran Mucizeleri": "kuran-mucizeleri",
-        "Hadis Mucizeleri": "hadis-mucizeleri",
-        "İslami Bloglar": "islami-bloglar"
-    }[category] || "kuran-mucizeleri";
-    router.push(`/admin/${categorySlug}`);
+        image: imageUrl,
+        description,
+        readTime
+    };
+
+    const success = await updatePost(post.id, updatedPayload);
+
+    if (success) {
+      toast({
+          title: "Yazı Başarıyla Güncellendi!",
+          description: "Değişiklikleriniz kaydedildi.",
+      });
+      const categorySlug = {
+          "Kuran Mucizeleri": "kuran-mucizeleri",
+          "Hadis Mucizeleri": "hadis-mucizeleri",
+          "İslami Bloglar": "islami-bloglar"
+      }[category] || "kuran-mucizeleri";
+      router.push(`/admin/${categorySlug}`);
+    } else {
+       toast({
+          title: "Hata!",
+          description: "Yazı güncellenirken bir sorun oluştu.",
+          variant: "destructive"
+       });
+    }
+  }
+
+  if (loading) {
+      return (
+        <div className="mx-auto grid max-w-4xl flex-1 auto-rows-max gap-4">
+            <div className="flex items-center gap-4">
+                <Skeleton className="h-7 w-7 rounded-full" />
+                <Skeleton className="h-6 w-40" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-[1fr_250px]">
+                <div className="grid auto-rows-max items-start gap-4">
+                    <Card>
+                        <CardHeader>
+                            <Skeleton className="h-6 w-48" />
+                            <Skeleton className="h-4 w-full" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                               <Skeleton className="h-10 w-full" />
+                               <Skeleton className="h-40 w-full" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                 <div className="grid auto-rows-max items-start gap-4">
+                     <Card>
+                        <CardHeader>
+                            <Skeleton className="h-6 w-32" />
+                        </CardHeader>
+                        <CardContent>
+                           <Skeleton className="h-10 w-full" />
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <Skeleton className="h-6 w-32" />
+                        </CardHeader>
+                        <CardContent>
+                           <Skeleton className="h-10 w-full" />
+                           <Skeleton className="h-40 w-full mt-2" />
+                        </CardContent>
+                    </Card>
+                 </div>
+            </div>
+        </div>
+      )
   }
 
   if (!post) {
-    notFound();
+    // This case should ideally be handled by the notFound() in useEffect, but as a fallback:
+    return notFound();
   }
 
   return (
@@ -86,14 +164,11 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
           Yazıyı Düzenle
         </h1>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
-          <Button variant="outline" size="sm" onClick={handlePublish}>
-            Değişiklikleri Kaydet
-          </Button>
-          <Button size="sm" onClick={handlePublish}>Yayınla</Button>
+          <Button size="sm" onClick={handlePublish}>Değişiklikleri Kaydet</Button>
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-[1fr_250px]">
-        <div className="grid auto-rows-max items-start gap-4">
+      <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3">
+        <div className="grid auto-rows-max items-start gap-4 lg:col-span-2">
             <Card>
             <CardHeader>
                 <CardTitle>Yazı Detayları</CardTitle>
@@ -114,15 +189,26 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
                     onChange={(e) => setTitle(e.target.value)}
                     />
                 </div>
+                 <div className="grid gap-3">
+                    <Label htmlFor="description">Açıklama</Label>
+                    <Input
+                    id="description"
+                    type="text"
+                    className="w-full"
+                    placeholder="Kısa bir açıklama girin..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    />
+                </div>
                 <div className="grid gap-3">
                     <Label htmlFor="content">İçerik</Label>
-                    <Editor />
+                    <Editor initialContent={content} onUpdate={setContent} />
                 </div>
                 </div>
             </CardContent>
             </Card>
         </div>
-        <div className="grid auto-rows-max items-start gap-4">
+        <div className="grid auto-rows-max items-start gap-4 lg:col-span-1">
             <Card>
             <CardHeader>
                 <CardTitle>Kategori</CardTitle>
@@ -142,6 +228,16 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
                       </SelectContent>
                     </Select>
                 </div>
+                 <div className="grid gap-3">
+                    <Label htmlFor="readTime">Okuma Süresi (dk)</Label>
+                    <Input
+                        id="readTime"
+                        type="number"
+                        className="w-full"
+                        value={readTime}
+                        onChange={(e) => setReadTime(Number(e.target.value))}
+                    />
+                 </div>
                 </div>
             </CardContent>
             </Card>
@@ -169,6 +265,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
                                     alt="Resim Önizlemesi" 
                                     fill 
                                     className="object-cover"
+                                    onError={(e) => e.currentTarget.style.display = 'none'}
                                 />
                             </div>
                         )}
@@ -178,10 +275,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
        <div className="flex items-center justify-center gap-2 md:hidden">
-          <Button variant="outline" size="sm" onClick={handlePublish}>
-            Değişiklikleri Kaydet
-          </Button>
-          <Button size="sm" onClick={handlePublish}>Yayınla</Button>
+          <Button size="sm" onClick={handlePublish}>Değişiklikleri Kaydet</Button>
         </div>
     </div>
   )
