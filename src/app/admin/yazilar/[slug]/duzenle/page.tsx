@@ -24,13 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Editor } from "@/components/editor"
-import { mockPosts } from "@/lib/posts";
+import { mockPosts, mainArticle } from "@/lib/posts";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EditPostPage({ params }: { params: { slug: string } }) {
-  const allPosts = [...mockPosts];
+  const allPosts = [mainArticle, ...mockPosts];
   const post = allPosts.find((p) => p.slug === params.slug);
   const router = useRouter();
   const { toast } = useToast();
@@ -77,7 +77,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
     <div className="mx-auto grid max-w-4xl flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" className="h-7 w-7" asChild>
-          <Link href="/admin">
+          <Link href={`/admin/${post.category.toLowerCase().replace(/ /g, '-')}`}>
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Geri</span>
           </Link>
