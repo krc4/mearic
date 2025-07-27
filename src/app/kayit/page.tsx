@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, ArrowRight, BookHeart } from "lucide-react";
+import { UserPlus, ArrowRight } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(3, { message: "İsim en az 3 karakter olmalıdır." }),
@@ -62,12 +62,6 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-transparent">
-       <div className="absolute top-4 left-4">
-        <Link href="/" className="flex items-center gap-2 text-primary font-bold">
-          <BookHeart className="w-6 h-6" />
-          Nurunyolu
-        </Link>
-      </div>
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <Card className="bg-background/80 backdrop-blur-lg shadow-2xl">
