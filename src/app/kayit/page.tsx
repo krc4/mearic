@@ -1,0 +1,168 @@
+"use client";
+
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Header } from "@/components/header";
+import { HeroBackground } from "@/components/hero-background";
+import { useToast } from "@/hooks/use-toast";
+import { UserPlus, ArrowRight } from "lucide-react";
+
+const registerSchema = z.object({
+  name: z.string().min(3, { message: "İsim en az 3 karakter olmalıdır." }),
+  email: z.string().email({ message: "Geçerli bir e-posta adresi girin." }),
+  password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
+  confirmPassword: z.string()
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Şifreler uyuşmuyor.",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
+export default function RegisterPage() {
+  const { toast } = useToast();
+
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onSubmit = (data: RegisterFormValues) => {
+    console.log(data);
+    toast({
+      title: "Kayıt Başarılı!",
+      description: "Hesabınız başarıyla oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz.",
+    });
+    // Burada giriş sayfasına yönlendirme yapılabilir.
+    // router.push('/giris');
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="relative flex-grow flex items-center justify-center p-4 overflow-hidden">
+        <HeroBackground />
+        <div className="relative z-10 w-full max-w-md">
+          <Card className="bg-background/80 backdrop-blur-lg shadow-2xl">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                  <UserPlus className="w-8 h-8 text-primary" />
+                </div>
+              </div>
+              <CardTitle className="text-3xl font-bold">Hesap Oluştur</CardTitle>
+              <CardDescription>
+                Aramıza katılın ve İslam'ı anlama yolculuğuna başlayın.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ad Soyad</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Adınız ve soyadınız" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-posta Adresi</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="ornek@eposta.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Şifre</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="••••••••" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Şifre Tekrarı</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="••••••••" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full !mt-6 group" size="lg">
+                    Kayıt Ol
+                    <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <p className="text-sm text-muted-foreground">
+                Zaten bir hesabınız var mı?{' '}
+                <Link href="#" className="font-semibold text-primary hover:underline">
+                  Giriş Yap
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </div>
+      </main>
+      <footer className="container mx-auto py-8 px-4 border-t z-10 relative bg-transparent text-muted-foreground">
+        <div className="flex flex-col md:flex-row justify-between items-center text-sm">
+            <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
+            <div className="flex gap-6 mt-4 md:mt-0">
+              <Link href="/" className="hover:text-primary transition-colors">Anasayfa</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
+              <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
+            </div>
+          </div>
+      </footer>
+    </div>
+  );
+}
