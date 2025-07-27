@@ -35,14 +35,13 @@ export default function NewPostPage() {
   const [category, setCategory] = useState('');
   const [readTime, setReadTime] = useState(5);
   const [description, setDescription] = useState('');
-  // Let's get content from the editor, for now it's a placeholder
   const [content, setContent] = useState('<p>Yazı içeriği buraya gelecek...</p>');
 
   const router = useRouter();
   const { toast } = useToast();
 
   const handlePublish = async () => {
-    if (!title || !category || !imageUrl || !description) {
+    if (!title || !category || !imageUrl || !description || !content) {
         toast({
             title: "Eksik Alanlar",
             description: "Lütfen tüm alanları doldurun.",
@@ -60,23 +59,32 @@ export default function NewPostPage() {
         content, 
     };
 
-    const postId = await addPost(newPost);
+    try {
+        const postId = await addPost(newPost);
 
-    if (postId) {
+        if (postId) {
+            toast({
+                title: "Yazı Başarıyla Yayınlandı!",
+                description: "Yeni yazınız oluşturuldu ve yayınlandı.",
+            });
+            const categorySlug = {
+                "Kuran Mucizeleri": "kuran-mucizeleri",
+                "Hadis Mucizeleri": "hadis-mucizeleri",
+                "İslami Bloglar": "islami-bloglar"
+            }[category] || "kuran-mucizeleri";
+            router.push(`/admin/${categorySlug}`);
+        } else {
+             toast({
+                title: "Hata",
+                description: "Yazı yayınlanırken bir sorun oluştu.",
+                variant: "destructive",
+            });
+        }
+    } catch (error) {
+        console.error("Error publishing post: ", error);
         toast({
-            title: "Yazı Başarıyla Yayınlandı!",
-            description: "Yeni yazınız oluşturuldu ve yayınlandı.",
-        });
-        const categorySlug = {
-            "Kuran Mucizeleri": "kuran-mucizeleri",
-            "Hadis Mucizeleri": "hadis-mucizeleri",
-            "İslami Bloglar": "islami-bloglar"
-        }[category] || "kuran-mucizeleri";
-        router.push(`/admin/${categorySlug}`);
-    } else {
-         toast({
             title: "Hata",
-            description: "Yazı yayınlanırken bir sorun oluştu.",
+            description: "Yazı yayınlanırken bir sorun oluştu. Lütfen konsolu kontrol edin.",
             variant: "destructive",
         });
     }
@@ -136,7 +144,7 @@ export default function NewPostPage() {
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="content">İçerik</Label>
-                        <Editor />
+                        <Editor onUpdate={(html) => setContent(html)} />
                     </div>
                 </div>
             </CardContent>

@@ -19,6 +19,7 @@ import {
   Heading3
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
+import { useEffect } from 'react';
 
 const Toolbar = ({ editor }: { editor: EditorType | null }) => {
   if (!editor) {
@@ -100,20 +101,34 @@ const Toolbar = ({ editor }: { editor: EditorType | null }) => {
   );
 };
 
-export const Editor = () => {
+interface EditorProps {
+  initialContent?: string;
+  onUpdate: (html: string) => void;
+}
+
+export const Editor = ({ initialContent, onUpdate }: EditorProps) => {
   const editor = useEditor({
     extensions: [StarterKit.configure({
         heading: {
             levels: [1, 2, 3],
         }
     })],
-    content: '<p>Yazı içeriğini buraya yazın...</p>',
+    content: initialContent || '<p>Yazı içeriğini buraya yazın...</p>',
     editorProps: {
         attributes: {
             class: "prose dark:prose-invert min-h-[400px] w-full max-w-none rounded-b-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         }
-    }
+    },
+    onUpdate: ({ editor }) => {
+      onUpdate(editor.getHTML());
+    },
   });
+
+  useEffect(() => {
+    if(editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent])
 
   return (
     <div>
