@@ -45,7 +45,7 @@ import {
   YAxis,
   Tooltip,
 } from "recharts"
-import { ChartTooltipContent } from "@/components/ui/chart"
+import { ChartTooltipContent, ChartContainer } from "@/components/ui/chart"
 
 const chartData = [
   { date: "Pzt", users: 12, posts: 5 },
@@ -56,6 +56,17 @@ const chartData = [
   { date: "Cmt", users: 25, posts: 10 },
   { date: "Paz", users: 28, posts: 11 },
 ]
+
+const chartConfig = {
+  users: {
+    label: "Yeni Kullanıcı",
+    color: "hsl(var(--primary))",
+  },
+  posts: {
+    label: "Yeni Yazı",
+    color: "hsl(var(--primary) / 0.5)",
+  },
+}
 
 export default function AdminDashboard() {
   return (
@@ -109,7 +120,7 @@ export default function AdminDashboard() {
                 </CardTitle>
             </CardHeader>
             <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={350}>
+            <ChartContainer config={chartConfig} className="h-[350px] w-full">
                 <BarChart data={chartData}>
                     <XAxis
                     dataKey="date"
@@ -129,10 +140,10 @@ export default function AdminDashboard() {
                         cursor={{fill: 'hsl(var(--accent))', radius: 'var(--radius)'}}
                         content={<ChartTooltipContent indicator="dot" />}
                     />
-                    <Bar dataKey="users" fill="hsl(var(--primary))" name="Yeni Kullanıcı" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="posts" fill="hsl(var(--primary) / 0.5)" name="Yeni Yazı" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="users" fill="var(--color-users)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="posts" fill="var(--color-posts)" radius={[4, 4, 0, 0]} />
                 </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
