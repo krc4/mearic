@@ -1,7 +1,7 @@
 
 "use client"
 import Link from "next/link"
-import { notFound, useRouter } from 'next/navigation';
+import { notFound, useRouter, useParams } from 'next/navigation';
 import {
   ChevronLeft,
 } from "lucide-react"
@@ -31,8 +31,10 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function EditPostPage({ params }: { params: { slug: string } }) {
+export default function EditPostPage() {
   const router = useRouter();
+  const params = useParams();
+  const slug = params.slug as string;
   const { toast } = useToast();
   
   const [post, setPost] = useState<Post | null>(null);
@@ -47,8 +49,9 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
 
   useEffect(() => {
     const fetchPost = async () => {
+      if (!slug) return;
       setLoading(true);
-      const fetchedPost = await getPostBySlug(params.slug);
+      const fetchedPost = await getPostBySlug(slug);
       if (fetchedPost) {
         setPost(fetchedPost);
         setTitle(fetchedPost.title);
@@ -63,7 +66,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
       setLoading(false);
     };
     fetchPost();
-  }, [params.slug]);
+  }, [slug]);
 
   const handlePublish = async () => {
     if (!post) return;
