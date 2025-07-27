@@ -1,6 +1,7 @@
+
 "use client";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Clock,
@@ -11,43 +12,69 @@ import {
   Eye,
   ChevronRight,
 } from "lucide-react";
-import { mockPosts, mainArticle } from "@/lib/posts";
+import type { Post } from "@/lib/posts";
+import { getPostsByCategory } from "@/lib/firebase/services";
 import { ReadingProgressBar } from "@/components/reading-progress-bar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/header";
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HadisMucizeleriPage() {
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
-  const [viewed, setViewed] = useState<Set<number>>(new Set());
+  const [viewed, setViewed] = useState<Set<string>>(new Set());
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const hadithPosts = useMemo(() => {
-    const list = mockPosts.filter((p) => p.category === "Hadis Mucizeleri");
-    return filter === "latest"
-      ? [...list].sort((a, b) => b.id - a.id) // Assuming newer posts have higher IDs
-      : list.sort((a, b) => b.views - a.views);
-  }, [filter]);
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      const fetchedPosts = await getPostsByCategory("Hadis Mucizeleri");
+      const sortedByDate = [...fetchedPosts].sort((a, b) => {
+        const dateA = a.createdAt?.toDate() || 0;
+        const dateB = b.createdAt?.toDate() || 0;
+        return dateB.getTime() - dateA.getTime();
+      });
+      setPosts(sortedByDate);
+      setLoading(false);
+    };
+    fetchPosts();
+  }, []);
 
-  const mainHadithArticle = hadithPosts[0] || mainArticle;
+  const sortedPosts = useMemo(() => {
+    if (loading) return [];
+    return [...posts].sort((a, b) => {
+      if (filter === "latest") {
+        const dateA = a.createdAt?.toDate() || 0;
+        const dateB = b.createdAt?.toDate() || 0;
+        return dateB.getTime() - dateA.getTime();
+      }
+      // trending
+      return (b.views || 0) - (a.views || 0);
+    });
+  }, [filter, posts, loading]);
+  
+  const mainArticleImage = posts[0]?.image || "https://images.unsplash.com/photo-1599447462858-a7b5251543e4?q=80&w=2070&auto=format&fit=crop";
 
-  const toggleViewed = (id: number) =>
+
+  const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
 
   const handleShare = async (postTitle: string, postSlug: string) => {
+    const url = `${window.location.origin}/posts/${postSlug}`;
     if (navigator.share) {
         try {
-            await navigator.share({
-                title: postTitle,
-                url: `/posts/${postSlug}`,
-            });
+            await navigator.share({ title: postTitle, url });
         } catch (error) {
             console.error('Error sharing:', error);
+            navigator.clipboard.writeText(url);
+            toast({ title: "Link panoya kopyalandı!" });
         }
     } else {
-        navigator.clipboard.writeText(`${window.location.origin}/posts/${postSlug}`);
+        navigator.clipboard.writeText(url);
         toast({ title: "Link panoya kopyalandı!" });
     }
   }
@@ -60,10 +87,10 @@ export default function HadisMucizeleriPage() {
         
         {/* Parallax Hero */}
         <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
-          <div
+           <div
             className="absolute inset-0 -z-10 scale-125"
             style={{
-              backgroundImage: `url(${mainHadithArticle.image})`,
+              backgroundImage: `url(${mainArticleImage})`,
               backgroundAttachment: "fixed",
               backgroundSize: "cover",
               backgroundPosition: "center",
@@ -123,7 +150,20 @@ export default function HadisMucizeleriPage() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <AnimatePresence>
-              {hadithPosts.map((post) => (
+               {loading ? (
+                 Array.from({ length: 3 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 p-6 shadow-xl"
+                    >
+                        <Skeleton className="w-full h-full rounded-2xl"/>
+                    </motion.div>
+                 ))
+              ) : (
+                sortedPosts.map((post) => (
                 <motion.article
                   key={post.id}
                   layout
@@ -134,11 +174,14 @@ export default function HadisMucizeleriPage() {
                   className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
                 >
                   <Image
-                    src={post.image}
+                    src={post.image || 'https://placehold.co/600x800.png'}
                     alt={post.title}
                     fill
                     className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
                     data-ai-hint="hadith miracle"
+                     onError={(e) => {
+                        e.currentTarget.srcset = 'https://placehold.co/600x800.png';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
@@ -195,7 +238,8 @@ export default function HadisMucizeleriPage() {
                     </div>
                   </div>
                 </motion.article>
-              ))}
+              ))
+            )}
             </AnimatePresence>
           </motion.div>
         </main>
@@ -214,3 +258,5 @@ export default function HadisMucizeleriPage() {
     </>
   );
 }
+
+    
