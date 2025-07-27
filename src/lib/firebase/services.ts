@@ -33,7 +33,7 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
                 id: doc.id,
                 slug: data.slug,
                 title: data.title,
-                image: data.image,
+                image: data.image || 'https://placehold.co/600x800.png', // Fallback image
                 readTime: data.readTime,
                 category: data.category,
                 content: data.content,
@@ -57,11 +57,12 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
             console.log("No matching documents.");
             return null;
         }
-        const doc = querySnapshot.docs[0];
-        const data = doc.data();
+        const postDoc = querySnapshot.docs[0];
+        const data = postDoc.data();
         return {
-            id: doc.id,
-            ...data
+            id: postDoc.id,
+            ...data,
+            image: data.image || 'https://placehold.co/1200x630.png', // Fallback for single post
         } as Post;
     } catch (e) {
         console.error("Error getting document by slug: ", e);

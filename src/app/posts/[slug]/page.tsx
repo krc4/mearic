@@ -1,7 +1,8 @@
+
+"use client"
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { mockPosts, mainArticle } from "@/lib/posts";
 import { Header } from "@/components/header";
 import { ReadingProgressBar } from "@/components/reading-progress-bar";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,10 @@ import { Clock, Tag, Home, ChevronRight } from "lucide-react";
 import styles from "@/app/page.module.css";
 import { SocialShare } from "@/components/social-share";
 import { CommentSection } from "@/components/comment-section";
+import type { Post } from "@/lib/posts";
+import { getPostBySlug } from "@/lib/firebase/services";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type PostPageProps = {
   params: {
@@ -17,11 +22,43 @@ type PostPageProps = {
 };
 
 export default function PostPage({ params }: PostPageProps) {
-  const allPosts = [mainArticle, ...mockPosts.map(p => ({...p, id: p.slug}))];
-  const post = allPosts.find((p) => p.slug === params.slug);
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      setLoading(true);
+      const fetchedPost = await getPostBySlug(params.slug);
+      if (fetchedPost) {
+        setPost(fetchedPost);
+      } else {
+        notFound();
+      }
+      setLoading(false);
+    };
+    fetchPost();
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+        <>
+            <Header />
+            <div className="h-[50vh] bg-muted animate-pulse" />
+            <div className="container mx-auto max-w-4xl px-4 py-12">
+                <Skeleton className="h-8 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-1/2 mb-8" />
+                <div className="space-y-4">
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-5/6" />
+                </div>
+            </div>
+        </>
+    )
+  }
 
   if (!post) {
-    notFound();
+    return notFound();
   }
 
   return (
