@@ -1,9 +1,9 @@
 
 "use client"
 import Link from "next/link"
-import React, { useState } from "react"
+import React from "react"
 import {
-  File,
+  Sparkles,
   PlusCircle,
   MoreHorizontal,
 } from "lucide-react"
@@ -32,22 +32,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { mockPosts, mainArticle, type Post } from "@/lib/posts"
+import { mockPosts, type Post } from "@/lib/posts"
 
-const allPosts = [mainArticle, ...mockPosts];
+const allPosts = [...mockPosts];
+const hadisPosts = allPosts.filter(p => p.category === "Hadis Mucizeleri");
 
 const PostTable = ({ posts }: { posts: Post[] }) => (
     <Table>
     <TableHeader>
         <TableRow>
         <TableHead>Başlık</TableHead>
-        <TableHead className="hidden md:table-cell">Kategori</TableHead>
         <TableHead className="hidden md:table-cell">Durum</TableHead>
         <TableHead className="hidden md:table-cell">Tarih</TableHead>
         <TableHead>
@@ -59,7 +53,6 @@ const PostTable = ({ posts }: { posts: Post[] }) => (
         {posts.map((post) => (
         <TableRow key={post.id}>
             <TableCell className="font-medium">{post.title}</TableCell>
-            <TableCell className="hidden md:table-cell">{post.category}</TableCell>
             <TableCell className="hidden md:table-cell">
             <Badge variant="outline">Yayında</Badge>
             </TableCell>
@@ -88,20 +81,13 @@ const PostTable = ({ posts }: { posts: Post[] }) => (
 );
 
 
-export default function PostsPage() {
-  const [activeTab, setActiveTab] = useState("all");
-
-  const filteredPosts = allPosts.filter(post => {
-    if (activeTab === "all") return true;
-    return post.category === activeTab;
-  });
-
+export default function HadisMucizeleriAdminPage() {
   return (
     <>
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <File className="h-6 w-6" />
-          Yazılar
+          <Sparkles className="h-6 w-6" />
+          Hadis Mucizeleri
         </h1>
         <Button asChild>
           <Link href="/admin/yazilar/yeni">
@@ -111,27 +97,17 @@ export default function PostsPage() {
         </Button>
       </div>
 
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">Tümü</TabsTrigger>
-            <TabsTrigger value="Kuran Mucizeleri">Kuran Mucizeleri</TabsTrigger>
-            <TabsTrigger value="Hadis Mucizeleri">Hadis Mucizeleri</TabsTrigger>
-            <TabsTrigger value="İslami Bloglar">İslami Bloglar</TabsTrigger>
-        </TabsList>
-        <Card className="mt-4">
-            <CardHeader>
-            <CardTitle>
-                {activeTab === "all" ? "Tüm Yazılar" : activeTab}
-            </CardTitle>
-            <CardDescription>
-                {activeTab === "all" ? "Tüm yazıları yönetin." : `${activeTab} kategorisindeki yazıları yönetin.`}
-            </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <PostTable posts={filteredPosts} />
-            </CardContent>
-        </Card>
-      </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle>Hadis Mucizeleri Yazıları</CardTitle>
+          <CardDescription>
+            Bu kategorideki yazıları yönetin.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <PostTable posts={hadisPosts} />
+        </CardContent>
+      </Card>
     </>
   )
 }

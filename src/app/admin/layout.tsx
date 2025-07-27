@@ -10,6 +10,9 @@ import {
   Settings,
   PanelLeft,
   LogOut,
+  BookOpen,
+  Sparkles,
+  PenSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -89,10 +92,26 @@ function AdminSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Yazılar">
-                <Link href="/admin/yazilar">
-                  <FileText />
-                  <span>Yazılar</span>
+              <SidebarMenuButton asChild tooltip="Kuran Mucizeleri">
+                <Link href="/admin/kuran-mucizeleri">
+                  <BookOpen />
+                  <span>Kuran Mucizeleri</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Hadis Mucizeleri">
+                <Link href="/admin/hadis-mucizeleri">
+                  <Sparkles />
+                  <span>Hadis Mucizeleri</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="İslami Bloglar">
+                <Link href="/admin/islami-bloglar">
+                  <PenSquare />
+                  <span>İslami Bloglar</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
