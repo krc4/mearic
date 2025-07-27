@@ -51,7 +51,7 @@ const PostTable = ({ posts }: { posts: Post[] }) => (
     </TableHeader>
     <TableBody>
         {posts.map((post) => (
-        <TableRow key={post.id}>
+        <TableRow key={post.slug}>
             <TableCell className="font-medium">{post.title}</TableCell>
             <TableCell className="hidden md:table-cell">
             <Badge variant="outline">Yayında</Badge>
