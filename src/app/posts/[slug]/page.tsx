@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Tag, Home, ChevronRight } from "lucide-react";
 import styles from "@/app/page.module.css";
 import { SocialShare } from "@/components/social-share";
+import { CommentSection } from "@/components/comment-section";
 
 type PostPageProps = {
   params: {
@@ -88,11 +89,18 @@ export default function PostPage({ params }: PostPageProps) {
             
             <hr className="my-8" />
 
-            {/* Social Share and Footer */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pb-16">
+            {/* Social Share */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pb-12">
               <SocialShare />
-              <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Nurunyolu</p>
             </div>
+
+            {/* Comments Section */}
+            <CommentSection />
+
+            {/* Footer */}
+            <footer className="text-center py-16 text-sm text-muted-foreground">
+              <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
+            </footer>
           </div>
         </main>
       </div>
