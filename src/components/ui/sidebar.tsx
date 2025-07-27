@@ -178,14 +178,6 @@ const Sidebar = React.forwardRef<
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
-    const sheetTitle = React.Children.toArray(children).find((child) =>
-        React.isValidElement(child) && child.type === (SheetTitle as any)
-    );
-    const sidebarContent = React.Children.toArray(children).filter((child) =>
-        React.isValidElement(child) && child.type !== (SheetTitle as any)
-    );
-
-
     if (collapsible === "none") {
       return (
         <div
@@ -215,8 +207,7 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
-            {sheetTitle}
-            <div className="flex h-full w-full flex-col">{sidebarContent}</div>
+            <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
       )
@@ -771,5 +762,3 @@ export {
   SidebarTrigger,
   useSidebar,
 }
-
-    
