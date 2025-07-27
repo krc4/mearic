@@ -27,27 +27,54 @@ import { Editor } from "@/components/editor"
 import { useState } from "react"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
+import { addPost, type PostPayload } from "@/lib/firebase/services"
 
 export default function NewPostPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
+  const [readTime, setReadTime] = useState(5);
+  const [description, setDescription] = useState('');
+  // Let's get content from the editor, for now it's a placeholder
+  const [content, setContent] = useState('<p>Yazı içeriği buraya gelecek...</p>');
+
   const router = useRouter();
   const { toast } = useToast();
 
-  const handlePublish = () => {
-    // TODO: Implement actual database logic here
-    console.log({
+  const handlePublish = async () => {
+    if (!title || !category || !imageUrl || !description) {
+        toast({
+            title: "Eksik Alanlar",
+            description: "Lütfen tüm alanları doldurun.",
+            variant: "destructive",
+        });
+        return;
+    }
+    
+    const newPost: PostPayload = {
         title,
         category,
-        imageUrl,
-        // content is in the editor, need a way to get it out
-    });
-    toast({
-        title: "Yazı Başarıyla Yayınlandı!",
-        description: "Yeni yazınız oluşturuldu ve yayınlandı.",
-    });
-    router.push('/admin');
+        image: imageUrl,
+        readTime: Number(readTime),
+        description,
+        content, 
+    };
+
+    const postId = await addPost(newPost);
+
+    if (postId) {
+        toast({
+            title: "Yazı Başarıyla Yayınlandı!",
+            description: "Yeni yazınız oluşturuldu ve yayınlandı.",
+        });
+        router.push(`/admin/${category.toLowerCase().replace(/ /g, '-')}`);
+    } else {
+         toast({
+            title: "Hata",
+            description: "Yazı yayınlanırken bir sorun oluştu.",
+            variant: "destructive",
+        });
+    }
   }
 
   return (
@@ -80,21 +107,32 @@ export default function NewPostPage() {
             </CardHeader>
             <CardContent>
                 <div className="grid gap-6">
-                <div className="grid gap-3">
-                    <Label htmlFor="title">Başlık</Label>
-                    <Input
-                    id="title"
-                    type="text"
-                    className="w-full"
-                    placeholder="Yazı başlığını buraya girin..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    />
-                </div>
-                <div className="grid gap-3">
-                    <Label htmlFor="content">İçerik</Label>
-                    <Editor />
-                </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="title">Başlık</Label>
+                        <Input
+                        id="title"
+                        type="text"
+                        className="w-full"
+                        placeholder="Yazı başlığını buraya girin..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
+                     <div className="grid gap-3">
+                        <Label htmlFor="description">Açıklama</Label>
+                        <Input
+                        id="description"
+                        type="text"
+                        className="w-full"
+                        placeholder="Kısa bir açıklama girin..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="content">İçerik</Label>
+                        <Editor />
+                    </div>
                 </div>
             </CardContent>
             </Card>
@@ -106,19 +144,29 @@ export default function NewPostPage() {
             </CardHeader>
             <CardContent>
                 <div className="grid gap-6">
-                <div className="grid gap-3">
-                    <Label htmlFor="category">Kategori</Label>
-                    <Select onValueChange={setCategory}>
-                    <SelectTrigger id="category" aria-label="Kategori Seç">
-                        <SelectValue placeholder="Kategori Seç" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Kuran Mucizeleri">Kuran Mucizeleri</SelectItem>
-                        <SelectItem value="Hadis Mucizeleri">Hadis Mucizeleri</SelectItem>
-                        <SelectItem value="İslami Bloglar">İslami Bloglar</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="category">Kategori</Label>
+                        <Select onValueChange={setCategory}>
+                        <SelectTrigger id="category" aria-label="Kategori Seç">
+                            <SelectValue placeholder="Kategori Seç" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Kuran Mucizeleri">Kuran Mucizeleri</SelectItem>
+                            <SelectItem value="Hadis Mucizeleri">Hadis Mucizeleri</SelectItem>
+                            <SelectItem value="İslami Bloglar">İslami Bloglar</SelectItem>
+                        </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid gap-3">
+                        <Label htmlFor="readTime">Okuma Süresi (dk)</Label>
+                        <Input
+                        id="readTime"
+                        type="number"
+                        className="w-full"
+                        value={readTime}
+                        onChange={(e) => setReadTime(Number(e.target.value))}
+                        />
+                    </div>
                 </div>
             </CardContent>
             </Card>

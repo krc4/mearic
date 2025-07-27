@@ -1,5 +1,7 @@
+import { Timestamp } from 'firebase/firestore';
+
 export interface Post {
-  id: number;
+  id: string; // Changed to string to accommodate Firestore document IDs
   title: string;
   slug: string;
   image: string;
@@ -8,12 +10,12 @@ export interface Post {
   content: string;
   description: string;
   views: number;
+  createdAt?: Timestamp; // Optional timestamp
 }
 
-export const mainArticle: Post = {
-  id: 1,
+export const mainArticle: Omit<Post, 'id' | 'views' | 'createdAt'> = {
   title: 'Kuran\'da Evrenin Genişlemesi Mucizesi',
-  slug: 'kuranda-evrenin-genislemesi-mucizesi',
+  slug: 'kuran-da-evrenin-genislemesi-mucizesi',
   image: 'https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080',
   readTime: 7,
   category: 'Kuran Mucizeleri',
@@ -29,85 +31,26 @@ export const mainArticle: Post = {
     <h3 class="text-2xl font-bold mt-8 mb-4">Bilimsel ve Kuranî Perspektifin Uyumu</h3>
     <p>Kuran'ın bu ifadesi, o dönemin ilkel astronomi bilgisiyle açıklanabilecek bir durum değildir. O dönemde hakim olan inanış, Aristo ve Batlamyus'un etkisindeki statik evren modeliydi. Kuran, bu yaygın ve yanlış inanışın aksine, dinamik ve genişleyen bir evren tablosu çizmiştir. Bu durum, Kuran'ın insanüstü bir kaynaktan geldiğini ve her çağda insanlığa yol gösteren bir rehber olduğunu kanıtlar niteliktedir.</p>
   `,
-  views: 1250,
 };
 
-export const mockPosts: Post[] = [
-  {
-    id: 2,
+// Mock posts can be kept for fallback or other pages if needed, but the main pages will fetch from Firebase.
+export const mockPosts: Omit<Post, 'id' | 'views' | 'createdAt'>[] = [
+    {
     title: 'Dağların Hareket Halinde Olması',
     slug: 'daglarin-hareket-halinde-olmasi',
     image: 'https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080',
     readTime: 5,
     category: 'Kuran Mucizeleri',
     description: 'Kuran\'da dağların sadece sabit yapılar olmadığı, aynı zamanda hareket halinde oldukları bildirilmiştir. Bu olguyu jeolojik kanıtlarla inceliyoruz.',
-    content: '',
-    views: 890,
+    content: '<p>İçerik buraya gelecek.</p>',
   },
   {
-    id: 3,
     title: 'Embriyo Aşamaları Mucizesi',
     slug: 'embriyo-asamalari-mucizesi',
     image: 'https://images.unsplash.com/photo-1604363236113-a8a5f3b7381c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbWJyeW98ZW58MHx8fHwxNzUzMzgzNjgyfDA&ixlib=rb-4.1.0&q=80&w=1080',
     readTime: 6,
     category: 'Kuran Mucizeleri',
     description: 'Kuran, modern embriyolojinin asırlar sonra keşfedeceği insanın anne karnındaki gelişim aşamalarını detaylı olarak bildirmiştir.',
-    content: '',
-    views: 1100,
-  },
-  {
-    id: 4,
-    title: 'Hadislerde Tıbb-ı Nebevi',
-    slug: 'hadislerde-tibb-i-nebevi',
-    image: 'https://images.unsplash.com/photo-1576092762791-ddc214d25e3c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    readTime: 8,
-    category: 'Hadis Mucizeleri',
-    description: "Peygamber Efendimiz'in (S.A.V) tavsiye ettiği ve modern tıbbın da faydalarını onayladığı şifalı yöntemler.",
-    content: '',
-    views: 750,
-  },
-  {
-    id: 5,
-    title: 'Hurmanın Besin Değeri Mucizesi',
-    slug: 'hurmanin-besin-degeri-mucizesi',
-    image: 'https://images.unsplash.com/photo-1598229452289-5b27a17a4a93?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    readTime: 6,
-    category: 'Hadis Mucizeleri',
-    description: 'Hadislerde övülen ve bilimsel olarak da zengin besin değerleri kanıtlanmış olan hurmanın mucizevi faydaları.',
-    content: '',
-    views: 680,
-  },
-  {
-    id: 6,
-    title: 'Sabrın Önemi ve Faziletleri',
-    slug: 'sabrin-onemi-ve-faziletleri',
-    image: 'https://images.unsplash.com/photo-1597854224215-c63d41f057c3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    readTime: 7,
-    category: 'İslami Bloglar',
-    description: 'Hayatın zorlukları karşısında bir mü\'minin en güçlü sığınağı olan sabrın faziletleri ve hayata yansımaları.',
-    content: '',
-    views: 920,
-  },
-  {
-    id: 7,
-    title: 'İnfak Kültürü ve Toplumsal Dayanışma',
-    slug: 'infak-kulturu-ve-toplumsal-dayanisma',
-    image: 'https://images.unsplash.com/photo-1518623380242-d992d14e073c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    readTime: 5,
-    category: 'İslami Bloglar',
-    description: "İslam'ın toplumsal dayanışma ve yardımlaşma temellerinden biri olan infakın manası ve önemi.",
-    content: '',
-    views: 550,
-  },
-  {
-    id: 8,
-    title: 'Parmak İzindeki Mucize',
-    slug: 'parmak-izindeki-mucize',
-    image: 'https://images.unsplash.com/photo-1588508139556-53a7e5a073da?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    readTime: 4,
-    category: 'Hadis Mucizeleri',
-    description: 'Her insanın parmak izinin benzersiz olduğu gerçeği, hadislerde insanın her zerresinin farklı yaratıldığına işaret eder.',
-    content: '',
-    views: 610,
+    content: '<p>İçerik buraya gelecek.</p>',
   },
 ];

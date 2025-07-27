@@ -17,7 +17,7 @@ type PostPageProps = {
 };
 
 export default function PostPage({ params }: PostPageProps) {
-  const allPosts = [mainArticle, ...mockPosts];
+  const allPosts = [mainArticle, ...mockPosts.map(p => ({...p, id: p.slug}))];
   const post = allPosts.find((p) => p.slug === params.slug);
 
   if (!post) {
