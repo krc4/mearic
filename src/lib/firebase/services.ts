@@ -33,7 +33,7 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
                 id: doc.id,
                 slug: data.slug,
                 title: data.title,
-                image: data.image || 'https://placehold.co/600x800.png', // Fallback image
+                image: data.image,
                 readTime: data.readTime,
                 category: data.category,
                 content: data.content,
@@ -62,7 +62,7 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
         return {
             id: postDoc.id,
             ...data,
-            image: data.image || 'https://placehold.co/1200x630.png', // Fallback for single post
+            image: data.image,
         } as Post;
     } catch (e) {
         console.error("Error getting document by slug: ", e);

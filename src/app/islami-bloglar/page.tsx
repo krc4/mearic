@@ -22,7 +22,7 @@ import { Header } from "@/components/header";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function HadisMucizeleriPage() {
+export default function IslamiBloglarPage() {
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [viewed, setViewed] = useState<Set<string>>(new Set());
@@ -32,7 +32,7 @@ export default function HadisMucizeleriPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
-      const fetchedPosts = await getPostsByCategory("Hadis Mucizeleri");
+      const fetchedPosts = await getPostsByCategory("İslami Bloglar");
       const sortedByDate = [...fetchedPosts].sort((a, b) => {
         const dateA = a.createdAt?.toDate() || 0;
         const dateB = b.createdAt?.toDate() || 0;
@@ -57,7 +57,7 @@ export default function HadisMucizeleriPage() {
     });
   }, [filter, posts, loading]);
   
-  const mainArticleImage = posts[0]?.image || "https://images.unsplash.com/photo-1599447462858-a7b5251543e4?q=80&w=2070&auto=format&fit=crop";
+  const mainArticleImage = posts[0]?.image || "https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop";
 
 
   const toggleViewed = (id: string) =>
@@ -105,10 +105,10 @@ export default function HadisMucizeleriPage() {
             className="text-center text-white"
           >
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
-              Hadislerdeki Mucizeler
+              İslami Bloglar
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-white/80">
-              Peygamber Efendimiz'in (S.A.V) 1400 yıl önce bildirdiği bilimsel ve tıbbi gerçekleri keşfedin.
+                İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak yazılar.
             </p>
           </motion.div>
         </section>
@@ -119,7 +119,7 @@ export default function HadisMucizeleriPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-primary">Anasayfa</Link>
               <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground">Hadislerdeki Mucizeler</span>
+              <span className="text-foreground">İslami Bloglar</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function HadisMucizeleriPage() {
                     alt={post.title}
                     fill
                     className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
-                    data-ai-hint="hadith miracle"
+                    data-ai-hint="islamic blog"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
@@ -255,5 +255,3 @@ export default function HadisMucizeleriPage() {
     </>
   );
 }
-
-    

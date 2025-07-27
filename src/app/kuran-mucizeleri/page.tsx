@@ -57,7 +57,7 @@ export default function KuranMucizeleriPage() {
     });
   }, [filter, posts, loading]);
 
-  const mainArticleImage = "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
+  const mainArticleImage = posts[0]?.image || "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
 
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
@@ -171,14 +171,11 @@ export default function KuranMucizeleriPage() {
                     className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
                     >
                     <Image
-                        src={post.image}
+                        src={post.image || 'https://placehold.co/600x800.png'}
                         alt={post.title}
                         fill
                         className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
                         data-ai-hint="quran miracle"
-                         onError={(e) => {
-                            e.currentTarget.srcset = 'https://placehold.co/600x800.png';
-                        }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
