@@ -1,6 +1,7 @@
 
 "use client"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ChevronLeft,
 } from "lucide-react"
@@ -25,9 +26,29 @@ import {
 import { Editor } from "@/components/editor"
 import { useState } from "react"
 import Image from "next/image"
+import { useToast } from "@/hooks/use-toast"
 
 export default function NewPostPage() {
   const [imageUrl, setImageUrl] = useState("");
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handlePublish = () => {
+    // TODO: Implement actual database logic here
+    console.log({
+        title,
+        category,
+        imageUrl,
+        // content is in the editor, need a way to get it out
+    });
+    toast({
+        title: "Yazı Başarıyla Yayınlandı!",
+        description: "Yeni yazınız oluşturuldu ve yayınlandı.",
+    });
+    router.push('/admin');
+  }
 
   return (
     <div className="mx-auto grid max-w-4xl flex-1 auto-rows-max gap-4">
@@ -42,10 +63,10 @@ export default function NewPostPage() {
           Yeni Yazı Oluştur
         </h1>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handlePublish}>
             Taslak Olarak Kaydet
           </Button>
-          <Button size="sm">Yayınla</Button>
+          <Button size="sm" onClick={handlePublish}>Yayınla</Button>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-[1fr_250px]">
@@ -66,6 +87,8 @@ export default function NewPostPage() {
                     type="text"
                     className="w-full"
                     placeholder="Yazı başlığını buraya girin..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     />
                 </div>
                 <div className="grid gap-3">
@@ -85,7 +108,7 @@ export default function NewPostPage() {
                 <div className="grid gap-6">
                 <div className="grid gap-3">
                     <Label htmlFor="category">Kategori</Label>
-                    <Select>
+                    <Select onValueChange={setCategory}>
                     <SelectTrigger id="category" aria-label="Kategori Seç">
                         <SelectValue placeholder="Kategori Seç" />
                     </SelectTrigger>
@@ -132,10 +155,10 @@ export default function NewPostPage() {
         </div>
       </div>
        <div className="flex items-center justify-center gap-2 md:hidden">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handlePublish}>
             Taslak Olarak Kaydet
           </Button>
-          <Button size="sm">Yayınla</Button>
+          <Button size="sm" onClick={handlePublish}>Yayınla</Button>
         </div>
     </div>
   )

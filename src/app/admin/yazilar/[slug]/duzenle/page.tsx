@@ -1,7 +1,7 @@
 
 "use client"
 import Link from "next/link"
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import {
   ChevronLeft,
 } from "lucide-react"
@@ -27,10 +27,13 @@ import { Editor } from "@/components/editor"
 import { mockPosts, mainArticle } from "@/lib/posts";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
 
 export default function EditPostPage({ params }: { params: { slug: string } }) {
   const allPosts = [mainArticle, ...mockPosts];
   const post = allPosts.find((p) => p.slug === params.slug);
+  const router = useRouter();
+  const { toast } = useToast();
   
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -45,6 +48,21 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
       setImageUrl(post.image);
     }
   }, [post]);
+
+  const handlePublish = () => {
+    // TODO: Implement actual database logic here
+    console.log({
+        title,
+        content,
+        category,
+        imageUrl,
+    });
+    toast({
+        title: "Yazı Başarıyla Güncellendi!",
+        description: "Değişiklikleriniz kaydedildi.",
+    });
+    router.push('/admin');
+  }
 
   if (!post) {
     notFound();
@@ -63,10 +81,10 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
           Yazıyı Düzenle
         </h1>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handlePublish}>
             Değişiklikleri Kaydet
           </Button>
-          <Button size="sm">Yayınla</Button>
+          <Button size="sm" onClick={handlePublish}>Yayınla</Button>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-[1fr_250px]">
@@ -155,10 +173,10 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
        <div className="flex items-center justify-center gap-2 md:hidden">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handlePublish}>
             Değişiklikleri Kaydet
           </Button>
-          <Button size="sm">Yayınla</Button>
+          <Button size="sm" onClick={handlePublish}>Yayınla</Button>
         </div>
     </div>
   )
