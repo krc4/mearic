@@ -34,7 +34,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function EditPostPage({ params }: { params: { slug: string } }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { slug } = params;
   
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +48,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
   useEffect(() => {
     const fetchPost = async () => {
       setLoading(true);
-      const fetchedPost = await getPostBySlug(slug);
+      const fetchedPost = await getPostBySlug(params.slug);
       if (fetchedPost) {
         setPost(fetchedPost);
         setTitle(fetchedPost.title);
@@ -64,7 +63,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
       setLoading(false);
     };
     fetchPost();
-  }, [slug]);
+  }, [params.slug]);
 
   const handlePublish = async () => {
     if (!post) return;
