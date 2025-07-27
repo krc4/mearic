@@ -29,8 +29,6 @@ export default function HadisMucizeleriPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const mainArticleImage = "https://images.unsplash.com/photo-1599447462858-a7b5251543e4?q=80&w=2070&auto=format&fit=crop";
-
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -58,6 +56,8 @@ export default function HadisMucizeleriPage() {
       return (b.views || 0) - (a.views || 0);
     });
   }, [filter, posts, loading]);
+  
+  const mainArticleImage = sortedPosts[0]?.image || "https://images.unsplash.com/photo-1599447462858-a7b5251543e4?q=80&w=2070&auto=format&fit=crop";
 
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
