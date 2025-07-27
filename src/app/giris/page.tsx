@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LogIn, ArrowRight } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Geçerli bir e-posta adresi girin." }),
+  username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
   password: z.string().min(1, { message: "Şifre alanı boş bırakılamaz." }),
 });
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -75,12 +75,12 @@ export default function LoginPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="email"
+                    name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>E-posta Adresi</FormLabel>
+                        <FormLabel>Kullanıcı Adı</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="ornek@eposta.com" {...field} />
+                          <Input type="text" placeholder="Kullanıcı adınız" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

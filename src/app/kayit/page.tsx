@@ -27,8 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
 
 const registerSchema = z.object({
-  name: z.string().min(3, { message: "İsim en az 3 karakter olmalıdır." }),
-  email: z.string().email({ message: "Geçerli bir e-posta adresi girin." }),
+  username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
   password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
   confirmPassword: z.string()
 }).refine(data => data.password === data.confirmPassword, {
@@ -44,8 +43,7 @@ export default function RegisterPage() {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      username: "",
       password: "",
       confirmPassword: "",
     },
@@ -82,25 +80,12 @@ export default function RegisterPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="name"
+                    name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ad Soyad</FormLabel>
+                        <FormLabel>Kullanıcı Adı</FormLabel>
                         <FormControl>
-                          <Input placeholder="Adınız ve soyadınız" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>E-posta Adresi</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="ornek@eposta.com" {...field} />
+                          <Input placeholder="Kullanıcı adınızı belirleyin" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
