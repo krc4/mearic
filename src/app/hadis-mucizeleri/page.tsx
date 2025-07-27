@@ -1,6 +1,5 @@
 
 "use client";
-import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -52,7 +51,6 @@ export default function HadisMucizeleriPage() {
         const dateB = b.createdAt?.toDate() || 0;
         return dateB.getTime() - dateA.getTime();
       }
-      // trending
       return (b.views || 0) - (a.views || 0);
     });
   }, [filter, posts, loading]);
@@ -84,7 +82,6 @@ export default function HadisMucizeleriPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         
-        {/* Parallax Hero */}
         <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
            <div
             className="absolute inset-0 -z-10 scale-125"
@@ -112,7 +109,6 @@ export default function HadisMucizeleriPage() {
           </motion.div>
         </section>
 
-        {/* Breadcrumb + Filter */}
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -142,7 +138,6 @@ export default function HadisMucizeleriPage() {
           </div>
         </div>
 
-        {/* Grid */}
         <main className="container mx-auto flex-grow px-4 pb-20">
           <motion.div
             layout
@@ -172,21 +167,17 @@ export default function HadisMucizeleriPage() {
                   transition={{ duration: 0.4 }}
                   className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
                 >
-                  <Image
-                    src={post.image || 'https://placehold.co/600x800.png'}
-                    alt={post.title}
-                    fill
-                    className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
+                  <div
+                    style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
+                    className={`absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
                     data-ai-hint="hadith miracle"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                  {/* Corner tag */}
                   <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
                     {post.category}
                   </Badge>
 
-                  {/* Hover overlay actions */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                       <Button
                         size="icon"

@@ -1,6 +1,5 @@
 
 "use client";
-import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -33,7 +32,6 @@ export default function KuranMucizeleriPage() {
     const fetchPosts = async () => {
       setLoading(true);
       const fetchedPosts = await getPostsByCategory("Kuran Mucizeleri");
-      // Sort by date initially to have a consistent order
       const sortedByDate = [...fetchedPosts].sort((a, b) => {
         const dateA = a.createdAt?.toDate() || 0;
         const dateB = b.createdAt?.toDate() || 0;
@@ -53,13 +51,11 @@ export default function KuranMucizeleriPage() {
         const dateB = b.createdAt?.toDate() || 0;
         return dateB.getTime() - dateA.getTime();
       }
-      // trending
       return (b.views || 0) - (a.views || 0);
     });
   }, [filter, posts, loading]);
 
   const mainArticleImage = sortedPosts[0]?.image || "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop";
-
 
   const toggleViewed = (id: string) =>
     setViewed((v) => new Set(v).add(id));
@@ -164,74 +160,72 @@ export default function KuranMucizeleriPage() {
               ) : (
                 sortedPosts.map((post) => (
                     <motion.article
-                    key={post.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4 }}
-                    className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
+                      key={post.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.4 }}
+                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
                     >
-                    <Image
-                        src={post.image || 'https://placehold.co/600x800.png'}
-                        alt={post.title}
-                        fill
-                        className={`object-cover transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
+                      <div
+                        style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
+                        className={`absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
                         data-ai-hint="quran miracle"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                    <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
-                        {post.category}
-                    </Badge>
+                      <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
+                          {post.category}
+                      </Badge>
 
-                    <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-white hover:bg-white/20 hover:text-white"
-                            onClick={() => toast({ title: "Favorilere eklendi!"})}
-                        >
-                            <Heart className="h-5 w-5" />
-                        </Button>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-white hover:bg-white/20 hover:text-white"
-                            onClick={() => handleShare(post.title, post.slug)}
-                        >
-                            <Share2 className="h-5 w-5" />
-                        </Button>
-                        </div>
+                      <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-white hover:bg-white/20 hover:text-white"
+                              onClick={() => toast({ title: "Favorilere eklendi!"})}
+                          >
+                              <Heart className="h-5 w-5" />
+                          </Button>
+                          <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-white hover:bg-white/20 hover:text-white"
+                              onClick={() => handleShare(post.title, post.slug)}
+                          >
+                              <Share2 className="h-5 w-5" />
+                          </Button>
+                      </div>
 
-                    <div className="relative z-10 flex flex-col justify-end p-6 h-full">
-                        <div className="mt-auto">
-                        <h3 className="text-xl font-bold text-white leading-tight">
-                            {post.title}
-                        </h3>
-                        <p className="mt-2 text-sm text-white/80 line-clamp-2">
-                            {post.description}
-                        </p>
-                        </div>
+                      <div className="relative z-10 flex flex-col justify-end p-6 h-full">
+                          <div className="mt-auto">
+                            <h3 className="text-xl font-bold text-white leading-tight">
+                                {post.title}
+                            </h3>
+                            <p className="mt-2 text-sm text-white/80 line-clamp-2">
+                                {post.description}
+                            </p>
+                          </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <span className="flex items-center gap-1.5 text-xs text-white/70">
-                            <Clock className="h-3.5 w-3.5" />
-                            {post.readTime} dk
-                            </span>
-                            <Button
-                            asChild
-                            size="sm"
-                            onClick={() => toggleViewed(post.id)}
-                            className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
-                            >
-                            <Link href={`/posts/${post.slug}`}>
-                                Oku
-                                <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                            </Link>
-                            </Button>
-                        </div>
-                    </div>
+                          <div className="mt-4 flex items-center justify-between">
+                              <span className="flex items-center gap-1.5 text-xs text-white/70">
+                                <Clock className="h-3.5 w-3.5" />
+                                {post.readTime} dk
+                              </span>
+                              <Button
+                                asChild
+                                size="sm"
+                                onClick={() => toggleViewed(post.id)}
+                                className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
+                              >
+                                <Link href={`/posts/${post.slug}`}>
+                                    Oku
+                                    <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                                </Link>
+                              </Button>
+                          </div>
+                      </div>
                     </motion.article>
                 ))
               )}
