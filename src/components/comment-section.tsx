@@ -35,7 +35,7 @@ const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, is
     >
       <Card className={cn(
         "border-2 border-transparent bg-gradient-to-br from-card/80 to-card/60 shadow-lg backdrop-blur-sm transition-all duration-300",
-        comment.isAdmin && "border-amber-400/50 bg-gradient-to-br from-amber-500/10 to-card/70 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.5)] shadow-amber-400/30 animate-pulse"
+        comment.isAdmin && "border-amber-400/50 bg-gradient-to-br from-amber-500/10 to-card/70 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.5)] shadow-amber-400/30"
       )}>
         <CardContent className="p-5 flex items-start gap-4">
           <Avatar className={cn(
