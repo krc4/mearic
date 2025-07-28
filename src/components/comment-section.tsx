@@ -68,7 +68,7 @@ export function CommentSection({ postId }: { postId: string }) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
-    const [adminUids, setAdminUids] = useState<Set<string>>(new Set());
+    const [adminUids, setAdminUids] = useState<Set<string> | null>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -86,7 +86,8 @@ export function CommentSection({ postId }: { postId: string }) {
     }, []);
 
     useEffect(() => {
-        if (!postId) return;
+        if (!postId || adminUids === null) return; // Wait until adminUids are loaded
+
         const fetchComments = async () => {
             setCommentsLoading(true);
             const fetchedComments = await getCommentsForPost(postId);
@@ -94,7 +95,7 @@ export function CommentSection({ postId }: { postId: string }) {
             setCommentsLoading(false);
         }
         fetchComments();
-    }, [postId]);
+    }, [postId, adminUids]);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -131,6 +132,9 @@ export function CommentSection({ postId }: { postId: string }) {
             });
         }
     }
+    
+    const isLoading = commentsLoading || adminUids === null;
+
 
     return (
         <section className="w-full py-12">
@@ -138,7 +142,7 @@ export function CommentSection({ postId }: { postId: string }) {
                 <div className="flex items-center gap-3">
                     <MessageCircle className="w-8 h-8 text-primary" />
                     <h2 className="text-3xl font-bold tracking-tight">
-                        Yorumlar ({comments.length})
+                        Yorumlar ({isLoading ? '...' : comments.length})
                     </h2>
                 </div>
 
@@ -175,7 +179,7 @@ export function CommentSection({ postId }: { postId: string }) {
                 </Card>
 
                 <div className="space-y-6">
-                    {commentsLoading ? (
+                     {isLoading ? (
                         <>
                             <CommentSkeleton />
                             <CommentSkeleton />
@@ -194,5 +198,3 @@ export function CommentSection({ postId }: { postId: string }) {
         </section>
     )
 }
-
-    
