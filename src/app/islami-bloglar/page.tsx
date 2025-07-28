@@ -65,7 +65,7 @@ export default function IslamiBloglarPage() {
       }
       return newFavs;
     });
-    toast({ title: "Favori güncellendi!" });
+    toast({ title: "Gönderi beğenildi!" });
   };
    
   const handleShare = (title: string, slug: string) => {
@@ -160,7 +160,7 @@ export default function IslamiBloglarPage() {
 
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <Badge className="mb-2 bg-emerald-500/20 text-emerald-200 border-emerald-400">
-                  {post.category}
+                  Blog
                 </Badge>
                 <h3 className="text-2xl font-bold text-white leading-tight">
                   {post.title}
