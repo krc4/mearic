@@ -10,6 +10,7 @@ import {
   Filter,
   Eye,
   ChevronRight,
+  PenSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,17 +83,20 @@ export default function IslamiBloglarPage() {
         
         <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
            <div
-            className="absolute inset-0 -z-10 scale-125"
+            className="absolute inset-0 -z-10 scale-125 bg-cover bg-center bg-fixed brightness-40"
             style={{
               backgroundImage: `url(https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop)`,
-              backgroundAttachment: "fixed",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "brightness(.4)",
             }}
             data-ai-hint="islamic knowledge"
           />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
+           <motion.div
+            animate={{ y: [0, -15, 0] }}
+            transition={{ duration: 6, repeat: Infinity }}
+            className="absolute inset-0 opacity-5 dark:opacity-10"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2300f2ff' fill-opacity='0.1'%3E%3Cpath d='M20 20h20v20H20z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -106,6 +110,11 @@ export default function IslamiBloglarPage() {
                 İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak yazılar.
             </p>
           </motion.div>
+             <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-r from-transparent via-black/5 to-transparent flex items-center justify-center">
+                <span className="font-kufi text-2xl text-white/20 select-none">
+                ﷽
+                </span>
+            </div>
         </section>
 
         <div className="container mx-auto px-4 py-6">
