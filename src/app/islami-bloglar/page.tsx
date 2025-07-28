@@ -16,7 +16,7 @@ const posts = [
     desc: "Zariyat 47 – 1400 yıl önce bildirildi.",
     img: "https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
     ayet: "وَالسَّمَاءَ بَنَيْنَاهَا بِأَيْيْدٍ وَإِنَّا لَمُوسِعُونَ",
-    category: "Kozmoloji",
+    category: "Tefekkür",
     readTime: 7,
   },
   {
@@ -26,7 +26,7 @@ const posts = [
     desc: "Neml 88 – Kayan kıtalar mucizesi.",
     img: "https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080",
     ayet: "وَتَرَى الْجِبَالَ تَحْسَبُهَا جَامِدَةً",
-    category: "Jeoloji",
+    category: "Tefekkür",
     readTime: 6,
   },
   {
@@ -36,7 +36,7 @@ const posts = [
     desc: "Müminun 12-14 – Tıbbi mucize.",
     img: "https://images.unsplash.com/photo-1604363236113-a8a5f3b7381c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbWJyeW98ZW58MHx8fHwxNzUzMzgzNjgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
     ayet: "ثُمَّ خَلَقْنَا النُّطْفَةَ عَلَقَةً",
-    category: "Tıp",
+    category: "Tefekkür",
     readTime: 8,
   },
 ];
