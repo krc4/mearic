@@ -14,7 +14,7 @@ import { HeroBackground } from '@/components/hero-background';
 import styles from './page.module.css';
 import { DidYouKnowSection } from '@/components/did-you-know';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
 export default function Home() {
@@ -26,6 +26,13 @@ export default function Home() {
   const blogArticle1 = mockPosts[0]; // Corrected index
   const blogArticle2 = mockPosts[1]; // Corrected index
   const [muted, setMuted] = useState(true);
+  const [videoSrc, setVideoSrc] = useState('');
+
+  const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4'];
+
+  useEffect(() => {
+    setVideoSrc(videos[Math.floor(Math.random() * videos.length)]);
+  }, []);
 
   return (
     <>
@@ -35,13 +42,14 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="relative h-screen w-full overflow-hidden bg-black">
-         <video
-          src="/anasayfa_video.mp4"
+         {videoSrc && <video
+          key={videoSrc}
+          src={videoSrc}
           autoPlay
           loop
           muted={muted}
           className="absolute inset-0 w-full h-full object-cover brightness-50"
-        />
+        />}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
         <motion.div
@@ -87,7 +95,7 @@ export default function Home() {
 
         <button
           onClick={() => setMuted(!muted)}
-          className="absolute top-6 right-6 text-white/70 hover:text-white"
+          className="absolute top-6 right-6 text-white/70 hover:text-white z-20"
         >
           {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
         </button>
@@ -546,5 +554,3 @@ export default function Home() {
     </>
   );
 }
-
-    
