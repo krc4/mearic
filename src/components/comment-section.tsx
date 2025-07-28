@@ -7,17 +7,25 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { MessageCircle, Send, MoreVertical, ShieldCheck } from "lucide-react"
+import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2 } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost, isAdmin } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost, isAdmin, deleteComment } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
 import { Badge } from "./ui/badge"
 import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 
-const CommentItem = ({ comment }: { comment: Comment }) => (
+
+const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, isAdmin: boolean, onDeleteClick: (commentId: string) => void }) => (
     <Card className={cn(
         "bg-card/50 transition-all duration-300", 
         comment.isAdmin && "border-primary/50 bg-primary/5 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.3)]"
@@ -38,7 +46,22 @@ const CommentItem = ({ comment }: { comment: Comment }) => (
                             </Badge>
                         )}
                     </div>
-                    <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                     {isAdmin && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                 <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() => onDeleteClick(comment.id)}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Yorumu Sil
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
                  <p className="text-xs text-muted-foreground">
                     {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString() : 'Şimdi'}
@@ -64,14 +87,24 @@ const CommentSkeleton = () => (
 export function CommentSection({ postId }: { postId: string }) {
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
+    const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
+            if (currentUser) {
+                const adminStatus = await isAdmin(currentUser.uid);
+                setIsCurrentUserAdmin(adminStatus);
+            } else {
+                setIsCurrentUserAdmin(false);
+            }
             setAuthLoading(false);
         });
         return () => unsubscribe();
@@ -100,16 +133,13 @@ export function CommentSection({ postId }: { postId: string }) {
             return;
         }
 
-        // Check if the current user is an admin before submitting
-        const isAdminUser = await isAdmin(user.uid);
-
-        const commentData = {
+        const commentData: CommentPayload = {
             postId,
             userId: user.uid,
             username: user.displayName || "Anonim",
             photoURL: user.photoURL || "",
             text: newComment,
-            isAdmin: isAdminUser, // Pass the admin status
+            isAdmin: isCurrentUserAdmin, 
         };
 
         const newCommentDoc = await addComment(commentData);
@@ -127,6 +157,25 @@ export function CommentSection({ postId }: { postId: string }) {
                 variant: "destructive"
             });
         }
+    }
+
+    const handleDeleteClick = (commentId: string) => {
+        setCommentToDelete(commentId);
+        setIsAlertOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!commentToDelete || !postId) return;
+        
+        const success = await deleteComment(postId, commentToDelete);
+        if (success) {
+            setComments(comments.filter(c => c.id !== commentToDelete));
+            toast({ title: "Başarılı!", description: "Yorum başarıyla silindi." });
+        } else {
+            toast({ title: "Hata!", description: "Yorum silinirken bir sorun oluştu.", variant: "destructive" });
+        }
+        setCommentToDelete(null);
+        setIsAlertOpen(false);
     }
     
     return (
@@ -179,7 +228,12 @@ export function CommentSection({ postId }: { postId: string }) {
                         </>
                     ) : comments.length > 0 ? (
                         comments.map((comment) => (
-                           <CommentItem key={comment.id} comment={comment} />
+                           <CommentItem 
+                                key={comment.id} 
+                                comment={comment} 
+                                isAdmin={isCurrentUserAdmin} 
+                                onDeleteClick={handleDeleteClick}
+                            />
                         ))
                     ) : (
                         <p className="text-center text-muted-foreground py-8">
@@ -188,6 +242,14 @@ export function CommentSection({ postId }: { postId: string }) {
                     )}
                 </div>
             </div>
+             <DeleteConfirmationDialog
+                isOpen={isAlertOpen}
+                onOpenChange={setIsAlertOpen}
+                onConfirm={handleDeleteConfirm}
+                title="Yorumu Silmek İstediğinizden Emin misiniz?"
+                description="Bu işlem geri alınamaz. Yorum kalıcı olarak silinecektir."
+                confirmText="Evet, Sil"
+            />
         </section>
     )
 }

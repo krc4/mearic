@@ -151,25 +151,22 @@ export const deletePost = async (postId: string) => {
 
 // Comments services
 
-export const addComment = async (comment: CommentPayload): Promise<Comment | null> => {
+export const addComment = async (commentData: CommentPayload): Promise<Comment | null> => {
   try {
-    const isAdminUser = await isAdmin(comment.userId);
     const commentWithTimestamp = {
-      ...comment,
-      isAdmin: isAdminUser, // Ensure isAdmin is part of the saved document
+      ...commentData,
       createdAt: serverTimestamp(),
     };
+    
     const docRef = await addDoc(
-      collection(db, 'posts', comment.postId, 'comments'),
+      collection(db, 'posts', commentData.postId, 'comments'),
       commentWithTimestamp
     );
     
-    // For immediate feedback, we create the full comment object to return
     const newComment: Comment = {
       id: docRef.id,
-      ...comment,
-      isAdmin: isAdminUser, // Pass the correct admin status
-      createdAt: new Timestamp(Date.now() / 1000, 0), // Estimate timestamp for immediate feedback
+      ...commentData,
+      createdAt: new Timestamp(Date.now() / 1000, 0), // Estimate for immediate feedback
     };
 
     return newComment;
@@ -182,7 +179,6 @@ export const addComment = async (comment: CommentPayload): Promise<Comment | nul
 
 export const getCommentsForPost = async (postId: string): Promise<Comment[]> => {
   try {
-    // This function is now simplified, as isAdmin is stored with the comment.
     const commentsRef = collection(db, 'posts', postId, 'comments');
     const q = query(commentsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -198,6 +194,18 @@ export const getCommentsForPost = async (postId: string): Promise<Comment[]> => 
     return [];
   }
 };
+
+export const deleteComment = async (postId: string, commentId: string): Promise<boolean> => {
+    try {
+        const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+        await deleteDoc(commentRef);
+        return true;
+    } catch (error) {
+        console.error('Error deleting comment: ', error);
+        return false;
+    }
+};
+
 
 // Admin Management Services
 
