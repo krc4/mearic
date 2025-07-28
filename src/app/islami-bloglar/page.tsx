@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Heart, Share2, Volume2, VolumeX, Play, Clock, Sparkles } from "lucide-react";
+import { Heart, Share2, Volume2, VolumeX, Play, Clock, ArrowUpRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
@@ -49,19 +49,6 @@ export default function IslamiBloglarPage() {
   const { scrollYProgress } = useScroll({ target: ref });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
-  useEffect(() => {
-    // This is a client component, window is available
-    const handleScroll = () => {
-      const video = document.querySelector('video');
-      if(video) {
-        const scrollPosition = window.scrollY;
-        video.style.transform = `translateY(${scrollPosition * 0.3}px)`;
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  },[])
-
   const toggleFav = (id: number) => {
     setFavs(currentFavs => {
       const newFavs = new Set(currentFavs);
@@ -86,13 +73,7 @@ export default function IslamiBloglarPage() {
       <Header />
       {/* Cinematic Hero */}
       <section className="relative h-screen w-full overflow-hidden">
-        <video
-          src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4"
-          autoPlay
-          loop
-          muted={muted}
-          className="absolute inset-0 w-full h-full object-cover brightness-50"
-        />
+        <div className="absolute inset-0 w-full h-full object-cover brightness-50" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
         {/* Floating Kandil */}
@@ -165,6 +146,7 @@ export default function IslamiBloglarPage() {
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                 style={{ backgroundImage: `url(${post.img})` }}
+                data-ai-hint="islamic blog"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
@@ -184,7 +166,17 @@ export default function IslamiBloglarPage() {
                   <span className="text-xs text-white/60 flex items-center gap-1">
                     <Clock size={14} /> {post.readTime} dk
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
+                     <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                    >
+                      <Link href={`/posts/${post.slug}`}>
+                        Oku <ArrowUpRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
                     <Button
                       size="icon"
                       variant="ghost"
