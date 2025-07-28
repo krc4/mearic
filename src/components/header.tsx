@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useComingSoonPopup } from '@/hooks/use-coming-soon-popup';
 import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase/config';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
@@ -24,7 +23,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from './ui/skeleton';
 
 export function Header() {
-  const { setPopupContent, setIsOpen } = useComingSoonPopup();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,14 +38,6 @@ export function Header() {
     await signOut(auth);
   };
   
-  const handleProfileClick = () => {
-    setPopupContent({
-      title: "Profil Ayarları Çok Yakında!",
-      content: "Kullanıcı profilinizi düzenleyebileceğiniz, bilgilerinizi güncelleyebileceğiniz ve hesap ayarlarınızı yönetebileceğiniz kişisel alanınızı hazırlıyoruz."
-    });
-    setIsOpen(true);
-  }
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -117,9 +107,11 @@ export function Header() {
                             </Link>
                         </DropdownMenuItem>
                          {user && (
-                            <DropdownMenuItem onClick={handleProfileClick}>
-                                <UserIcon className="mr-2 h-4 w-4" />
-                                <span>Profil</span>
+                             <DropdownMenuItem asChild>
+                                <Link href="/profil">
+                                    <UserIcon className="mr-2 h-4 w-4" />
+                                    <span>Profil</span>
+                                </Link>
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
@@ -139,3 +131,5 @@ export function Header() {
     </header>
   );
 }
+
+    
