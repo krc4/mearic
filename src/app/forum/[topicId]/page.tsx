@@ -33,7 +33,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 // Mock Data - In a real app, this would be fetched based on topicId
-// The stats are now handled dynamically below.
 const topicData = {
   id: "1",
   title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
@@ -152,7 +151,6 @@ export default function ForumTopicPage() {
                 description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
              });
          } else {
-            // If user cancels share, do nothing or maybe copy to clipboard as a fallback
              navigator.clipboard.writeText(url);
              toast({
                 title: "Link panoya kopyalandı!",
@@ -268,7 +266,7 @@ export default function ForumTopicPage() {
                      
                      {/* The comment section needs a real post ID from a database. 
                          Using a mock ID for now to make it render. */}
-                     <CommentSection postId={`forum-${topic.id}`} />
+                     <CommentSection postId={`forum-${topic.id}`} onCommentCountChange={setCommentCount} />
                 </motion.main>
 
                  {/* Sidebar */}
@@ -347,5 +345,3 @@ export default function ForumTopicPage() {
     </>
   );
 }
-
-    

@@ -103,8 +103,12 @@ const CommentSkeleton = () => (
     </div>
 );
 
+interface CommentSectionProps {
+    postId: string;
+    onCommentCountChange: (count: number) => void;
+}
 
-export function CommentSection({ postId }: { postId: string }) {
+export function CommentSection({ postId, onCommentCountChange }: CommentSectionProps) {
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
     const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
@@ -137,10 +141,11 @@ export function CommentSection({ postId }: { postId: string }) {
             setCommentsLoading(true);
             const fetchedComments = await getCommentsForPost(postId);
             setComments(fetchedComments);
+            onCommentCountChange(fetchedComments.length);
             setCommentsLoading(false);
         }
         fetchComments();
-    }, [postId]);
+    }, [postId, onCommentCountChange]);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -165,7 +170,11 @@ export function CommentSection({ postId }: { postId: string }) {
         const newCommentDoc = await addComment(commentData);
         if (newCommentDoc) {
             // Add comment to UI instantly with correct admin status
-            setComments(prev => [newCommentDoc, ...prev]);
+            setComments(prev => {
+                const newComments = [newCommentDoc, ...prev];
+                onCommentCountChange(newComments.length);
+                return newComments;
+            });
             setNewComment("");
             toast({
                 title: "Yorumunuz için teşekkürler!",
@@ -190,7 +199,11 @@ export function CommentSection({ postId }: { postId: string }) {
         
         const success = await deleteComment(postId, commentToDelete);
         if (success) {
-            setComments(comments.filter(c => c.id !== commentToDelete));
+            setComments(prev => {
+                const newComments = prev.filter(c => c.id !== commentToDelete);
+                onCommentCountChange(newComments.length);
+                return newComments;
+            });
             toast({ title: "Başarılı!", description: "Yorum başarıyla silindi." });
         } else {
             toast({ title: "Hata!", description: "Yorum silinirken bir sorun oluştu.", variant: "destructive" });

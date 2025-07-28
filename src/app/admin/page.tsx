@@ -46,15 +46,20 @@ import {
   Tooltip,
 } from "recharts"
 import { ChartTooltipContent, ChartContainer } from "@/components/ui/chart"
+import { useState, useEffect } from "react"
+import { getDocs, collection, query, orderBy, limit as firestoreLimit } from "firebase/firestore"
+import { db } from "@/lib/firebase/config"
+import type { Post } from "@/lib/posts"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const chartData = [
-  { date: "Pzt", users: 12, posts: 5 },
-  { date: "Sal", users: 18, posts: 7 },
-  { date: "Çar", users: 15, posts: 6 },
-  { date: "Per", users: 22, posts: 9 },
-  { date: "Cum", users: 30, posts: 12 },
-  { date: "Cmt", users: 25, posts: 10 },
-  { date: "Paz", users: 28, posts: 11 },
+  { date: "Pzt", users: 2, posts: 1 },
+  { date: "Sal", users: 5, posts: 2 },
+  { date: "Çar", users: 3, posts: 1 },
+  { date: "Per", users: 6, posts: 3 },
+  { date: "Cum", users: 8, posts: 4 },
+  { date: "Cmt", users: 7, posts: 2 },
+  { date: "Paz", users: 10, posts: 5 },
 ]
 
 const chartConfig = {
@@ -69,6 +74,53 @@ const chartConfig = {
 }
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({ posts: 0, users: 0, comments: 0 });
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoadingStats(true);
+      const postQuery = query(collection(db, "posts"));
+      const userQuery = query(collection(db, "users"));
+      
+      const postSnapshot = await getDocs(postQuery);
+      const userSnapshot = await getDocs(userQuery);
+      
+      let totalComments = 0;
+      for (const postDoc of postSnapshot.docs) {
+          const commentsQuery = query(collection(db, "posts", postDoc.id, "comments"));
+          const commentsSnapshot = await getDocs(commentsQuery);
+          totalComments += commentsSnapshot.size;
+      }
+
+      setStats({
+        posts: postSnapshot.size,
+        users: userSnapshot.size,
+        comments: totalComments
+      });
+      setLoadingStats(false);
+    }
+
+    const fetchRecentPosts = async () => {
+        setLoadingPosts(true);
+        const postsRef = collection(db, "posts");
+        const q = query(postsRef, orderBy("createdAt", "desc"), firestoreLimit(5));
+        const querySnapshot = await getDocs(q);
+        const posts: Post[] = [];
+        querySnapshot.forEach(doc => {
+            posts.push({ id: doc.id, ...doc.data() } as Post);
+        });
+        setRecentPosts(posts);
+        setLoadingPosts(false);
+    }
+
+    fetchStats();
+    fetchRecentPosts();
+  }, [])
+
+
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -78,9 +130,9 @@ export default function AdminDashboard() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">152</div>
+            {loadingStats ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{stats.posts}</div>}
             <p className="text-xs text-muted-foreground">
-              +12 son aydan
+              Tüm kategorilerdeki toplam yazı sayısı
             </p>
           </CardContent>
         </Card>
@@ -92,9 +144,9 @@ export default function AdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
+             {loadingStats ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{stats.users}</div>}
             <p className="text-xs text-muted-foreground">
-              +180.1% son aydan
+              Sisteme kayıtlı tüm kullanıcılar
             </p>
           </CardContent>
         </Card>
@@ -104,9 +156,9 @@ export default function AdminDashboard() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+             {loadingStats ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{stats.comments}</div>}
             <p className="text-xs text-muted-foreground">
-              +19% son aydan
+              Tüm yazılara yapılan yorum sayısı
             </p>
           </CardContent>
         </Card>
@@ -154,50 +206,39 @@ export default function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Başlık</TableHead>
-                  <TableHead className="text-right">Görüntülenme</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Kuran'da Evrenin Genişlemesi</div>
-                  </TableCell>
-                  <TableCell className="text-right">1250</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Dağların Hareketi</div>
-                  </TableCell>
-                  <TableCell className="text-right">890</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Embriyo Aşamaları</div>
-                  </TableCell>
-                  <TableCell className="text-right">1100</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Tıbb-ı Nebevi</div>
-                  </TableCell>
-                  <TableCell className="text-right">750</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Sabrın Önemi</div>
-                  </TableCell>
-                  <TableCell className="text-right">920</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            {loadingPosts ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Başlık</TableHead>
+                      <TableHead className="text-right">Görüntülenme</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentPosts.map(post => (
+                       <TableRow key={post.id}>
+                          <TableCell>
+                            <div className="font-medium">{post.title}</div>
+                             <div className="text-xs text-muted-foreground">{post.category}</div>
+                          </TableCell>
+                          <TableCell className="text-right">{post.views || 0}</TableCell>
+                        </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+            )}
           </CardContent>
           <CardFooter className="justify-end">
              <Button asChild size="sm" variant="outline">
-              <Link href="#">
+              <Link href="/admin/kuran-mucizeleri">
                 Tümünü Gör
                 <ArrowUpRight className="h-4 w-4 ml-1.5" />
               </Link>

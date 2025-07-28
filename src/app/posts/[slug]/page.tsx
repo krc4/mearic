@@ -14,7 +14,7 @@ import {
   Eye
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
-import { getPostBySlug, incrementPostView, getCommentCount, toggleLikePost } from "@/lib/firebase/services";
+import { getPostBySlug, incrementPostView, toggleLikePost } from "@/lib/firebase/services";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/header";
@@ -70,10 +70,6 @@ export default function PostPage() {
             setViewCount(fetchedPost.views || 0);
         }
         
-        // Fetch counts
-        const comments = await getCommentCount(fetchedPost.id);
-        
-        setCommentCount(comments);
         setLikeCount(fetchedPost.likes || 0);
 
         // Check if liked from localStorage
@@ -140,12 +136,20 @@ export default function PostPage() {
         } else {
             throw new Error("Share API not supported");
         }
-    } catch (error) {
-        navigator.clipboard.writeText(url);
-        toast({
-            title: "Link panoya kopyalandı!",
-            description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
-        });
+    } catch (error: any) {
+         if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+             navigator.clipboard.writeText(url);
+             toast({
+                title: "Link panoya kopyalandı!",
+                description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
+             });
+         } else {
+             navigator.clipboard.writeText(url);
+             toast({
+                title: "Link panoya kopyalandı!",
+                description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
+             });
+         }
     }
   };
 
@@ -254,7 +258,7 @@ export default function PostPage() {
                         </CardContent>
                      </Card>
 
-                     <CommentSection postId={post.id} />
+                     <CommentSection postId={post.id} onCommentCountChange={setCommentCount} />
                 </motion.main>
 
                  {/* Sidebar */}
