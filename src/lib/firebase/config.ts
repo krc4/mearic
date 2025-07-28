@@ -18,7 +18,7 @@ const firebaseConfig = {
 // Initialize Firebase
 // This pattern prevents re-initializing the app on every render.
 const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
+const auth: Auth = getAuth(app);
 
 export { db, auth };

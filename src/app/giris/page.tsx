@@ -60,6 +60,8 @@ export default function LoginPage() {
         let description = "Giriş sırasında bir hata oluştu. Lütfen bilgilerinizi kontrol edin.";
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             description = "E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edip tekrar deneyin."
+        } else if (error.code === 'auth/configuration-not-found') {
+            description = "Firebase yapılandırması bulunamadı. Lütfen yönetici ile iletişime geçin."
         }
         toast({
             title: "Giriş Hatası",

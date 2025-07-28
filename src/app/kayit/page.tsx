@@ -88,6 +88,8 @@ export default function RegisterPage() {
         let description = "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.";
         if (error.code === 'auth/email-already-in-use') {
             description = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta ile deneyin veya giriş yapın."
+        } else if (error.code === 'auth/configuration-not-found') {
+            description = "Firebase yapılandırması bulunamadı. Lütfen yönetici ile iletişime geçin."
         }
         toast({
             title: "Kayıt Hatası",
