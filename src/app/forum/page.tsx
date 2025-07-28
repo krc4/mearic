@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -65,24 +66,24 @@ export default function NurunyoluForum() {
     <section className="container mx-auto py-8">
 
       {/* Header */}
-      <header className="relative z-20 flex items-center justify-between p-6 rounded-lg bg-card border">
-        <h1 className="text-3xl font-black tracking-tight">
+      <header className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-lg bg-card border">
+        <h1 className="text-3xl font-black tracking-tight text-center md:text-left">
           Nurunyolu <span className="text-primary">Forum</span>
         </h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
           <input
             type="text"
             placeholder="Ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-background rounded-full px-4 py-2 text-sm border focus:outline-none focus:ring-2 focus:ring-primary"
+            className="bg-background rounded-full px-4 py-2 text-sm border focus:outline-none focus:ring-2 focus:ring-primary w-full"
           />
           <Button
             size="sm"
             className="flex items-center gap-2 rounded-full font-bold"
             onClick={() => setNewPostOpen(true)}
           >
-            <Plus size={16} /> Yeni Konu
+            <Plus size={16} /> <span className="hidden sm:inline">Yeni Konu</span>
           </Button>
         </div>
       </header>
@@ -93,7 +94,7 @@ export default function NurunyoluForum() {
           <button
             key={tag}
             onClick={() => setFilterTag(tag)}
-            className={`rounded-full px-4 py-1.5 text-sm transition ${
+            className={`rounded-full px-4 py-1.5 text-sm transition whitespace-nowrap ${
               filterTag === tag
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent"
@@ -106,7 +107,7 @@ export default function NurunyoluForum() {
 
       {/* Topics */}
       <AnimatePresence>
-        <motion.div className="relative z-20 px-6 py-4 space-y-4">
+        <motion.div className="relative z-20 px-4 md:px-6 py-4 space-y-4">
           {filtered.map((topic) => (
             <motion.div
               key={topic.id}
@@ -115,14 +116,14 @@ export default function NurunyoluForum() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               whileHover={{ scale: 1.01 }}
-              className="group relative rounded-2xl border bg-card/50 backdrop-blur-md p-5 flex items-center justify-between transition hover:bg-accent/80 hover:shadow-lg"
+              className="group relative rounded-2xl border bg-card/50 backdrop-blur-md p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:bg-accent/80 hover:shadow-lg"
             >
               <div className="flex-1">
                 <h3 className="font-bold text-lg">
                   {topic.pinned && <Star className="inline-block mr-2 h-4 w-4 text-amber-400" />}
                   {topic.title}
                 </h3>
-                <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                   <span>@{topic.author}</span>
                   <span className="flex items-center gap-1">
                     <MessageSquare size={14} /> {topic.replies} yorum
@@ -134,7 +135,7 @@ export default function NurunyoluForum() {
                     <Clock size={14} /> {topic.lastReply}
                   </span>
                 </div>
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex gap-2 flex-wrap">
                   {topic.tags.map((t) => (
                     <span key={t} className="text-xs bg-primary/10 text-primary rounded px-2 py-0.5">
                       # {t}
@@ -142,8 +143,8 @@ export default function NurunyoluForum() {
                   ))}
                 </div>
               </div>
-              <Link href={`/forum/${topic.id}`}>
-                <Button size="sm" variant="ghost" className="text-foreground hover:text-primary">
+              <Link href={`/forum/${topic.id}`} className="w-full sm:w-auto">
+                <Button size="sm" variant="ghost" className="text-foreground hover:text-primary w-full sm:w-auto">
                   Gör
                 </Button>
               </Link>
