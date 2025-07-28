@@ -74,11 +74,18 @@ export default function IslamiBloglarPage() {
   };
 
   return (
-    <div ref={ref} className="bg-background">
+    <div ref={ref}>
       <Header />
       {/* Cinematic Hero */}
-      <section className="relative h-screen w-full overflow-hidden">
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
+      <section className="relative h-screen w-full overflow-hidden bg-black">
+         <video
+          src="/videos/intro.mp4"
+          autoPlay
+          loop
+          muted={muted}
+          className="absolute inset-0 w-full h-full object-cover brightness-50"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
         {/* Floating Kandil */}
         <motion.div
