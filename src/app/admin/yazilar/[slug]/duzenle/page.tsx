@@ -162,6 +162,15 @@ export default function EditPostPage() {
     // This case should ideally be handled by the notFound() in useEffect, but as a fallback:
     return notFound();
   }
+  
+  const isUrlValid = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
 
   return (
     <div className="mx-auto grid max-w-4xl flex-1 auto-rows-max gap-4">
@@ -270,7 +279,7 @@ export default function EditPostPage() {
                             value={imageUrl}
                             onChange={(e) => setImageUrl(e.target.value)}
                         />
-                         {imageUrl && (
+                         {isUrlValid(imageUrl) && (
                             <div className="relative aspect-video w-full overflow-hidden rounded-md mt-2">
                                 <Image 
                                     src={imageUrl} 
