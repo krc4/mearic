@@ -30,6 +30,7 @@ export default function Home() {
   const [videoSrc, setVideoSrc] = useState('');
   const [isClient, setIsClient] = useState(false); // State to track client-side mount
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
 
   const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4', '/anasayfa_video3.mp4'];
 
@@ -41,6 +42,11 @@ export default function Home() {
 
   const handleVideoEnd = () => {
     if (videoRef.current) {
+        if (!hasPlayedOnce) {
+            videoRef.current.muted = true;
+            setMuted(true);
+            setHasPlayedOnce(true);
+        }
         videoRef.current.play();
     }
   };
@@ -67,7 +73,6 @@ export default function Home() {
           src={videoSrc}
           autoPlay
           muted={muted}
-          loop
           playsInline
           onEnded={handleVideoEnd}
           className="absolute inset-0 w-full h-full object-cover brightness-50"
