@@ -32,7 +32,7 @@ import { Header } from "@/components/header";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
-// Mock Data - In a real app, this would be fetched based on topicId
+// Static data for the topic, stats are now handled dynamically.
 const topicData = {
   id: "1",
   title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
@@ -81,31 +81,27 @@ export default function ForumTopicPage() {
         if (fetchedTopic) {
             setTopic(fetchedTopic);
             
-             if (typeof window !== 'undefined') {
-                const topicStorageId = `forum-${fetchedTopic.id}`;
-                
-                // Handle view count with sessionStorage
-                const viewedKey = `viewed-${topicStorageId}`;
-                const hasViewed = sessionStorage.getItem(viewedKey);
-                let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`)) || 0;
+            const topicStorageId = `forum-${fetchedTopic.id}`;
+            
+            // Handle view count with sessionStorage to ensure it increments only once per session.
+            const viewedKey = `viewed-${topicStorageId}`;
+            let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`)) || 0;
+            const hasViewedInSession = sessionStorage.getItem(viewedKey);
 
-                if (!hasViewed) {
-                    currentViews += 1;
-                    localStorage.setItem(`views-${topicStorageId}`, String(currentViews));
-                    sessionStorage.setItem(viewedKey, 'true');
-                }
-                setViewCount(currentViews);
+            if (!hasViewedInSession) {
+                currentViews += 1;
+                localStorage.setItem(`views-${topicStorageId}`, String(currentViews));
+                sessionStorage.setItem(viewedKey, 'true');
+            }
+            setViewCount(currentViews);
 
-                // Handle like state with localStorage
-                const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
-                setLiked(isLiked);
-                setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`)) || 0);
+            // Handle like state with localStorage for persistence across sessions.
+            const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
+            setLiked(isLiked);
+            setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`)) || 0);
 
-             } else {
-                 setViewCount(0);
-                 setLikeCount(0);
-             }
-             setCommentCount(0); // This will be updated by CommentSection
+            // Comment count will be updated by the CommentSection component.
+            setCommentCount(0); 
         }
         setLoading(false);
     }, 500);
@@ -118,12 +114,12 @@ export default function ForumTopicPage() {
     
     setLiked(newLikedState);
     const newLikeCount = likeCount + (newLikedState ? 1 : -1);
-    setLikeCount(newLikeCount < 0 ? 0 : newLikeCount);
+    const finalLikeCount = newLikeCount < 0 ? 0 : newLikeCount;
+    setLikeCount(finalLikeCount);
 
-    if (typeof window !== 'undefined') {
-        localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
-        localStorage.setItem(`likes-${topicStorageId}`, String(newLikeCount < 0 ? 0 : newLikeCount));
-    }
+    localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
+    localStorage.setItem(`likes-${topicStorageId}`, String(finalLikeCount));
+    
     toast({
         title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
     });
@@ -151,6 +147,7 @@ export default function ForumTopicPage() {
                 description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
              });
          } else {
+             // User cancelled the share action, copy to clipboard as a fallback
              navigator.clipboard.writeText(url);
              toast({
                 title: "Link panoya kopyalandı!",
@@ -345,3 +342,5 @@ export default function ForumTopicPage() {
     </>
   );
 }
+
+    
