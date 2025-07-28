@@ -13,6 +13,7 @@ import {
   BookOpen,
   Sparkles,
   PenSquare,
+  Shield,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -112,6 +113,14 @@ function AdminSidebar() {
                 <Link href="/admin/islami-bloglar">
                   <PenSquare />
                   <span>İslami Bloglar</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Yöneticiler">
+                <Link href="/admin/yoneticiler">
+                  <Shield />
+                  <span>Yöneticiler</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

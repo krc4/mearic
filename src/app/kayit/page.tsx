@@ -28,6 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
 import { auth } from "@/lib/firebase/config"; 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 const registerSchema = z.object({
   username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
@@ -63,6 +65,15 @@ export default function RegisterPage() {
       if (user) {
          await updateProfile(user, {
             displayName: data.username
+         });
+
+         // Create a document in the 'users' collection
+         const userRef = doc(db, "users", user.uid);
+         await setDoc(userRef, {
+            email: user.email,
+            displayName: data.username,
+            photoURL: user.photoURL,
+            createdAt: serverTimestamp()
          });
       }
       

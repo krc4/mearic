@@ -1,12 +1,54 @@
 
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, writeBatch } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
 import type { Comment, CommentPayload } from '@/lib/comments';
+import type { AdminUser } from '@/lib/admin';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt'> & {
     content: string;
 };
+
+// Find a user by email in the 'users' collection
+export const findUserByEmail = async (email: string): Promise<{ uid: string, displayName: string | null, photoURL: string | null } | null> => {
+    try {
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return null;
+        }
+        const userDoc = querySnapshot.docs[0];
+        const data = userDoc.data();
+        return {
+            uid: userDoc.id,
+            displayName: data.displayName || null,
+            photoURL: data.photoURL || null
+        };
+    } catch (e) {
+        console.error("Error finding user by email: ", e);
+        return null;
+    }
+};
+
+const ensureUserDocument = async (user: import('firebase/auth').User) => {
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+        try {
+            await writeBatch(db)
+                .set(userRef, {
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    createdAt: serverTimestamp()
+                })
+                .commit();
+        } catch (error) {
+            console.error("Error creating user document:", error);
+        }
+    }
+};
+
 
 export const addPost = async (post: PostPayload) => {
     try {
@@ -147,3 +189,70 @@ export const getCommentsForPost = async (postId: string): Promise<Comment[]> => 
     return [];
   }
 };
+
+// Admin Management Services
+
+export const getAdmins = async (): Promise<AdminUser[]> => {
+    try {
+        const adminsRef = collection(db, "admins");
+        const q = query(adminsRef, orderBy('addedAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            uid: doc.id,
+            ...doc.data()
+        } as AdminUser));
+    } catch (error) {
+        console.error("Error getting admins: ", error);
+        return [];
+    }
+}
+
+export const addAdmin = async (email: string): Promise<{ success: boolean; message: string }> => {
+    const user = await findUserByEmail(email);
+    if (!user) {
+        return { success: false, message: "Bu e-posta adresine sahip bir kullanıcı bulunamadı." };
+    }
+
+    const adminRef = doc(db, "admins", user.uid);
+    const adminSnap = await getDoc(adminRef);
+
+    if (adminSnap.exists()) {
+        return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
+    }
+
+    try {
+        await setDoc(adminRef, {
+            email: email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            addedAt: serverTimestamp(),
+        });
+        return { success: true, message: `${email} başarıyla yönetici olarak atandı.` };
+    } catch (error) {
+        console.error("Error adding admin: ", error);
+        return { success: false, message: "Yönetici eklenirken bir sunucu hatası oluştu." };
+    }
+};
+
+export const removeAdmin = async (uid: string): Promise<boolean> => {
+    try {
+        const adminRef = doc(db, "admins", uid);
+        await deleteDoc(adminRef);
+        return true;
+    } catch (error) {
+        console.error("Error removing admin: ", error);
+        return false;
+    }
+}
+
+// Function to check if a user is an admin
+export const isAdmin = async (uid: string): Promise<boolean> => {
+    try {
+        const adminRef = doc(db, "admins", uid);
+        const adminSnap = await getDoc(adminRef);
+        return adminSnap.exists();
+    } catch (error) {
+        console.error("Error checking admin status: ", error);
+        return false;
+    }
+}
