@@ -130,6 +130,23 @@ export default function NurunyoluForum() {
         </div>
       </header>
 
+      {/* Advertisement Section */}
+      <div className="mb-12">
+        <Link href="#" className="block w-full aspect-video relative overflow-hidden rounded-lg group">
+          <Image 
+            src="https://placehold.co/1280x720.png"
+            alt="Reklam"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            data-ai-hint="advertisement banner"
+          />
+           <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="bg-black/50 text-white px-4 py-2 rounded-md text-sm font-semibold">Reklam</span>
+          </div>
+        </Link>
+      </div>
+
+
       {/* Featured Topics Section */}
        <motion.div 
         initial={{ opacity: 0, y: -20 }}
