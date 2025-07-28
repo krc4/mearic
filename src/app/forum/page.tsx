@@ -157,7 +157,7 @@ export default function NurunyoluForum() {
       {/* Footer */}
       <footer className="relative z-20 text-center py-8 text-muted-foreground">
         <Heart className="mx-auto mb-2 h-6 w-6 text-red-500" />
-        <p className="text-sm">© {new Date().getFullYear()} Nurunyolu – Tasarım aşkıyla kodlandı.</p>
+        <p className="text-sm">© {new Date().getFullYear()} Nurunyolu</p>
       </footer>
     </section>
   );
