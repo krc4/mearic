@@ -60,19 +60,22 @@ export default function ForumTopicPage() {
   
   const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Initialize all states to 0 to prevent hydration mismatch
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
+    // Simulate fetching data
     setLoading(true);
-    // Simulate fetching static data
     setTimeout(() => {
         const fetchedTopic = staticTopicData; // In a real app, this would be a fetch
         if (fetchedTopic && fetchedTopic.id === topicId) {
             setTopic(fetchedTopic);
-
+            
+            // Key to prevent conflicts with other pages/versions
             const topicStorageId = `forum-topic-v2-${fetchedTopic.id}`;
 
             // Handle Views
@@ -104,7 +107,7 @@ export default function ForumTopicPage() {
     const topicStorageId = `forum-topic-v2-${topic.id}`;
     const newLikedState = !liked;
     const currentLikes = Number(localStorage.getItem(`likes-${topicStorageId}`) || 0);
-    const newLikes = newLikedState ? currentLikes + 1 : currentLikes - 1;
+    const newLikes = newLikedState ? currentLikes + 1 : Math.max(0, currentLikes - 1);
 
     setLiked(newLikedState);
     setLikeCount(newLikes);
@@ -322,5 +325,3 @@ export default function ForumTopicPage() {
     </>
   );
 }
-
-    
