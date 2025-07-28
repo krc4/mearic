@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -49,7 +50,6 @@ export default function IslamiBloglarPage() {
 
   const toggleFav = (id: number) => {
     const isAlreadyFaved = favs.has(id);
-
     setFavs(currentFavs => {
       const newFavs = new Set(currentFavs);
       if (newFavs.has(id)) {
@@ -59,14 +59,13 @@ export default function IslamiBloglarPage() {
       }
       return newFavs;
     });
-    
     if (isAlreadyFaved) {
         toast({ title: "Beğeni geri çekildi" });
     } else {
         toast({ title: "Gönderi beğenildi!" });
     }
   };
-   
+
   const handleShare = (title: string, slug: string) => {
     const url = `${window.location.origin}/posts/${slug}`;
     navigator.clipboard.writeText(url);
@@ -225,9 +224,9 @@ export default function IslamiBloglarPage() {
       {/* Final Şelale */}
       <footer className="relative overflow-hidden py-20">
         <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/20 via-transparent to-transparent blur-3xl" />
-        <div className="container mx-auto text-center text-white/60">
+        <div className="container mx-auto text-center text-muted-foreground">
           <Sparkles className="mx-auto mb-4 h-12 w-12 text-yellow-300" />
-          <p className="text-sm">© 2025 Nurunyolu – Tasarım aşkıyla kodlandı.</p>
+          <p className="text-sm">© {new Date().getFullYear()} Nurunyolu</p>
         </div>
       </footer>
     </div>
