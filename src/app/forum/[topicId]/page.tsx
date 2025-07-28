@@ -43,11 +43,6 @@ const topicData = {
     title: "İlahiyat Araştırmacısı",
   },
   image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
-  stats: {
-    replies: 0,
-    views: 0,
-    likes: 0,
-  },
   readTime: 8,
   category: 'Kozmoloji',
   createdAt: "2 gün önce",
@@ -108,10 +103,10 @@ export default function ForumTopicPage() {
                 setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`)) || 0);
 
              } else {
-                 setViewCount(fetchedTopic.stats.views);
-                 setLikeCount(fetchedTopic.stats.likes);
+                 setViewCount(0);
+                 setLikeCount(0);
              }
-             setCommentCount(fetchedTopic.stats.replies); // This will be updated by CommentSection
+             setCommentCount(0); // This will be updated by CommentSection
         }
         setLoading(false);
     }, 500);
@@ -123,12 +118,12 @@ export default function ForumTopicPage() {
     const newLikedState = !liked;
     
     setLiked(newLikedState);
-    setLikeCount(current => current + (newLikedState ? 1 : -1));
+    const newLikeCount = likeCount + (newLikedState ? 1 : -1);
+    setLikeCount(newLikeCount < 0 ? 0 : newLikeCount);
 
     if (typeof window !== 'undefined') {
         localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
-        const newLikeCount = likeCount + (newLikedState ? 1 : -1);
-        localStorage.setItem(`likes-${topicStorageId}`, String(newLikeCount));
+        localStorage.setItem(`likes-${topicStorageId}`, String(newLikeCount < 0 ? 0 : newLikeCount));
     }
     toast({
         title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
@@ -352,3 +347,5 @@ export default function ForumTopicPage() {
     </>
   );
 }
+
+    
