@@ -1,3 +1,4 @@
+
 'use client';
 import Link from 'next/link';
 import {
@@ -39,10 +40,10 @@ export function Header() {
     await signOut(auth);
   };
   
-  const handleForumClick = () => {
+  const handleProfileClick = () => {
     setPopupContent({
-      title: "Forum Çok Yakında!",
-      content: "Topluluğumuzla bir araya geleceğiniz, fikir alışverişinde bulunacağınız ve sorularınızı sorabileceğiniz interaktif forum bölümümüzü hazırlıyoruz."
+      title: "Profil Ayarları Çok Yakında!",
+      content: "Kullanıcı profilinizi düzenleyebileceğiniz, bilgilerinizi güncelleyebileceğiniz ve hesap ayarlarınızı yönetebileceğiniz kişisel alanınızı hazırlıyoruz."
     });
     setIsOpen(true);
   }
@@ -75,7 +76,7 @@ export function Header() {
             </Link>
             <Link
               href="/forum"
-              className="transition-colors hover:text-primary text-foreground/60"
+              className="transition-colors hover:text-primary text-foreground"
             >
               Forum
             </Link>
@@ -115,10 +116,12 @@ export function Header() {
                                 <span>Admin Paneli</span>
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                             <UserIcon className="mr-2 h-4 w-4" />
-                            <span>Profil</span>
-                        </DropdownMenuItem>
+                         {user && (
+                            <DropdownMenuItem onClick={handleProfileClick}>
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                <span>Profil</span>
+                            </DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout}>
                              <LogOut className="mr-2 h-4 w-4" />
