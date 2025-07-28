@@ -25,10 +25,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, ArrowRight, AlertTriangle } from "lucide-react";
+import { UserPlus, ArrowRight } from "lucide-react";
 import { auth } from "@/lib/firebase/config"; 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { useState } from "react";
 
 const registerSchema = z.object({
   username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
@@ -56,47 +55,37 @@ export default function RegisterPage() {
     },
   });
 
-  // const onSubmit = async (data: RegisterFormValues) => {
-  //   try {
-  //     const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-  //     const user = userCredential.user;
+  const onSubmit = async (data: RegisterFormValues) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
 
-  //     if (user) {
-  //        await updateProfile(user, {
-  //           displayName: data.username
-  //        });
-  //     }
+      if (user) {
+         await updateProfile(user, {
+            displayName: data.username
+         });
+      }
       
-  //     toast({
-  //       title: "Kayıt Başarılı!",
-  //       description: "Hesabınız başarıyla oluşturuldu. Hoş geldiniz!",
-  //     });
-  //     router.push('/');
-  //   } catch (error: any) {
-  //       console.error("Firebase registration error:", error);
-  //       let description = "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.";
-  //       if (error.code === 'auth/email-already-in-use') {
-  //           description = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta ile deneyin veya giriş yapın."
-  //       } else if (error.code === 'auth/configuration-not-found') {
-  //           description = "Firebase yapılandırması bulunamadı. Lütfen yönetici ile iletişime geçin."
-  //       }
-  //       toast({
-  //           title: "Kayıt Hatası",
-  //           description,
-  //           variant: "destructive"
-  //       });
-  //   }
-  // };
-
-  // Dummy function for now
-   const onSubmit = async (data: RegisterFormValues) => {
-     console.log(data);
-     toast({
-       title: "Kayıt Devre Dışı",
-       description: "Lütfen önce giriş sayfasını test edin.",
-       variant: "destructive"
-     })
-   };
+      toast({
+        title: "Kayıt Başarılı!",
+        description: "Hesabınız başarıyla oluşturuldu. Hoş geldiniz!",
+      });
+      router.push('/');
+    } catch (error: any) {
+        console.error("Firebase registration error:", error);
+        let description = "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.";
+        if (error.code === 'auth/email-already-in-use') {
+            description = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta ile deneyin veya giriş yapın."
+        } else if (error.code === 'auth/configuration-not-found') {
+            description = "Firebase yapılandırması bulunamadı veya e-posta/şifre ile kimlik doğrulama etkin değil. Lütfen yönetici ile iletişime geçin."
+        }
+        toast({
+            title: "Kayıt Hatası",
+            description,
+            variant: "destructive"
+        });
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-transparent">
@@ -115,15 +104,6 @@ export default function RegisterPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6" role="alert">
-                    <div className="flex">
-                        <div className="py-1"><AlertTriangle className="h-5 w-5 text-yellow-500 mr-3"/></div>
-                        <div>
-                            <p className="font-bold">Test Modu</p>
-                            <p className="text-sm">Lütfen Firebase konsolundan manuel olarak bir test kullanıcısı (test@mail.com / 123456) oluşturun ve Giriş sayfasından giriş yapmayı deneyin.</p>
-                        </div>
-                    </div>
-                </div>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
@@ -133,7 +113,7 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>Kullanıcı Adı</FormLabel>
                         <FormControl>
-                          <Input placeholder="Kullanıcı adınızı belirleyin" {...field} disabled/>
+                          <Input placeholder="Kullanıcı adınızı belirleyin" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -146,7 +126,7 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>E-posta Adresi</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="ornek@mail.com" {...field} disabled/>
+                          <Input type="email" placeholder="ornek@mail.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -159,7 +139,7 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>Şifre</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} disabled/>
+                          <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -172,13 +152,13 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>Şifre Tekrarı</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} disabled/>
+                          <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full !mt-6 group" size="lg" disabled>
+                  <Button type="submit" className="w-full !mt-6 group" size="lg">
                     Kayıt Ol
                     <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
