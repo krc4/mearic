@@ -43,9 +43,9 @@ const topicData = {
   },
   image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
   stats: {
-    replies: 42,
-    views: 1240,
-    likes: 178,
+    replies: 0,
+    views: 0,
+    likes: 0,
   },
   readTime: 8,
   category: 'Kozmoloji',
@@ -85,14 +85,13 @@ export default function ForumTopicPage() {
         const fetchedTopic = topicData; // Assuming topicId '1' is the mock
         if (fetchedTopic) {
             setTopic(fetchedTopic);
-            setLikeCount(fetchedTopic.stats.likes);
-            setCommentCount(fetchedTopic.stats.replies);
-
+            
              if (typeof window !== 'undefined') {
                 // Handle view count with sessionStorage
                 const viewedKey = `viewed-forum-${fetchedTopic.id}`;
                 const hasViewed = sessionStorage.getItem(viewedKey);
-                let currentViews = Number(localStorage.getItem(`views-forum-${fetchedTopic.id}`)) || fetchedTopic.stats.views;
+                // Initialize from localStorage or 0 if not present
+                let currentViews = Number(localStorage.getItem(`views-forum-${fetchedTopic.id}`)) || 0;
 
                 if (!hasViewed) {
                     currentViews += 1;
@@ -104,9 +103,14 @@ export default function ForumTopicPage() {
                 // Handle like state with localStorage
                 const isLiked = localStorage.getItem(`liked-forum-${fetchedTopic.id}`) === 'true';
                 setLiked(isLiked);
+                // Initialize like count from localStorage or 0
+                setLikeCount(Number(localStorage.getItem(`likes-forum-${fetchedTopic.id}`)) || 0);
+
              } else {
                  setViewCount(fetchedTopic.stats.views);
+                 setLikeCount(fetchedTopic.stats.likes);
              }
+             setCommentCount(fetchedTopic.stats.replies); // This will be updated by CommentSection
         }
         setLoading(false);
     }, 500);
@@ -115,12 +119,14 @@ export default function ForumTopicPage() {
   const handleLikeToggle = () => {
     if (!topic) return;
     const newLikedState = !liked;
+    const newLikeCount = likeCount + (newLikedState ? 1 : -1);
     
     setLiked(newLikedState);
-    setLikeCount(current => current + (newLikedState ? 1 : -1));
+    setLikeCount(newLikeCount);
 
     if (typeof window !== 'undefined') {
         localStorage.setItem(`liked-forum-${topic.id}`, String(newLikedState));
+        localStorage.setItem(`likes-forum-${topic.id}`, String(newLikeCount));
     }
     toast({
         title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
@@ -337,3 +343,5 @@ export default function ForumTopicPage() {
     </>
   );
 }
+
+    
