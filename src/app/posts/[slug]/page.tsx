@@ -129,25 +129,25 @@ export default function PostPage() {
   const handleShare = async () => {
     if (!post) return;
     const url = window.location.href;
-    if (navigator.share) {
-        try {
-            await navigator.share({ title: post.title, url });
-        } catch (error: any) {
-            // If user cancels share dialog (AbortError) or permission is denied, do nothing.
-            if (error.name === 'AbortError' || error.name === 'NotAllowedError') {
-                return;
-            }
-            console.error('Error sharing:', error);
-            // Fallback to clipboard for other errors
-            navigator.clipboard.writeText(url);
-            toast({ title: "Link panoya kopyalandı!" });
+    const shareData = {
+        title: post.title,
+        url: url,
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            throw new Error("Share API not supported");
         }
-    } else {
-        // Fallback for browsers that don't support navigator.share
+    } catch (error) {
         navigator.clipboard.writeText(url);
-        toast({ title: "Link panoya kopyalandı!" });
+        toast({
+            title: "Link panoya kopyalandı!",
+            description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
+        });
     }
-  }
+  };
 
 
   if (loading) {
@@ -323,5 +323,3 @@ export default function PostPage() {
     </>
   );
 }
-
-    
