@@ -43,13 +43,12 @@ export function Header() {
             >
               İslami Bloglar
             </Link>
-            <Button
-              variant="link"
-              onClick={handleForumClick}
-              className="transition-colors hover:text-primary text-foreground/60 p-0"
+            <Link
+              href="/forum"
+              className="transition-colors hover:text-primary text-foreground/60"
             >
               Forum
-            </Button>
+            </Link>
           </nav>
         </div>
 
