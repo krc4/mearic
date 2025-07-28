@@ -32,8 +32,7 @@ import { Header } from "@/components/header";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
-// Static data for the topic, stats are now handled dynamically.
-const topicData = {
+const staticTopicData = {
   id: "1",
   title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
   author: {
@@ -64,7 +63,7 @@ export default function ForumTopicPage() {
   const topicId = params.topicId as string;
   const { toast } = useToast();
   
-  const [topic, setTopic] = useState<typeof topicData | null>(null);
+  const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
   const [loading, setLoading] = useState(true);
   
   const [liked, setLiked] = useState(false);
@@ -74,16 +73,13 @@ export default function ForumTopicPage() {
 
   useEffect(() => {
     setLoading(true);
-    // In a real app, you would fetch data based on topicId
-    // For now, we use mock data and a timeout to simulate loading
     setTimeout(() => {
-        const fetchedTopic = topicData; // Assuming topicId '1' is the mock
+        const fetchedTopic = staticTopicData;
         if (fetchedTopic) {
             setTopic(fetchedTopic);
             
             const topicStorageId = `forum-${fetchedTopic.id}`;
             
-            // Handle view count with sessionStorage to ensure it increments only once per session.
             const viewedKey = `viewed-${topicStorageId}`;
             let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`)) || 0;
             const hasViewedInSession = sessionStorage.getItem(viewedKey);
@@ -95,12 +91,10 @@ export default function ForumTopicPage() {
             }
             setViewCount(currentViews);
 
-            // Handle like state with localStorage for persistence across sessions.
             const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
             setLiked(isLiked);
             setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`)) || 0);
 
-            // Comment count will be updated by the CommentSection component.
             setCommentCount(0); 
         }
         setLoading(false);
@@ -147,7 +141,6 @@ export default function ForumTopicPage() {
                 description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
              });
          } else {
-             // User cancelled the share action, copy to clipboard as a fallback
              navigator.clipboard.writeText(url);
              toast({
                 title: "Link panoya kopyalandı!",
@@ -261,8 +254,6 @@ export default function ForumTopicPage() {
                         </CardContent>
                      </Card>
                      
-                     {/* The comment section needs a real post ID from a database. 
-                         Using a mock ID for now to make it render. */}
                      <CommentSection postId={`forum-${topic.id}`} onCommentCountChange={setCommentCount} />
                 </motion.main>
 
@@ -342,5 +333,3 @@ export default function ForumTopicPage() {
     </>
   );
 }
-
-    
