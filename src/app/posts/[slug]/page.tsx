@@ -116,14 +116,12 @@ export default function PostPage() {
         <div className="relative h-72 md:h-96 w-full">
             {post.image ? (
                 <>
-                    <Image
-                        src={post.image}
-                        alt={post.title}
-                        fill
-                        className="object-cover"
+                    <div
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${post.image})` }}
                         data-ai-hint="post image"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
                 </>
             ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/50" />
