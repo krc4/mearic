@@ -24,9 +24,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function KuranMucizeleriPage() {
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
-  const [viewed, setViewed] = useState<Set<string>>(new Set());
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favs, setFavs] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -55,8 +55,23 @@ export default function KuranMucizeleriPage() {
     });
   }, [filter, posts, loading]);
 
-  const toggleViewed = (id: string) =>
-    setViewed((v) => new Set(v).add(id));
+  const toggleFav = (id: string) => {
+    const isAlreadyFaved = favs.has(id);
+    setFavs(currentFavs => {
+      const newFavs = new Set(currentFavs);
+      if (newFavs.has(id)) {
+        newFavs.delete(id);
+      } else {
+        newFavs.add(id);
+      }
+      return newFavs;
+    });
+    if (isAlreadyFaved) {
+        toast({ title: "Beğeni geri çekildi" });
+    } else {
+        toast({ title: "Gönderi beğenildi!" });
+    }
+  };
 
   const handleShare = async (postTitle: string, postSlug: string) => {
     const url = `${window.location.origin}/posts/${postSlug}`;
@@ -141,7 +156,7 @@ export default function KuranMucizeleriPage() {
         <main className="container mx-auto flex-grow px-4 pb-20">
           <motion.div
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           >
             <AnimatePresence>
               {loading ? (
@@ -151,7 +166,7 @@ export default function KuranMucizeleriPage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 p-6 shadow-xl"
+                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl"
                     >
                         <Skeleton className="w-full h-full rounded-2xl"/>
                     </motion.div>
@@ -159,72 +174,80 @@ export default function KuranMucizeleriPage() {
               ) : (
                 sortedPosts.map((post) => (
                     <motion.article
-                      key={post.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.4 }}
-                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
+                        key={post.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.4 }}
+                        className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
+                        whileHover={{ scale: 1.03 }}
+                        style={{ transformStyle: "preserve-3d" }}
                     >
-                      <div
-                        style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
-                        className={`absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
-                        data-ai-hint="quran miracle"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                        <div
+                            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                            style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
+                            data-ai-hint="quran miracle"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                      <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
-                          {post.category}
-                      </Badge>
+                        <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
 
-                      <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                          <Button
-                              size="icon"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 hover:text-white"
-                              onClick={() => toast({ title: "Favorilere eklendi!"})}
-                          >
-                              <Heart className="h-5 w-5" />
-                          </Button>
-                          <Button
-                              size="icon"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 hover:text-white"
-                              onClick={() => handleShare(post.title, post.slug)}
-                          >
-                              <Share2 className="h-5 w-5" />
-                          </Button>
-                      </div>
-
-                      <div className="relative z-10 flex flex-col justify-end p-6 h-full">
-                          <div className="mt-auto">
-                            <h3 className="text-xl font-bold text-white leading-tight">
+                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                            <Badge variant="secondary" className="mb-2">
+                                {post.category}
+                            </Badge>
+                            <h3 className="text-2xl font-bold text-white leading-tight">
                                 {post.title}
                             </h3>
                             <p className="mt-2 text-sm text-white/80 line-clamp-2">
                                 {post.description}
                             </p>
-                          </div>
 
-                          <div className="mt-4 flex items-center justify-between">
-                              <span className="flex items-center gap-1.5 text-xs text-white/70">
-                                <Clock className="h-3.5 w-3.5" />
-                                {post.readTime} dk
-                              </span>
-                              <Button
-                                asChild
-                                size="sm"
-                                onClick={() => toggleViewed(post.id)}
-                                className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
-                              >
-                                <Link href={`/posts/${post.slug}`}>
-                                    Oku
-                                    <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                                </Link>
-                              </Button>
-                          </div>
-                      </div>
+                            <div className="mt-4 flex items-center justify-between">
+                                <span className="text-xs text-white/60 flex items-center gap-1">
+                                    <Clock size={14} /> {post.readTime} dk
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                      asChild
+                                      size="sm"
+                                      variant="ghost"
+                                      className="rounded-full text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                                    >
+                                      <Link href={`/posts/${post.slug}`}>
+                                        Oku <ArrowUpRight className="h-4 w-4 ml-1" />
+                                      </Link>
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="text-white hover:bg-white/10 rounded-full"
+                                      onClick={() => toggleFav(post.id)}
+                                    >
+                                      <motion.div
+                                        animate={
+                                          favs.has(post.id)
+                                            ? { scale: [1, 1.4, 1] }
+                                            : { scale: 1 }
+                                        }
+                                      >
+                                        <Heart
+                                          className={`h-5 w-5 ${favs.has(post.id) ? "text-red-500 fill-current" : ""}`}
+                                        />
+                                      </motion.div>
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="text-white hover:bg-white/10 rounded-full"
+                                      onClick={() => handleShare(post.title, post.slug)}
+                                    >
+                                      <Share2 size={16} />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     </motion.article>
                 ))
               )}
