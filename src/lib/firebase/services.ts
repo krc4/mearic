@@ -161,11 +161,16 @@ export const addComment = async (comment: CommentPayload): Promise<Comment | nul
       collection(db, 'posts', comment.postId, 'comments'),
       commentWithTimestamp
     );
-    return {
+    
+    const newComment: Comment = {
       id: docRef.id,
       ...comment,
       createdAt: new Timestamp(Date.now() / 1000, 0), // Estimate timestamp for immediate feedback
+      isAdmin: await isAdmin(comment.userId) // Check if the new commenter is an admin
     };
+
+    return newComment;
+
   } catch (error) {
     console.error('Error adding comment: ', error);
     return null;
@@ -174,16 +179,22 @@ export const addComment = async (comment: CommentPayload): Promise<Comment | nul
 
 export const getCommentsForPost = async (postId: string): Promise<Comment[]> => {
   try {
+    const adminsRef = collection(db, "admins");
+    const adminsSnapshot = await getDocs(adminsRef);
+    const adminUids = new Set(adminsSnapshot.docs.map(doc => doc.id));
+    
     const commentsRef = collection(db, 'posts', postId, 'comments');
     const q = query(commentsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
-      (doc) =>
-        ({
+
+    return querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
           id: doc.id,
-          ...doc.data(),
-        } as Comment)
-    );
+          ...data,
+          isAdmin: adminUids.has(data.userId),
+        } as Comment
+    });
   } catch (error) {
     console.error('Error getting comments: ', error);
     return [];

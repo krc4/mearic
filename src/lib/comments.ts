@@ -8,6 +8,7 @@ export interface Comment {
   photoURL?: string;
   text: string;
   createdAt: Timestamp;
+  isAdmin?: boolean; // Add isAdmin flag
 }
 
-export type CommentPayload = Omit<Comment, 'id' | 'createdAt'>;
+export type CommentPayload = Omit<Comment, 'id' | 'createdAt' | 'isAdmin'>;

@@ -10,20 +10,20 @@ import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send, MoreVertical, ShieldCheck } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost, getAdmins } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
 import { Badge } from "./ui/badge"
 import { cn } from "@/lib/utils"
 
-const CommentItem = ({ comment, isAdmin }: { comment: Comment, isAdmin: boolean }) => (
+const CommentItem = ({ comment }: { comment: Comment }) => (
     <Card className={cn(
         "bg-card/50 transition-all duration-300", 
-        isAdmin && "border-primary/50 bg-primary/5 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.3)]"
+        comment.isAdmin && "border-primary/50 bg-primary/5 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.3)]"
     )}>
         <CardContent className="p-5 flex items-start gap-4">
-            <Avatar className={cn(isAdmin && "border-2 border-primary")}>
+            <Avatar className={cn(comment.isAdmin && "border-2 border-primary")}>
                 <AvatarImage src={comment.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${comment.userId}`} alt={comment.username} />
                 <AvatarFallback>{comment.username.charAt(0)}</AvatarFallback>
             </Avatar>
@@ -31,7 +31,7 @@ const CommentItem = ({ comment, isAdmin }: { comment: Comment, isAdmin: boolean 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <p className="font-semibold">{comment.username}</p>
-                        {isAdmin && (
+                        {comment.isAdmin && (
                             <Badge variant="default" className="flex items-center gap-1">
                                 <ShieldCheck className="h-3 w-3"/>
                                 Yönetici
@@ -68,25 +68,17 @@ export function CommentSection({ postId }: { postId: string }) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
-    const [adminUids, setAdminUids] = useState<Set<string> | null>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
         });
-        
-        const fetchAdminIds = async () => {
-            const admins = await getAdmins();
-            setAdminUids(new Set(admins.map(a => a.uid)));
-        }
-
-        fetchAdminIds();
         return () => unsubscribe();
     }, []);
 
     useEffect(() => {
-        if (!postId || adminUids === null) return; // Wait until adminUids are loaded
+        if (!postId) return;
 
         const fetchComments = async () => {
             setCommentsLoading(true);
@@ -95,7 +87,7 @@ export function CommentSection({ postId }: { postId: string }) {
             setCommentsLoading(false);
         }
         fetchComments();
-    }, [postId, adminUids]);
+    }, [postId]);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -133,16 +125,13 @@ export function CommentSection({ postId }: { postId: string }) {
         }
     }
     
-    const isLoading = commentsLoading || adminUids === null;
-
-
     return (
         <section className="w-full py-12">
             <div className="space-y-8">
                 <div className="flex items-center gap-3">
                     <MessageCircle className="w-8 h-8 text-primary" />
                     <h2 className="text-3xl font-bold tracking-tight">
-                        Yorumlar ({isLoading ? '...' : comments.length})
+                        Yorumlar ({commentsLoading ? '...' : comments.length})
                     </h2>
                 </div>
 
@@ -179,14 +168,14 @@ export function CommentSection({ postId }: { postId: string }) {
                 </Card>
 
                 <div className="space-y-6">
-                     {isLoading ? (
+                     {commentsLoading ? (
                         <>
                             <CommentSkeleton />
                             <CommentSkeleton />
                         </>
                     ) : comments.length > 0 ? (
                         comments.map((comment) => (
-                           <CommentItem key={comment.id} comment={comment} isAdmin={adminUids.has(comment.userId)}/>
+                           <CommentItem key={comment.id} comment={comment} />
                         ))
                     ) : (
                         <p className="text-center text-muted-foreground py-8">
