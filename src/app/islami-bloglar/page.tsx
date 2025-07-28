@@ -1,22 +1,21 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Heart, Share2, Volume2, VolumeX, Play, Clock, ArrowUpRight, Sparkles } from "lucide-react";
+import { Heart, Share2, Volume2, VolumeX, Play, Clock, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const posts = [
+const islamiPosts = [
   {
     id: 1,
     slug: "evren",
     title: "Evrenin Genişlemesi",
     desc: "Zariyat 47 – 1400 yıl önce bildirildi.",
     img: "https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    ayet: "وَالسَّمَاءَ بَنَيْنَاهَا بِأَيْيْدٍ وَإِنَّا لَمُوسِعُونَ",
-    category: "Tefekkür",
+    category: "Blog",
     readTime: 7,
   },
   {
@@ -25,8 +24,7 @@ const posts = [
     title: "Dağların Hareketi",
     desc: "Neml 88 – Kayan kıtalar mucizesi.",
     img: "https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    ayet: "وَتَرَى الْجِبَالَ تَحْسَبُهَا جَامِدَةً",
-    category: "Tefekkür",
+    category: "Blog",
     readTime: 6,
   },
   {
@@ -35,8 +33,7 @@ const posts = [
     title: "Embriyo Evreleri",
     desc: "Müminun 12-14 – Tıbbi mucize.",
     img: "https://images.unsplash.com/photo-1604363236113-a8a5f3b7381c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbWJyeW98ZW58MHx8fHwxNzUzMzgzNjgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    ayet: "ثُمَّ خَلَقْنَا النُّطْفَةَ عَلَقَةً",
-    category: "Tefekkür",
+    category: "Blog",
     readTime: 8,
   },
 ];
@@ -73,7 +70,6 @@ export default function IslamiBloglarPage() {
       <Header />
       {/* Cinematic Hero */}
       <section className="relative h-screen w-full overflow-hidden">
-        <div className="absolute inset-0 w-full h-full object-cover brightness-50" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
         {/* Floating Kandil */}
@@ -136,7 +132,7 @@ export default function IslamiBloglarPage() {
           viewport={{ once: true }}
           transition={{ duration: 1 }}
         >
-          {posts.map((post) => (
+          {islamiPosts.map((post) => (
             <motion.article
               key={post.id}
               className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
