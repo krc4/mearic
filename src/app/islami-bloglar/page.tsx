@@ -48,6 +48,8 @@ export default function IslamiBloglarPage() {
   const ref = useRef(null);
 
   const toggleFav = (id: number) => {
+    const isAlreadyFaved = favs.has(id);
+
     setFavs(currentFavs => {
       const newFavs = new Set(currentFavs);
       if (newFavs.has(id)) {
@@ -57,7 +59,12 @@ export default function IslamiBloglarPage() {
       }
       return newFavs;
     });
-    toast({ title: "Gönderi beğenildi!" });
+    
+    if (isAlreadyFaved) {
+        toast({ title: "Beğeni geri çekildi" });
+    } else {
+        toast({ title: "Gönderi beğenildi!" });
+    }
   };
    
   const handleShare = (title: string, slug: string) => {
