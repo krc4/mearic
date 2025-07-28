@@ -21,14 +21,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from './ui/skeleton';
+import { isAdmin } from '@/lib/firebase/services';
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        const adminStatus = await isAdmin(currentUser.uid);
+        setIsUserAdmin(adminStatus);
+      } else {
+        setIsUserAdmin(false);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -100,20 +108,20 @@ export function Header() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                         <DropdownMenuItem asChild>
-                            <Link href="/admin">
-                                <LayoutDashboard className="mr-2 h-4 w-4" />
-                                <span>Admin Paneli</span>
-                            </Link>
-                        </DropdownMenuItem>
-                         {user && (
-                             <DropdownMenuItem asChild>
-                                <Link href="/profil">
-                                    <UserIcon className="mr-2 h-4 w-4" />
-                                    <span>Profil</span>
+                         {isUserAdmin && (
+                            <DropdownMenuItem asChild>
+                                <Link href="/admin">
+                                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                                    <span>Admin Paneli</span>
                                 </Link>
                             </DropdownMenuItem>
-                        )}
+                         )}
+                         <DropdownMenuItem asChild>
+                            <Link href="/profil">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                <span>Profil</span>
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout}>
                              <LogOut className="mr-2 h-4 w-4" />
@@ -131,5 +139,3 @@ export function Header() {
     </header>
   );
 }
-
-    

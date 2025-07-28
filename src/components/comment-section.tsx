@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2 } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost, isAdmin, deleteComment } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost, isAdmin, deleteComment, CommentPayload } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
@@ -144,6 +144,7 @@ export function CommentSection({ postId }: { postId: string }) {
 
         const newCommentDoc = await addComment(commentData);
         if (newCommentDoc) {
+            // Add comment to UI instantly with correct admin status
             setComments(prev => [newCommentDoc, ...prev]);
             setNewComment("");
             toast({

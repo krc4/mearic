@@ -33,6 +33,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard, Image as ImageIcon, ChevronLeft } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import NextImage from "next/image";
+import { isAdmin } from "@/lib/firebase/services";
 
 
 const photoSchema = z.object({
@@ -53,15 +54,18 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const adminStatus = await isAdmin(currentUser.uid);
+        setIsUserAdmin(adminStatus);
       } else {
         router.push("/giris");
       }
@@ -177,9 +181,11 @@ export default function ProfilePage() {
             <p className="text-muted-foreground">{user.email}</p>
           </div>
            <div className="sm:ml-auto flex gap-2">
-              <Button asChild variant="outline">
-                <a href="/admin"><LayoutDashboard /> Admin Paneli</a>
-              </Button>
+              {isUserAdmin && (
+                <Button asChild variant="outline">
+                    <Link href="/admin"><LayoutDashboard /> Admin Paneli</Link>
+                </Button>
+              )}
               <Button onClick={() => auth.signOut()} variant="ghost">
                 <LogOut /> Çıkış Yap
               </Button>
