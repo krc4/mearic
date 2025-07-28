@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,9 +26,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, ArrowRight } from "lucide-react";
+import { auth } from "@/lib/firebase/config";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const loginSchema = z.object({
-  username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
+  email: z.string().email({ message: "Lütfen geçerli bir e-posta adresi girin." }),
   password: z.string().min(1, { message: "Şifre alanı boş bırakılamaz." }),
 });
 
@@ -35,23 +38,36 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log(data);
-    toast({
-      title: "Giriş Başarılı!",
-      description: "Hoş geldiniz! Ana sayfaya yönlendiriliyorsunuz.",
-    });
-    // Burada ana sayfaya yönlendirme yapılabilir.
-    // router.push('/');
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+        console.log(userCredential);
+        toast({
+            title: "Giriş Başarılı!",
+            description: `Hoş geldiniz ${userCredential.user.displayName || ''}! Ana sayfaya yönlendiriliyorsunuz.`,
+        });
+        router.push('/');
+    } catch (error: any) {
+        let description = "Giriş sırasında bir hata oluştu. Lütfen bilgilerinizi kontrol edin.";
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            description = "E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edip tekrar deneyin."
+        }
+        toast({
+            title: "Giriş Hatası",
+            description,
+            variant: "destructive"
+        });
+    }
   };
 
   return (
@@ -75,12 +91,12 @@ export default function LoginPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="username"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Kullanıcı Adı</FormLabel>
+                        <FormLabel>E-posta Adresi</FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder="Kullanıcı adınız" {...field} />
+                          <Input type="email" placeholder="ornek@mail.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

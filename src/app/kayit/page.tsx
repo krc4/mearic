@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,9 +26,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
+import { auth } from "@/lib/firebase/config";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import ReCAPTCHA from "react-google-recaptcha";
+import { useState } from "react";
 
 const registerSchema = z.object({
   username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
+  email: z.string().email({ message: "Lütfen geçerli bir e-posta adresi girin." }),
   password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
   confirmPassword: z.string()
 }).refine(data => data.password === data.confirmPassword, {
@@ -39,24 +45,55 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const { toast } = useToast();
+  const router = useRouter();
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
+      email: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = (data: RegisterFormValues) => {
-    console.log(data);
-    toast({
-      title: "Kayıt Başarılı!",
-      description: "Hesabınız başarıyla oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz.",
-    });
-    // Burada giriş sayfasına yönlendirme yapılabilir.
-    // router.push('/giris');
+  const onSubmit = async (data: RegisterFormValues) => {
+    if (!recaptchaToken) {
+        toast({
+            title: "Doğrulama Hatası",
+            description: "Lütfen reCAPTCHA doğrulamasını tamamlayın.",
+            variant: "destructive"
+        })
+        return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      
+      if (auth.currentUser) {
+         await updateProfile(auth.currentUser, {
+            displayName: data.username
+         });
+      }
+      
+      console.log(userCredential);
+      toast({
+        title: "Kayıt Başarılı!",
+        description: "Hesabınız başarıyla oluşturuldu. Hoş geldiniz!",
+      });
+      router.push('/');
+    } catch (error: any) {
+        let description = "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.";
+        if (error.code === 'auth/email-already-in-use') {
+            description = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta ile deneyin veya giriş yapın."
+        }
+        toast({
+            title: "Kayıt Hatası",
+            description,
+            variant: "destructive"
+        });
+    }
   };
 
   return (
@@ -91,6 +128,19 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
+                   <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-posta Adresi</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="ornek@mail.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="password"
@@ -117,7 +167,13 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full !mt-6 group" size="lg">
+                   <div className="flex justify-center">
+                     <ReCAPTCHA
+                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcqAAAAABg329i4l2f1j9tYc9F-3r8eG9cT"} // Test key, replace with your own
+                        onChange={(token) => setRecaptchaToken(token)}
+                    />
+                   </div>
+                  <Button type="submit" className="w-full !mt-6 group" size="lg" disabled={!recaptchaToken}>
                     Kayıt Ol
                     <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
