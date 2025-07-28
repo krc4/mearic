@@ -26,7 +26,7 @@ export default function Home() {
   const thirdArticle = mockPosts[1];
   const blogArticle1 = mockPosts[0]; // Corrected index
   const blogArticle2 = mockPosts[1]; // Corrected index
-  const [muted, setMuted] = useState(true); // Start muted
+  const [muted, setMuted] = useState(false); // Start unmuted
   const [videoSrc, setVideoSrc] = useState('');
   const [isClient, setIsClient] = useState(false); // State to track client-side mount
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,7 +66,7 @@ export default function Home() {
           key={videoSrc}
           src={videoSrc}
           autoPlay
-          muted
+          muted={muted}
           loop
           playsInline
           onEnded={handleVideoEnd}
