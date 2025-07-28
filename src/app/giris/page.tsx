@@ -51,10 +51,9 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-        console.log(userCredential);
         toast({
             title: "Giriş Başarılı!",
-            description: `Hoş geldiniz ${userCredential.user.displayName || ''}! Ana sayfaya yönlendiriliyorsunuz.`,
+            description: `Hoş geldiniz, ${userCredential.user.displayName || userCredential.user.email}! Ana sayfaya yönlendiriliyorsunuz.`,
         });
         router.push('/');
     } catch (error: any) {

@@ -77,7 +77,6 @@ export default function RegisterPage() {
          });
       }
       
-      console.log(userCredential);
       toast({
         title: "Kayıt Başarılı!",
         description: "Hesabınız başarıyla oluşturuldu. Hoş geldiniz!",
@@ -169,7 +168,7 @@ export default function RegisterPage() {
                   />
                    <div className="flex justify-center">
                      <ReCAPTCHA
-                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
                         onChange={(token) => setRecaptchaToken(token)}
                     />
                    </div>
