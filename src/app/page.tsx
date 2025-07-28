@@ -36,7 +36,21 @@ export default function Home() {
   }, []);
 
   const handleVideoEnd = () => {
-    setMuted(true);
+    if (videoRef.current) {
+        // Set muted to true for subsequent loops
+        videoRef.current.muted = true;
+        setMuted(true);
+        // Play the video again to loop it
+        videoRef.current.play();
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const currentMuted = videoRef.current.muted;
+      videoRef.current.muted = !currentMuted;
+      setMuted(!currentMuted);
+    }
   };
 
   return (
@@ -52,7 +66,6 @@ export default function Home() {
           key={videoSrc}
           src={videoSrc}
           autoPlay
-          loop
           muted={muted}
           onEnded={handleVideoEnd}
           className="absolute inset-0 w-full h-full object-cover brightness-50"
@@ -101,7 +114,7 @@ export default function Home() {
         </div>
 
         <button
-          onClick={() => setMuted(!muted)}
+          onClick={toggleMute}
           className="absolute top-6 right-6 text-white/70 hover:text-white z-20"
         >
           {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
@@ -218,6 +231,7 @@ export default function Home() {
           <section className="mb-16 md:mb-24">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary flex items-center justify-center gap-3">
+                <Sparkles className="w-8 h-8"/>
                 Hadislerdeki Mucizeler
               </h2>
               <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
