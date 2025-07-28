@@ -2,9 +2,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, MessageSquare, Users, Star, Clock, Filter, Heart, Eye, ArrowUpRight } from "lucide-react";
+import { Search, Plus, MessageSquare, Users, Star, Clock, Filter, Heart, Eye, ArrowUpRight, Pin } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 
 type Topic = {
@@ -49,6 +51,42 @@ const mockTopics: Topic[] = [
   },
 ];
 
+const featuredTopics = [
+  {
+    id: "f1",
+    title: "Ramazan Ayı Özel: Soru-Cevap Etkinliği",
+    image: "https://placehold.co/600x400.png",
+    category: "Duyurular",
+    link: "#",
+    hint: "ramadan lantern"
+  },
+  {
+    id: "f2",
+    title: "Yeni Başlayanlar İçin Hadis Okuma Rehberi",
+    image: "https://placehold.co/600x400.png",
+    category: "Rehberler",
+    link: "#",
+    hint: "islamic book"
+  },
+  {
+    id: "f3",
+    title: "Tefsir Dersleri: Fatiha Suresi Analizi",
+    image: "https://placehold.co/600x400.png",
+    category: "Dersler",
+    link: "#",
+    hint: "quran calligraphy"
+  },
+  {
+    id: "f4",
+    title: "Forum Kuralları ve Kullanım Kılavuzu",
+    image: "https://placehold.co/600x400.png",
+    category: "Bilgilendirme",
+    link: "#",
+    hint: "community rules"
+  }
+];
+
+
 export default function NurunyoluForum() {
   const [topics, setTopics] = useState(mockTopics);
   const [filterTag, setFilterTag] = useState("All");
@@ -66,7 +104,7 @@ export default function NurunyoluForum() {
     <section className="container mx-auto py-8">
 
       {/* Header */}
-      <header className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-lg bg-card border">
+      <header className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-lg bg-card border mb-8">
         <h1 className="text-3xl font-black tracking-tight text-center md:text-left">
           Nurunyolu <span className="text-primary">Forum</span>
         </h1>
@@ -87,6 +125,46 @@ export default function NurunyoluForum() {
           </Button>
         </div>
       </header>
+
+      {/* Featured Topics Section */}
+       <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="mb-12"
+      >
+        <h2 className="text-2xl font-bold tracking-tight mb-4 flex items-center gap-2">
+            <Pin className="h-6 w-6 text-primary"/>
+            Öne Çıkan Konular
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {featuredTopics.map(topic => (
+            <motion.div 
+              key={topic.id}
+              whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
+              className="group relative rounded-2xl overflow-hidden border bg-card"
+            >
+              <Image 
+                src={topic.image}
+                alt={topic.title}
+                width={400}
+                height={250}
+                className="w-full h-40 object-cover"
+                data-ai-hint={topic.hint}
+              />
+              <div className="p-4">
+                <Badge variant="secondary" className="mb-2">{topic.category}</Badge>
+                <h3 className="font-semibold text-md leading-tight h-12">{topic.title}</h3>
+                <Button asChild variant="link" className="p-0 h-auto mt-2 font-bold text-primary">
+                  <Link href={topic.link}>
+                    Göz At <ArrowUpRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
 
       {/* Filters */}
       <div className="relative z-20 flex gap-3 px-6 py-4 overflow-x-auto">
