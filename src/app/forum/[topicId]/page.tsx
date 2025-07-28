@@ -60,7 +60,6 @@ export default function ForumTopicPage() {
   
   const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
   const [loading, setLoading] = useState(true);
-  
   const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
@@ -284,3 +283,5 @@ export default function ForumTopicPage() {
     </>
   );
 }
+
+    
