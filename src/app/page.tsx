@@ -1,5 +1,7 @@
+
+'use client';
 import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight, Bot, BookOpen, Star, HeartPulse, Edit3 } from 'lucide-react';
+import { Clock, Rss, ArrowUpRight, Bot, BookOpen, Star, HeartPulse, Edit3, Volume2, VolumeX, Play } from 'lucide-react';
 import { mockPosts, mainArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
 import { PostCard } from '@/components/post-card';
@@ -11,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { HeroBackground } from '@/components/hero-background';
 import styles from './page.module.css';
 import { DidYouKnowSection } from '@/components/did-you-know';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 
 export default function Home() {
@@ -21,6 +25,7 @@ export default function Home() {
   const thirdArticle = mockPosts[1];
   const blogArticle1 = mockPosts[0]; // Corrected index
   const blogArticle2 = mockPosts[1]; // Corrected index
+  const [muted, setMuted] = useState(true);
 
   return (
     <>
@@ -29,23 +34,65 @@ export default function Home() {
         <Header />
 
         {/* Hero Section */}
-        <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center text-center text-white overflow-hidden">
-          <HeroBackground />
-          <div className="container px-4 z-10">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
-              İslam'ın Işığında Yapay Zeka
-            </h1>
-            <p className="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-white/80 drop-shadow-md">
-              İslami konulardaki sorularınızı yanıtlayan, size özel bir yapay zeka asistanı. Merak ettiklerinizi sorun, anında öğrenin.
-            </p>
-            <Button size="lg" className="mt-8 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20">
-              Yapay Zekayı Deneyin
-              <Bot className="w-5 h-5 ml-2" />
-            </Button>
-          </div>
-        </section>
+        <section className="relative h-screen w-full overflow-hidden bg-black">
+         <video
+          src="/videos/intro.mp4"
+          autoPlay
+          loop
+          muted={muted}
+          className="absolute inset-0 w-full h-full object-cover brightness-50"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
-        <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-radial from-yellow-300 via-transparent to-transparent blur-2xl"
+        />
+
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 1 }}
+            className="font-black text-6xl md:text-8xl tracking-tighter"
+          >
+            Nurunyolu
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 2 }}
+            className="mt-6 max-w-2xl text-xl text-white/80"
+          >
+            İslam'ın ışığında, Kuran ve Sünnetin rehberliğinde bir yolculuk.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 3 }}
+            className="mt-8"
+          >
+            <Button
+              size="lg"
+              className="rounded-full bg-gradient-to-r from-emerald-400 to-sky-500 text-black font-bold"
+              onClick={() => document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Keşfet
+            </Button>
+          </motion.div>
+        </div>
+
+        <button
+          onClick={() => setMuted(!muted)}
+          className="absolute top-6 right-6 text-white/70 hover:text-white"
+        >
+          {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+        </button>
+      </section>
+
+        <main id="main-content" className="flex-grow container mx-auto px-4 py-16 md:py-24">
           {/* Main Article Section */}
           <section className="mb-16 md:mb-24">
             <div className="text-center mb-12">
@@ -491,7 +538,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="#" className="hover:text-primary transition-colors">Anasayfa</Link>
+              <Link href="/" className="hover:text-primary transition-colors">Anasayfa</Link>
               <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
               <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
             </div>
@@ -501,5 +548,3 @@ export default function Home() {
     </>
   );
 }
-
-    
