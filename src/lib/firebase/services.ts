@@ -95,26 +95,6 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
     }
 };
 
-export const getTopLikedPosts = async (postLimit: number): Promise<Post[]> => {
-    try {
-        const q = query(collection(db, "posts"), orderBy("likes", "desc"), limit(postLimit));
-        const querySnapshot = await getDocs(q);
-        const posts: Post[] = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            posts.push({
-                id: doc.id,
-                ...data
-            } as Post);
-        });
-        return posts;
-    } catch (e) {
-        console.error("Error getting top liked posts: ", e);
-        return [];
-    }
-}
-
-
 export const getPostBySlug = async (slug: string): Promise<Post | null> => {
     try {
         const q = query(collection(db, "posts"), where("slug", "==", slug));

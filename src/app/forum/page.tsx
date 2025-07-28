@@ -1,6 +1,6 @@
 
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Plus, MessageSquare, Users, Star, Clock, Filter, Heart, Eye, ArrowUpRight, Pin } from "lucide-react";
 import Link from "next/link";
@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { getTopLikedPosts } from "@/lib/firebase/services";
-import type { Post } from "@/lib/posts";
 
 
 type Topic = {
@@ -54,49 +52,49 @@ const mockTopics: Topic[] = [
   },
 ];
 
-const staticFeaturedTopics = [
-  {
-    id: "f3",
-    title: "Forum Kuralları ve Kullanım Kılavuzu",
-    image: "https://placehold.co/600x400.png",
-    category: "Bilgilendirme",
-    link: "#",
-    hint: "community rules"
-  },
-  {
-    id: "f4",
-    title: "Forum Hakkında Sıkça Sorulan Sorular",
-    image: "https://placehold.co/600x400.png",
-    category: "Yardım",
-    link: "#",
-    hint: "questions help"
-  }
+const featuredTopics = [
+    {
+        id: "f1",
+        title: "Kur’an’da Evrenin Genişlemesi Tartışması",
+        image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
+        category: "Popüler Konu",
+        link: "/forum/1",
+        hint: "galaxy stars"
+    },
+    {
+        id: "f2",
+        title: "Tıbb-ı Nebevi: Hadislerdeki Sağlık Öğütleri",
+        image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop",
+        category: "Popüler Konu",
+        link: "/forum/2",
+        hint: "medicine health"
+    },
+    {
+        id: "f3",
+        title: "Forum Kuralları ve Kullanım Kılavuzu",
+        image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070&auto=format&fit=crop",
+        category: "Bilgilendirme",
+        link: "#",
+        hint: "community rules"
+    },
+    {
+        id: "f4",
+        title: "Sıkça Sorulan Sorular ve Yardım",
+        image: "https://images.unsplash.com/photo-1559863438-6b8d093c398e?q=80&w=2070&auto=format&fit=crop",
+        category: "Yardım",
+        link: "#",
+        hint: "questions help"
+    }
 ];
 
 
 export default function NurunyoluForum() {
   const [topics, setTopics] = useState(mockTopics);
-  const [featuredTopics, setFeaturedTopics] = useState<any[]>([]);
   const [filterTag, setFilterTag] = useState("All");
   const [search, setSearch] = useState("");
   const [newPostOpen, setNewPostOpen] = useState(false);
   const allTags = ["All", ...new Set(topics.flatMap((t) => t.tags))];
 
-  useEffect(() => {
-    const fetchTopPosts = async () => {
-      const topPosts = await getTopLikedPosts(2);
-      const dynamicTopics = topPosts.map(post => ({
-        id: post.id,
-        title: post.title,
-        image: post.image,
-        category: post.category,
-        link: `/posts/${post.slug}`,
-        hint: 'popular post'
-      }));
-      setFeaturedTopics([...dynamicTopics, ...staticFeaturedTopics]);
-    }
-    fetchTopPosts();
-  }, [])
 
   const filtered = topics.filter(
     (t) =>
@@ -132,8 +130,8 @@ export default function NurunyoluForum() {
           </Button>
         </div>
       </header>
-
-      {/* Advertisement Section */}
+      
+       {/* Advertisement Section */}
       <div className="mb-12">
         <Link href="#" className="block w-full aspect-[16/9] relative overflow-hidden rounded-lg group">
           <Image 
@@ -148,7 +146,6 @@ export default function NurunyoluForum() {
           </div>
         </Link>
       </div>
-
 
       {/* Featured Topics Section */}
        <motion.div 
