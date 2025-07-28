@@ -1,11 +1,11 @@
 
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
 import type { Comment, CommentPayload } from '@/lib/comments';
 import type { AdminUser } from '@/lib/admin';
 
-export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt'> & {
+export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes'> & {
     content: string;
 };
 
@@ -55,6 +55,7 @@ export const addPost = async (post: PostPayload) => {
             ...post,
             slug: post.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
             views: 0,
+            likes: 0,
             createdAt: serverTimestamp()
         });
         console.log("Document written with ID: ", docRef.id);
@@ -82,6 +83,7 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
                 content: data.content,
                 description: data.description,
                 views: data.views,
+                likes: data.likes || 0,
                 createdAt: data.createdAt,
             } as Post);
         });
@@ -106,12 +108,39 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
             id: postDoc.id,
             ...data,
             image: data.image,
+            likes: data.likes || 0,
         } as Post;
     } catch (e) {
         console.error("Error getting document by slug: ", e);
         return null;
     }
 }
+
+export const incrementPostView = async (postId: string) => {
+    try {
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, {
+            views: increment(1)
+        });
+    } catch (error) {
+        console.error("Error incrementing post view: ", error);
+    }
+};
+
+export const toggleLikePost = async (postId: string, liked: boolean): Promise<number | null> => {
+    try {
+        const postRef = doc(db, "posts", postId);
+        const amount = liked ? -1 : 1;
+        await updateDoc(postRef, {
+            likes: increment(amount)
+        });
+        const updatedDoc = await getDoc(postRef);
+        return updatedDoc.data()?.likes || 0;
+    } catch (error) {
+        console.error("Error toggling like on post: ", error);
+        return null;
+    }
+};
 
 
 export const updatePost = async (postId: string, payload: Partial<PostPayload>) => {
@@ -190,8 +219,7 @@ export const getCommentsForPost = async (postId: string): Promise<Comment[]> => 
     const commentsRef = collection(db, 'posts', postId, 'comments');
     const q = query(commentsRef, orderBy('createdAt', 'desc'));
     
-    const adminsRef = collection(db, "admins");
-    const adminSnapshot = await getDocs(adminsRef);
+    const adminSnapshot = await getDocs(collection(db, "admins"));
     const adminIds = new Set(adminSnapshot.docs.map(doc => doc.id));
     
     const querySnapshot = await getDocs(q);
@@ -209,6 +237,18 @@ export const getCommentsForPost = async (postId: string): Promise<Comment[]> => 
     return [];
   }
 };
+
+export const getCommentCount = async (postId: string): Promise<number> => {
+    try {
+        const commentsRef = collection(db, 'posts', postId, 'comments');
+        const snapshot = await getCountFromServer(commentsRef);
+        return snapshot.data().count;
+    } catch (error) {
+        console.error('Error getting comment count: ', error);
+        return 0;
+    }
+};
+
 
 export const deleteComment = async (postId: string, commentId: string): Promise<boolean> => {
     try {

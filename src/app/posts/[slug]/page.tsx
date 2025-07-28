@@ -10,15 +10,15 @@ import {
   Share2,
   Heart,
   MessageSquare,
-  Tag
+  Tag,
+  Eye
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
-import { getPostBySlug } from "@/lib/firebase/services";
+import { getPostBySlug, incrementPostView, getCommentCount, toggleLikePost } from "@/lib/firebase/services";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/header";
 import { ReadingProgressBar } from "@/components/reading-progress-bar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,27 +35,72 @@ export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
+
 
   useEffect(() => {
     if (!slug) return;
+
     const fetchPost = async () => {
       setLoading(true);
       const fetchedPost = await getPostBySlug(slug);
+
       if (fetchedPost) {
         setPost(fetchedPost);
+        // Increment view count
+        await incrementPostView(fetchedPost.id);
+        
+        // Fetch counts
+        const comments = await getCommentCount(fetchedPost.id);
+        
+        setCommentCount(comments);
+        setLikeCount(fetchedPost.likes || 0);
+        setViewCount((fetchedPost.views || 0) + 1);
+
+        // Check if liked from localStorage
+        const isLiked = localStorage.getItem(`liked-${fetchedPost.id}`) === 'true';
+        setLiked(isLiked);
+
       } else {
         notFound();
       }
       setLoading(false);
     };
+
     fetchPost();
   }, [slug]);
 
-  const handleLike = () => {
-    setLiked(!liked);
+  const handleLikeToggle = async () => {
+    if (!post) return;
+    const newLikedState = !liked;
+    
+    // Optimistic UI update
+    setLiked(newLikedState);
+    setLikeCount(current => current + (newLikedState ? 1 : -1));
+
+    localStorage.setItem(`liked-${post.id}`, String(newLikedState));
+
     toast({
-        title: liked ? "Beğeni geri çekildi" : "Yazıyı beğendiniz!",
+        title: newLikedState ? "Yazıyı beğendiniz!" : "Beğeni geri çekildi",
     });
+
+    // Sync with server
+    const serverLikeCount = await toggleLikePost(post.id, liked);
+    if (serverLikeCount !== null) {
+        setLikeCount(serverLikeCount);
+    } else {
+        // Revert UI on error
+        setLiked(!newLikedState);
+        setLikeCount(current => current + (!newLikedState ? 1 : -1));
+        localStorage.setItem(`liked-${post.id}`, String(!newLikedState));
+         toast({
+            title: "Hata!",
+            description: "Beğeni durumu güncellenemedi.",
+            variant: "destructive"
+        });
+    }
   };
 
   const handleShare = async () => {
@@ -107,6 +152,8 @@ export default function PostPage() {
     return notFound();
   }
 
+  const categorySlug = post.category.toLowerCase().replace(/ /g, '-').replace('i̇', 'i');
+
   return (
     <>
       <ReadingProgressBar />
@@ -139,7 +186,7 @@ export default function PostPage() {
                   <ChevronRight className="h-4 w-4 mx-1" />
                 </li>
                  <li className="flex items-center">
-                  <Link href={`/${post.category.toLowerCase().replace(/ /g, "-")}`} className="hover:text-primary">
+                  <Link href={`/${categorySlug}`} className="hover:text-primary">
                     {post.category}
                   </Link>
                   <ChevronRight className="h-4 w-4 mx-1" />
@@ -212,20 +259,20 @@ export default function PostPage() {
                             <CardContent className="space-y-4">
                                <div className="flex justify-around text-center">
                                    <div>
-                                       <p className="text-2xl font-bold">{post.views || 0}</p>
-                                       <p className="text-sm text-muted-foreground">Görüntülenme</p>
+                                       <p className="text-2xl font-bold">{viewCount}</p>
+                                       <p className="text-sm text-muted-foreground flex items-center gap-1"><Eye size={14}/>Görüntülenme</p>
                                    </div>
                                    <div>
-                                       <p className="text-2xl font-bold">25</p>
-                                       <p className="text-sm text-muted-foreground">Yorum</p>
+                                       <p className="text-2xl font-bold">{commentCount}</p>
+                                       <p className="text-sm text-muted-foreground flex items-center gap-1"><MessageSquare size={14}/>Yorum</p>
                                    </div>
                                    <div>
-                                       <p className="text-2xl font-bold">{178 + (liked ? 1 : 0)}</p>
-                                       <p className="text-sm text-muted-foreground">Beğeni</p>
+                                       <p className="text-2xl font-bold">{likeCount}</p>
+                                       <p className="text-sm text-muted-foreground flex items-center gap-1"><Heart size={14}/>Beğeni</p>
                                    </div>
                                </div>
                                <div className="flex gap-2 pt-4 border-t">
-                                    <Button className="w-full group" onClick={handleLike} variant={liked ? "default" : "outline"}>
+                                    <Button className="w-full group" onClick={handleLikeToggle} variant={liked ? "default" : "outline"}>
                                         <Heart className={`mr-2 h-4 w-4 ${liked ? "fill-current" : ""}`} /> {liked ? "Beğenildi" : "Beğen"}
                                     </Button>
                                      <Button className="w-full" variant="outline" onClick={handleShare}>

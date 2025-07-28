@@ -10,10 +10,11 @@ export interface Post {
   content: string;
   description: string;
   views: number;
+  likes: number;
   createdAt?: Timestamp; // Optional timestamp
 }
 
-export const mainArticle: Omit<Post, 'id' | 'views' | 'createdAt'> = {
+export const mainArticle: Omit<Post, 'id' | 'views' | 'createdAt' | 'likes'> = {
   title: 'Kuran\'da Evrenin Genişlemesi Mucizesi',
   slug: 'kuran-da-evrenin-genislemesi-mucizesi',
   image: 'https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -34,7 +35,7 @@ export const mainArticle: Omit<Post, 'id' | 'views' | 'createdAt'> = {
 };
 
 // Mock posts can be kept for fallback or other pages if needed, but the main pages will fetch from Firebase.
-export const mockPosts: Omit<Post, 'id' | 'views' | 'createdAt'>[] = [
+export const mockPosts: Omit<Post, 'id' | 'views' | 'createdAt' | 'likes'>[] = [
     {
     title: 'Dağların Hareket Halinde Olması',
     slug: 'daglarin-hareket-halinde-olmasi',
