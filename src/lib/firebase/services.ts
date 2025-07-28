@@ -333,3 +333,41 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
         return false;
     }
 }
+async function seedForumTopic() {
+    const slug = "kuran-da-evrenin-genislemesi-zariyat-47";
+    const postsRef = collection(db, "posts");
+    const q = query(postsRef, where("slug", "==", slug));
+    const existing = await getDocs(q);
+
+    if (existing.empty) {
+        console.log("Seeding forum topic...");
+        const forumTopicData = {
+            title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
+            slug: slug,
+            image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
+            readTime: 8,
+            category: 'Forum',
+            description: "Modern bilimin en çarpıcı keşiflerinden biri olan evrenin genişlemesi gerçeği, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde haber verilmiştir.",
+            content: `
+              <p class="text-xl leading-relaxed text-foreground/90">Modern bilimin en çarpıcı keşiflerinden biri, evrenin sürekli olarak genişlediği gerçeğidir. Bu keşif, 20. yüzyılın başlarında Edwin Hubble'ın gözlemleriyle bilim dünyasına kazandırılmıştır. Ancak, bu kozmolojik gerçek, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde mucizevi bir şekilde haber verilmiştir.</p>
+              <p>Hubble, teleskopuyla uzak galaksileri gözlemlerken, bu galaksilerin bizden uzaklaştığını ve bu uzaklaşma hızının mesafeyle doğru orantılı olduğunu keşfetti. Bu, evrenin statik bir yapıda olmadığını, aksine bir balon gibi sürekli şiştiğini gösteriyordu. Bu buluş, "Büyük Patlama" (Big Bang) teorisinin de en güçlü delillerinden biri haline geldi.</p>
+              <blockquote>
+                  <p>Biz göğü ‘büyük bir kudretle’ bina ettik ve şüphesiz Biz, (onu) genişleticiyiz.</p>
+                  <footer class="text-right not-italic text-base text-muted-foreground mt-2">— Zariyat Suresi, 47. Ayet</footer>
+              </blockquote>
+              <p>Bu ayette geçen "genişleticiyiz" (lā-mūsi'ūna) ifadesi, Arapça dilbilgisi açısından ism-i fail olup, genişletme eyleminin devam ettiğini ve gelecekte de devam edeceğini ifade eder. Bu, evrenin sadece bir defaya mahsus genişlemediğini, bu eylemin sürekli olduğunu vurgulayan mucizevi bir ifadedir. Bilimin ancak 20. yüzyılda ulaşabildiği bu bilgi, Kuran'ın Allah kelamı olduğunun apaçık bir delilidir.</p>
+              <h3 class="text-2xl font-bold mt-8 mb-4">Bilimsel ve Kuranî Perspektifin Uyumu</h3>
+              <p>Kuran'ın bu ifadesi, o dönemin ilkel astronomi bilgisiyle açıklanabilecek bir durum değildir. O dönemde hakim olan inanış, Aristo ve Batlamyus'un etkisindeki statik evren modeliydi. Kuran, bu yaygın ve yanlış inanışın aksine, dinamik ve genişleyen bir evren tablosu çizmiştir. Bu durum, Kuran'ın insanüstü bir kaynaktan geldiğini ve her çağda insanlığa yol gösteren bir rehber olduğunu kanıtlar niteliktedir.</p>
+            `,
+            views: 0,
+            likes: 0,
+            createdAt: serverTimestamp()
+        };
+        await addDoc(postsRef, forumTopicData);
+        console.log("Forum topic seeded successfully.");
+    } else {
+        console.log("Forum topic already exists.");
+    }
+}
+
+seedForumTopic();

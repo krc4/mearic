@@ -25,105 +25,107 @@ import { CommentSection } from "@/components/comment-section";
 import { ReadingProgressBar } from "@/components/reading-progress-bar";
 import { Header } from "@/components/header";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Post } from "@/lib/posts";
+import { getPostBySlug, incrementPostView, toggleLikePost } from "@/lib/firebase/services";
 
-
-const staticTopicData = {
-  id: "1",
-  title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
-  author: {
-    name: "Dr. Emre",
-    avatar: "https://github.com/shadcn.png",
-    title: "İlahiyat Araştırmacısı",
-  },
-  image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
-  readTime: 8,
-  category: 'Kozmoloji',
-  createdAt: "2 gün önce",
-  tags: ["Kozmoloji", "Zariyat", "Mucize"],
-  content: `
-    <p class="text-xl leading-relaxed text-foreground/90">Modern bilimin en çarpıcı keşiflerinden biri, evrenin sürekli olarak genişlediği gerçeğidir. Bu keşif, 20. yüzyılın başlarında Edwin Hubble'ın gözlemleriyle bilim dünyasına kazandırılmıştır. Ancak, bu kozmolojik gerçek, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde mucizevi bir şekilde haber verilmiştir.</p>
-    <p>Hubble, teleskopuyla uzak galaksileri gözlemlerken, bu galaksilerin bizden uzaklaştığını ve bu uzaklaşma hızının mesafeyle doğru orantılı olduğunu keşfetti. Bu, evrenin statik bir yapıda olmadığını, aksine bir balon gibi sürekli şiştiğini gösteriyordu. Bu buluş, "Büyük Patlama" (Big Bang) teorisinin de en güçlü delillerinden biri haline geldi.</p>
-    <blockquote>
-        <p>Biz göğü ‘büyük bir kudretle’ bina ettik ve şüphesiz Biz, (onu) genişleticiyiz.</p>
-        <footer class="text-right not-italic text-base text-muted-foreground mt-2">— Zariyat Suresi, 47. Ayet</footer>
-    </blockquote>
-    <p>Bu ayette geçen "genişleticiyiz" (lā-mūsi'ūna) ifadesi, Arapça dilbilgisi açısından ism-i fail olup, genişletme eyleminin devam ettiğini ve gelecekte de devam edeceğini ifade eder. Bu, evrenin sadece bir defaya mahsus genişlemediğini, bu eylemin sürekli olduğunu vurgulayan mucizevi bir ifadedir. Bilimin ancak 20. yüzyılda ulaşabildiği bu bilgi, Kuran'ın Allah kelamı olduğunun apaçık bir delilidir.</p>
-    <h3 class="text-2xl font-bold mt-8 mb-4">Bilimsel ve Kuranî Perspektifin Uyumu</h3>
-    <p>Kuran'ın bu ifadesi, o dönemin ilkel astronomi bilgisiyle açıklanabilecek bir durum değildir. O dönemde hakim olan inanış, Aristo ve Batlamyus'un etkisindeki statik evren modeliydi. Kuran, bu yaygın ve yanlış inanışın aksine, dinamik ve genişleyen bir evren tablosu çizmiştir. Bu durum, Kuran'ın insanüstü bir kaynaktan geldiğini ve her çağda insanlığa yol gösteren bir rehber olduğunu kanıtlar niteliktedir.</p>
-  `,
-};
 
 export default function ForumTopicPage() {
   const params = useParams();
-  const topicId = params.topicId as string;
+  // We use a static slug for this example forum page.
+  const slug = "kuran-da-evrenin-genislemesi-zariyat-47";
   const { toast } = useToast();
   
-  const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
+  const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Initialize all states to 0 to prevent hydration mismatch
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
-    // Simulate fetching data
-    setLoading(true);
-    setTimeout(() => {
-        const fetchedTopic = staticTopicData; // In a real app, this would be a fetch
-        if (fetchedTopic && fetchedTopic.id === topicId) {
-            setTopic(fetchedTopic);
-            
-            // Key to prevent conflicts with other pages/versions
-            const topicStorageId = `forum-topic-v2-${fetchedTopic.id}`;
+    if (!slug) return;
 
-            // Handle Views
-            const hasViewed = sessionStorage.getItem(`viewed-${topicStorageId}`);
-            let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`) || 0);
-            if (!hasViewed) {
-                currentViews++;
-                localStorage.setItem(`views-${topicStorageId}`, String(currentViews));
-                sessionStorage.setItem(`viewed-${topicStorageId}`, 'true');
-            }
-            setViewCount(currentViews);
+    const fetchPost = async () => {
+      setLoading(true);
+      const fetchedPost = await getPostBySlug(slug);
 
-            // Handle Likes
-            const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
-            setLiked(isLiked);
-            setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`) || 0));
+      if (fetchedPost) {
+        setPost(fetchedPost);
 
+        if (typeof window !== 'undefined') {
+          const viewedKey = `viewed-${fetchedPost.id}`;
+          const hasViewed = sessionStorage.getItem(viewedKey);
+
+          if (!hasViewed) {
+              const newViewCount = await incrementPostView(fetchedPost.id);
+              if (newViewCount !== null) {
+                setViewCount(newViewCount);
+              } else {
+                setViewCount(fetchedPost.views || 0);
+              }
+              sessionStorage.setItem(viewedKey, 'true');
+          } else {
+              setViewCount(fetchedPost.views || 0);
+          }
         } else {
-           notFound();
+            setViewCount(fetchedPost.views || 0);
         }
-        setLoading(false);
-    }, 500);
-  }, [topicId]);
+        
+        setLikeCount(fetchedPost.likes || 0);
+
+        if (typeof window !== 'undefined') {
+          const isLiked = localStorage.getItem(`liked-${fetchedPost.id}`) === 'true';
+          setLiked(isLiked);
+        }
+
+      } else {
+        notFound();
+      }
+      setLoading(false);
+    };
+
+    fetchPost();
+  }, [slug]);
 
 
-  const handleLikeToggle = () => {
-    if (!topic) return;
-
-    const topicStorageId = `forum-topic-v2-${topic.id}`;
+ const handleLikeToggle = async () => {
+    if (!post) return;
     const newLikedState = !liked;
-    const currentLikes = Number(localStorage.getItem(`likes-${topicStorageId}`) || 0);
-    const newLikes = newLikedState ? currentLikes + 1 : Math.max(0, currentLikes - 1);
-
-    setLiked(newLikedState);
-    setLikeCount(newLikes);
-    localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
-    localStorage.setItem(`likes-${topicStorageId}`, String(newLikes));
     
+    setLiked(newLikedState);
+    setLikeCount(current => current + (newLikedState ? 1 : -1));
+
+    if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked-${post.id}`, String(newLikedState));
+    }
+
     toast({
-        title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
+        title: newLikedState ? "Yazıyı beğendiniz!" : "Beğeni geri çekildi",
     });
+
+    const serverLikeCount = await toggleLikePost(post.id, newLikedState);
+    if (serverLikeCount !== null) {
+        setLikeCount(serverLikeCount);
+    } else {
+        setLiked(!newLikedState);
+        setLikeCount(current => current + (!newLikedState ? 1 : -1));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`liked-${post.id}`, String(!newLikedState));
+        }
+         toast({
+            title: "Hata!",
+            description: "Beğeni durumu güncellenemedi.",
+            variant: "destructive"
+        });
+    }
   };
 
+
   const handleShare = async () => {
-    if (!topic) return;
+    if (!post) return;
     const url = window.location.href;
     const shareData = {
-        title: topic.title,
+        title: post.title,
         url: url,
     };
 
@@ -170,7 +172,7 @@ export default function ForumTopicPage() {
     )
   }
 
-  if (!topic) {
+  if (!post) {
     return notFound();
   }
 
@@ -182,11 +184,11 @@ export default function ForumTopicPage() {
       <div className="bg-background text-foreground">
         {/* Header Image */}
         <div className="relative h-72 md:h-96 w-full">
-            {topic.image ? (
+            {post.image ? (
                 <>
                     <div
                         className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${topic.image})` }}
+                        style={{ backgroundImage: `url(${post.image})` }}
                         data-ai-hint="galaxy stars"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
@@ -213,7 +215,7 @@ export default function ForumTopicPage() {
                   <ChevronRight className="h-4 w-4 mx-1" />
                 </li>
                 <li className="truncate" style={{ maxWidth: "300px" }}>
-                  <span className="font-semibold text-white">{topic.title}</span>
+                  <span className="font-semibold text-white">{post.title}</span>
                 </li>
               </ol>
             </nav>
@@ -229,24 +231,24 @@ export default function ForumTopicPage() {
                         <CardContent className="p-6 md:p-8">
                             {/* Title */}
                             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-primary">
-                                {topic.title}
+                                {post.title}
                             </h1>
 
                              {/* Meta Info */}
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-6 pb-6 border-b">
-                                <span className="flex items-center gap-1.5"><Clock size={14} />{topic.readTime} dakika okuma</span>
-                                <span className="flex items-center gap-1.5"><Tag size={14} />{topic.category}</span>
+                                <span className="flex items-center gap-1.5"><Clock size={14} />{post.readTime} dakika okuma</span>
+                                <span className="flex items-center gap-1.5"><Tag size={14} />{post.category}</span>
                             </div>
 
                             {/* Article Content */}
                              <article
                                 className={`prose prose-lg dark:prose-invert max-w-none ${styles.articleContent}`}
-                                dangerouslySetInnerHTML={{ __html: topic.content }}
+                                dangerouslySetInnerHTML={{ __html: post.content }}
                             />
                         </CardContent>
                      </Card>
                      
-                     <CommentSection postId={`forum-${topic.id}`} onCommentCountChange={setCommentCount} />
+                     <CommentSection postId={post.id} onCommentCountChange={setCommentCount} />
                 </motion.main>
 
                  {/* Sidebar */}
@@ -263,12 +265,12 @@ export default function ForumTopicPage() {
                             </CardHeader>
                             <CardContent className="flex items-center gap-4">
                                 <Avatar className="h-16 w-16 border-2 border-primary">
-                                     <AvatarImage src={topic.author.avatar} alt={topic.author.name} />
-                                    <AvatarFallback>{topic.author.name.substring(0,2)}</AvatarFallback>
+                                     <AvatarImage src={"https://github.com/shadcn.png"} alt={"Dr. Emre"} />
+                                    <AvatarFallback>DE</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-bold text-lg">{topic.author.name}</p>
-                                    <p className="text-sm text-muted-foreground">{topic.author.title}</p>
+                                    <p className="font-bold text-lg">Dr. Emre</p>
+                                    <p className="text-sm text-muted-foreground">İlahiyat Araştırmacısı</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -307,7 +309,7 @@ export default function ForumTopicPage() {
                                 <h3 className="font-semibold text-lg">Etiketler</h3>
                             </CardHeader>
                             <CardContent className="flex flex-wrap gap-2">
-                                {topic.tags.map(tag => (
+                                {["Kozmoloji", "Zariyat", "Mucize"].map(tag => (
                                     <Badge key={tag} variant="secondary">{tag}</Badge>
                                 ))}
                             </CardContent>
