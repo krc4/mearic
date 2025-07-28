@@ -29,11 +29,13 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard } from "lucide-react";
+import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard, Image as ImageIcon } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import NextImage from "next/image";
 
-const profileSchema = z.object({
-  username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
+
+const photoSchema = z.object({
+    photoURL: z.string().url({ message: "Lütfen geçerli bir URL girin." }).min(1, { message: "URL alanı boş bırakılamaz." }),
 });
 
 const passwordSchema = z.object({
@@ -45,7 +47,7 @@ const passwordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
+type PhotoFormValues = z.infer<typeof photoSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
@@ -67,10 +69,10 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [router]);
 
-  const profileForm = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
+  const photoForm = useForm<PhotoFormValues>({
+    resolver: zodResolver(photoSchema),
     values: {
-        username: user?.displayName || ""
+        photoURL: user?.photoURL || ""
     }
   });
 
@@ -82,15 +84,20 @@ export default function ProfilePage() {
       confirmPassword: "",
     },
   });
+  
+  const watchedPhotoURL = photoForm.watch("photoURL");
 
-  const onProfileSubmit = async (data: ProfileFormValues) => {
+  const onPhotoSubmit = async (data: PhotoFormValues) => {
     if (!user) return;
     try {
-        await updateProfile(user, { displayName: data.username });
-        toast({ title: "Başarılı!", description: "Kullanıcı adınız güncellendi." });
+        await updateProfile(user, { photoURL: data.photoURL });
+        toast({ title: "Başarılı!", description: "Profil fotoğrafınız güncellendi." });
+        // Force a re-render to show the new avatar
+        setUser({...user});
+        router.refresh();
     } catch(error) {
         console.error(error);
-        toast({ title: "Hata!", description: "Profil güncellenirken bir sorun oluştu.", variant: "destructive" });
+        toast({ title: "Hata!", description: "Fotoğraf güncellenirken bir sorun oluştu.", variant: "destructive" });
     }
   };
 
@@ -170,33 +177,43 @@ export default function ProfilePage() {
         </header>
 
         <main className="space-y-12">
-          {/* Profile Info Card */}
+          {/* Change Photo Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><UserIcon/> Profil Bilgileri</CardTitle>
+              <CardTitle className="flex items-center gap-2"><ImageIcon/> Profil Fotoğrafı</CardTitle>
               <CardDescription>
-                Kullanıcı adınızı buradan güncelleyebilirsiniz.
+                Profil fotoğrafınızı bir resim URL'si ile güncelleyin.
               </CardDescription>
             </CardHeader>
-            <Form {...profileForm}>
-                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
-                    <CardContent>
+            <Form {...photoForm}>
+                <form onSubmit={photoForm.handleSubmit(onPhotoSubmit)}>
+                    <CardContent className="space-y-4">
                         <FormField
-                            control={profileForm.control}
-                            name="username"
+                            control={photoForm.control}
+                            name="photoURL"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Kullanıcı Adı</FormLabel>
+                                <FormLabel>Resim URL'si</FormLabel>
                                 <FormControl>
-                                <Input placeholder="Yeni kullanıcı adınız" {...field} />
+                                <Input type="url" placeholder="https://ornek.com/resim.jpg" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                             )}
                         />
+                        {photoForm.formState.isValid && watchedPhotoURL && (
+                             <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-md mt-2">
+                                <NextImage 
+                                    src={watchedPhotoURL} 
+                                    alt="Resim Önizlemesi" 
+                                    fill 
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
-                        <Button type="submit">Değişiklikleri Kaydet</Button>
+                        <Button type="submit">Fotoğrafı Kaydet</Button>
                     </CardFooter>
                 </form>
             </Form>
@@ -285,9 +302,10 @@ export default function ProfilePage() {
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteAccount}
+        title="Hesabınızı Silmek Üzere misiniz?"
+        description="Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinizden emin misiniz?"
+        confirmText="Evet, Hesabımı Sil"
       />
     </>
   );
 }
-
-    
