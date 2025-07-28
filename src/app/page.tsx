@@ -29,7 +29,7 @@ export default function Home() {
   const [videoSrc, setVideoSrc] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4'];
+  const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4', '/anasayfa_video3.mp4'];
 
   useEffect(() => {
     setVideoSrc(videos[Math.floor(Math.random() * videos.length)]);
@@ -37,19 +37,17 @@ export default function Home() {
 
   const handleVideoEnd = () => {
     if (videoRef.current) {
-        // Set muted to true for subsequent loops
         videoRef.current.muted = true;
         setMuted(true);
-        // Play the video again to loop it
         videoRef.current.play();
     }
   };
 
   const toggleMute = () => {
     if (videoRef.current) {
-      const currentMuted = videoRef.current.muted;
-      videoRef.current.muted = !currentMuted;
-      setMuted(!currentMuted);
+      const currentMuted = !videoRef.current.muted;
+      videoRef.current.muted = currentMuted;
+      setMuted(currentMuted);
     }
   };
 
