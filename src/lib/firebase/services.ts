@@ -1,6 +1,6 @@
 
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
 import type { Comment, CommentPayload } from '@/lib/comments';
 import type { AdminUser } from '@/lib/admin';
@@ -30,19 +30,18 @@ export const findUserByEmail = async (email: string): Promise<{ uid: string, dis
     }
 };
 
-const ensureUserDocument = async (user: import('firebase/auth').User) => {
+export const ensureUserDocument = async (user: import('firebase/auth').User) => {
     const userRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) {
         try {
-            await writeBatch(db)
-                .set(userRef, {
-                    email: user.email,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL,
-                    createdAt: serverTimestamp()
-                })
-                .commit();
+            await setDoc(userRef, {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                createdAt: serverTimestamp()
+            });
+             console.log("User document created for:", user.email);
         } catch (error) {
             console.error("Error creating user document:", error);
         }
@@ -163,10 +162,19 @@ export const addComment = async (commentData: CommentPayload): Promise<Comment |
       commentWithTimestamp
     );
     
+    // We get the fresh data back to ensure we have the server timestamp
+    const newCommentSnap = await getDoc(docRef);
+    const newCommentData = newCommentSnap.data();
+
     const newComment: Comment = {
       id: docRef.id,
-      ...commentData,
-      createdAt: new Timestamp(Date.now() / 1000, 0), // Estimate for immediate feedback
+      postId: commentData.postId,
+      userId: commentData.userId,
+      username: commentData.username,
+      photoURL: commentData.photoURL,
+      text: commentData.text,
+      createdAt: newCommentData?.createdAt as Timestamp,
+      isAdmin: commentData.isAdmin,
     };
 
     return newComment;
@@ -181,12 +189,19 @@ export const getCommentsForPost = async (postId: string): Promise<Comment[]> => 
   try {
     const commentsRef = collection(db, 'posts', postId, 'comments');
     const q = query(commentsRef, orderBy('createdAt', 'desc'));
+    
+    const adminsRef = collection(db, "admins");
+    const adminSnapshot = await getDocs(adminsRef);
+    const adminIds = new Set(adminSnapshot.docs.map(doc => doc.id));
+    
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map((doc) => {
+        const data = doc.data();
         return {
           id: doc.id,
-          ...doc.data(),
+          ...data,
+          isAdmin: adminIds.has(data.userId),
         } as Comment
     });
   } catch (error) {
@@ -265,6 +280,7 @@ export const removeAdmin = async (uid: string): Promise<boolean> => {
 // Function to check if a user is an admin
 export const isAdmin = async (uid: string): Promise<boolean> => {
     try {
+        if (!uid) return false;
         const adminRef = doc(db, "admins", uid);
         const adminSnap = await getDoc(adminRef);
         return adminSnap.exists();
