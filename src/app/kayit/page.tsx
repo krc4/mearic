@@ -169,7 +169,7 @@ export default function RegisterPage() {
                   />
                    <div className="flex justify-center">
                      <ReCAPTCHA
-                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcqAAAAABg329i4l2f1j9tYc9F-3r8eG9cT"} // Test key, replace with your own
+                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
                         onChange={(token) => setRecaptchaToken(token)}
                     />
                    </div>
