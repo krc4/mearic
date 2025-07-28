@@ -2,7 +2,8 @@
 import { db } from './config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
-import type { Comment, CommentPayload } from '@/lib/comments';
+import type { Comment } from '@/lib/comments';
+import { CommentPayload } from '@/lib/comments';
 import type { AdminUser } from '@/lib/admin';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes'> & {
@@ -116,21 +117,24 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
     }
 }
 
-export const incrementPostView = async (postId: string) => {
+export const incrementPostView = async (postId: string): Promise<number | null> => {
     try {
         const postRef = doc(db, "posts", postId);
         await updateDoc(postRef, {
             views: increment(1)
         });
+        const updatedDoc = await getDoc(postRef);
+        return updatedDoc.data()?.views || 0;
     } catch (error) {
         console.error("Error incrementing post view: ", error);
+        return null;
     }
 };
 
 export const toggleLikePost = async (postId: string, liked: boolean): Promise<number | null> => {
     try {
         const postRef = doc(db, "posts", postId);
-        const amount = liked ? -1 : 1;
+        const amount = liked ? 1 : -1;
         await updateDoc(postRef, {
             likes: increment(amount)
         });
@@ -318,7 +322,7 @@ export const removeAdmin = async (uid: string): Promise<boolean> => {
 }
 
 // Function to check if a user is an admin
-export const isAdmin = async (uid: string): Promise<boolean> => {
+export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
     try {
         if (!uid) return false;
         const adminRef = doc(db, "admins", uid);
@@ -329,3 +333,5 @@ export const isAdmin = async (uid: string): Promise<boolean> => {
         return false;
     }
 }
+
+    

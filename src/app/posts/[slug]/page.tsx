@@ -51,13 +51,17 @@ export default function PostPage() {
         setPost(fetchedPost);
 
         // Unique view logic using sessionStorage
-        const viewedKey = `viewed-${fetchedPost.id}`;
         if (typeof window !== 'undefined') {
+          const viewedKey = `viewed-${fetchedPost.id}`;
           const hasViewed = sessionStorage.getItem(viewedKey);
 
           if (!hasViewed) {
-              await incrementPostView(fetchedPost.id);
-              setViewCount((fetchedPost.views || 0) + 1);
+              const newViewCount = await incrementPostView(fetchedPost.id);
+              if (newViewCount !== null) {
+                setViewCount(newViewCount);
+              } else {
+                setViewCount(fetchedPost.views || 0);
+              }
               sessionStorage.setItem(viewedKey, 'true');
           } else {
               setViewCount(fetchedPost.views || 0);
@@ -104,7 +108,7 @@ export default function PostPage() {
     });
 
     // Sync with server
-    const serverLikeCount = await toggleLikePost(post.id, liked);
+    const serverLikeCount = await toggleLikePost(post.id, newLikedState);
     if (serverLikeCount !== null) {
         setLikeCount(serverLikeCount);
     } else {
@@ -129,15 +133,17 @@ export default function PostPage() {
         try {
             await navigator.share({ title: post.title, url });
         } catch (error: any) {
-            // If user cancels share dialog, do nothing.
-            if (error.name === 'AbortError') {
+            // If user cancels share dialog (AbortError) or permission is denied, do nothing.
+            if (error.name === 'AbortError' || error.name === 'NotAllowedError') {
                 return;
             }
             console.error('Error sharing:', error);
+            // Fallback to clipboard for other errors
             navigator.clipboard.writeText(url);
             toast({ title: "Link panoya kopyalandı!" });
         }
     } else {
+        // Fallback for browsers that don't support navigator.share
         navigator.clipboard.writeText(url);
         toast({ title: "Link panoya kopyalandı!" });
     }
@@ -317,3 +323,5 @@ export default function PostPage() {
     </>
   );
 }
+
+    
