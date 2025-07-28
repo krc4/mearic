@@ -60,7 +60,10 @@ export default function ForumTopicPage() {
   
   const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -69,6 +72,24 @@ export default function ForumTopicPage() {
         const fetchedTopic = staticTopicData; // In a real app, this would be a fetch
         if (fetchedTopic && fetchedTopic.id === topicId) {
             setTopic(fetchedTopic);
+
+            const topicStorageId = `forum-topic-v2-${fetchedTopic.id}`;
+
+            // Handle Views
+            const hasViewed = sessionStorage.getItem(`viewed-${topicStorageId}`);
+            let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`) || 0);
+            if (!hasViewed) {
+                currentViews++;
+                localStorage.setItem(`views-${topicStorageId}`, String(currentViews));
+                sessionStorage.setItem(`viewed-${topicStorageId}`, 'true');
+            }
+            setViewCount(currentViews);
+
+            // Handle Likes
+            const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
+            setLiked(isLiked);
+            setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`) || 0));
+
         } else {
            notFound();
         }
@@ -76,6 +97,24 @@ export default function ForumTopicPage() {
     }, 500);
   }, [topicId]);
 
+
+  const handleLikeToggle = () => {
+    if (!topic) return;
+
+    const topicStorageId = `forum-topic-v2-${topic.id}`;
+    const newLikedState = !liked;
+    const currentLikes = Number(localStorage.getItem(`likes-${topicStorageId}`) || 0);
+    const newLikes = newLikedState ? currentLikes + 1 : currentLikes - 1;
+
+    setLiked(newLikedState);
+    setLikeCount(newLikes);
+    localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
+    localStorage.setItem(`likes-${topicStorageId}`, String(newLikes));
+    
+    toast({
+        title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
+    });
+  };
 
   const handleShare = async () => {
     if (!topic) return;
@@ -238,7 +277,7 @@ export default function ForumTopicPage() {
                             <CardContent className="space-y-4">
                                <div className="flex justify-around text-center">
                                    <div>
-                                       <p className="text-2xl font-bold">0</p>
+                                       <p className="text-2xl font-bold">{viewCount}</p>
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><Eye size={14}/>Görüntülenme</p>
                                    </div>
                                    <div>
@@ -246,13 +285,13 @@ export default function ForumTopicPage() {
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><MessageSquare size={14}/>Yorum</p>
                                    </div>
                                    <div>
-                                       <p className="text-2xl font-bold">0</p>
+                                       <p className="text-2xl font-bold">{likeCount}</p>
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><Heart size={14}/>Beğeni</p>
                                    </div>
                                </div>
                                <div className="flex gap-2 pt-4 border-t">
-                                    <Button className="w-full group" variant={"outline"}>
-                                        <Heart className={`mr-2 h-4 w-4`} /> Beğen
+                                    <Button className="w-full group" onClick={handleLikeToggle} variant={liked ? "default" : "outline"}>
+                                        <Heart className={`mr-2 h-4 w-4 ${liked ? "fill-current" : ""}`} /> {liked ? "Beğenildi" : "Beğen"}
                                     </Button>
                                      <Button className="w-full" variant="outline" onClick={handleShare}>
                                         <Share2 className="mr-2 h-4 w-4" /> Paylaş
