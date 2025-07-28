@@ -26,20 +26,21 @@ export default function Home() {
   const thirdArticle = mockPosts[1];
   const blogArticle1 = mockPosts[0]; // Corrected index
   const blogArticle2 = mockPosts[1]; // Corrected index
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true); // Start muted
   const [videoSrc, setVideoSrc] = useState('');
+  const [isClient, setIsClient] = useState(false); // State to track client-side mount
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4', '/anasayfa_video3.mp4'];
 
   useEffect(() => {
+    // This effect runs only on the client
+    setIsClient(true);
     setVideoSrc(videos[Math.floor(Math.random() * videos.length)]);
   }, []);
 
   const handleVideoEnd = () => {
     if (videoRef.current) {
-        videoRef.current.muted = true;
-        setMuted(true);
         videoRef.current.play();
     }
   };
@@ -60,12 +61,14 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="relative h-screen w-full overflow-hidden bg-black">
-         {videoSrc && <video
+         {isClient && videoSrc && <video
           ref={videoRef}
           key={videoSrc}
           src={videoSrc}
           autoPlay
-          muted={muted}
+          muted
+          loop
+          playsInline
           onEnded={handleVideoEnd}
           className="absolute inset-0 w-full h-full object-cover brightness-50"
         />}
