@@ -52,12 +52,16 @@ export default function PostPage() {
 
         // Unique view logic using sessionStorage
         const viewedKey = `viewed-${fetchedPost.id}`;
-        const hasViewed = sessionStorage.getItem(viewedKey);
+        if (typeof window !== 'undefined') {
+          const hasViewed = sessionStorage.getItem(viewedKey);
 
-        if (!hasViewed) {
-            await incrementPostView(fetchedPost.id);
-            setViewCount((fetchedPost.views || 0) + 1);
-            sessionStorage.setItem(viewedKey, 'true');
+          if (!hasViewed) {
+              await incrementPostView(fetchedPost.id);
+              setViewCount((fetchedPost.views || 0) + 1);
+              sessionStorage.setItem(viewedKey, 'true');
+          } else {
+              setViewCount(fetchedPost.views || 0);
+          }
         } else {
             setViewCount(fetchedPost.views || 0);
         }
@@ -69,8 +73,10 @@ export default function PostPage() {
         setLikeCount(fetchedPost.likes || 0);
 
         // Check if liked from localStorage
-        const isLiked = localStorage.getItem(`liked-${fetchedPost.id}`) === 'true';
-        setLiked(isLiked);
+        if (typeof window !== 'undefined') {
+          const isLiked = localStorage.getItem(`liked-${fetchedPost.id}`) === 'true';
+          setLiked(isLiked);
+        }
 
       } else {
         notFound();
@@ -89,7 +95,9 @@ export default function PostPage() {
     setLiked(newLikedState);
     setLikeCount(current => current + (newLikedState ? 1 : -1));
 
-    localStorage.setItem(`liked-${post.id}`, String(newLikedState));
+    if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked-${post.id}`, String(newLikedState));
+    }
 
     toast({
         title: newLikedState ? "Yazıyı beğendiniz!" : "Beğeni geri çekildi",
@@ -103,7 +111,9 @@ export default function PostPage() {
         // Revert UI on error
         setLiked(!newLikedState);
         setLikeCount(current => current + (!newLikedState ? 1 : -1));
-        localStorage.setItem(`liked-${post.id}`, String(!newLikedState));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`liked-${post.id}`, String(!newLikedState));
+        }
          toast({
             title: "Hata!",
             description: "Beğeni durumu güncellenemedi.",
@@ -118,7 +128,11 @@ export default function PostPage() {
     if (navigator.share) {
         try {
             await navigator.share({ title: post.title, url });
-        } catch (error) {
+        } catch (error: any) {
+            // If user cancels share dialog, do nothing.
+            if (error.name === 'AbortError') {
+                return;
+            }
             console.error('Error sharing:', error);
             navigator.clipboard.writeText(url);
             toast({ title: "Link panoya kopyalandı!" });
