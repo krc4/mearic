@@ -100,7 +100,7 @@ export default function KuranMucizeleriPage() {
             <div
               className="absolute inset-0 -z-10 scale-125"
               style={{
-                backgroundImage: `url(/kuran.jpg)`,
+                backgroundImage: `url(/kuran-mucizeleri.png)`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",

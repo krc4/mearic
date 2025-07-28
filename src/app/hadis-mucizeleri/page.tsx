@@ -100,7 +100,7 @@ export default function HadisMucizeleriPage() {
            <div
             className="absolute inset-0 -z-10 scale-125"
             style={{
-              backgroundImage: `url(/hadis.jpg)`,
+              backgroundImage: `url(/hadis-mucizeleri.png)`,
               backgroundAttachment: "fixed",
               backgroundSize: "cover",
               backgroundPosition: "center",
