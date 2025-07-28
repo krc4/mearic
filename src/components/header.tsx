@@ -17,14 +17,6 @@ export function Header() {
     setIsOpen(true);
   }
 
-  const handleBlogsClick = () => {
-    setPopupContent({
-      title: "Bloglar Çok Yakında!",
-      content: "İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak, güncel ve özgün yazıların yer alacağı blog bölümümüzü hazırlıyoruz."
-    });
-    setIsOpen(true);
-  }
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -45,13 +37,12 @@ export function Header() {
             >
               Hadislerdeki Mucizeler
             </Link>
-            <Button
-              variant="link"
-              onClick={handleBlogsClick}
-              className="transition-colors hover:text-primary text-foreground/60 p-0"
+             <Link
+              href="/islami-bloglar"
+              className="transition-colors hover:text-primary text-foreground"
             >
               İslami Bloglar
-            </Button>
+            </Link>
             <Button
               variant="link"
               onClick={handleForumClick}
