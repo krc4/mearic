@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Clock,
@@ -10,15 +11,15 @@ import {
   Eye,
   ChevronRight,
 } from "lucide-react";
-import type { Post } from "@/lib/posts";
-import { getPostsByCategory } from "@/lib/firebase/services";
-import { ReadingProgressBar } from "@/components/reading-progress-bar";
+import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/header";
-import { motion, AnimatePresence } from "framer-motion";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ReadingProgressBar } from "@/components/reading-progress-bar";
+import type { Post } from "@/lib/posts";
+import { getPostsByCategory } from "@/lib/firebase/services";
 
 export default function IslamiBloglarPage() {
   const { toast } = useToast();
