@@ -80,20 +80,6 @@ export default function Home() {
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
           <motion.h1
             className="font-black text-6xl md:text-8xl tracking-tighter text-[#F9FAFB]"
-            animate={{
-              scale: [1, 1.03, 1],
-              textShadow: [
-                "0 0 0px #C0C0C0",
-                "0 0 12px #C0C0C0, 0 0 24px #F9FAFB",
-                "0 0 0px #C0C0C0",
-              ],
-              filter: ["brightness(1)", "brightness(1.3)", "brightness(1)"],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
           >
             Nurunyolu
           </motion.h1>
