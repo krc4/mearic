@@ -144,7 +144,7 @@ export default function NurunyoluForum() {
                 </div>
               </div>
               <Link href={`/forum/${topic.id}`} className="w-full sm:w-auto">
-                 <Button size="sm" variant="ghost" className="w-full sm:w-auto text-muted-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                 <Button size="sm" variant="outline" className="w-full sm:w-auto transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   Gör
                   <ArrowUpRight className="ml-1.5 h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"/>
                 </Button>
