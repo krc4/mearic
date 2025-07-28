@@ -114,24 +114,25 @@ export default function PostPage() {
       <div className="bg-background text-foreground">
         {/* Header Image */}
         <div className="relative h-72 md:h-96 w-full">
-          {post.image ? (
+            {post.image ? (
             <motion.div
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="absolute inset-0 z-10"
+                initial={{ y: -50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="absolute inset-0"
             >
-              <Image
-                src={post.image}
-                alt={post.title}
-                fill
-                className="object-cover"
-                data-ai-hint="post image"
-              />
+                <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                    data-ai-hint="post image"
+                />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-20" />
             </motion.div>
-          ) : <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/50" />}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-20" />
+            ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/50" />
+            )}
         </div>
         
         <div className="container mx-auto -mt-24 md:-mt-32 relative z-30 px-4">
