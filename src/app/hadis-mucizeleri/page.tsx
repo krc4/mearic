@@ -10,6 +10,7 @@ import {
   Filter,
   Eye,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
 import { getPostsByCategory } from "@/lib/firebase/services";
@@ -254,14 +255,12 @@ export default function HadisMucizeleriPage() {
           </motion.div>
         </main>
 
-        <footer className="container mx-auto mt-12 py-8 px-4 border-t">
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/" className="hover:text-primary transition-colors">Anasayfa</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
-              <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
-            </div>
+        {/* Final Şelale */}
+        <footer className="relative overflow-hidden py-20">
+          <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/20 via-transparent to-transparent blur-3xl" />
+          <div className="container mx-auto text-center text-white/60">
+            <Sparkles className="mx-auto mb-4 h-12 w-12 text-yellow-300" />
+            <p className="text-sm">© {new Date().getFullYear()} Nurunyolu – Tasarım aşkıyla kodlandı.</p>
           </div>
         </footer>
       </div>
