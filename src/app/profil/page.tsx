@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +30,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard, Image as ImageIcon } from "lucide-react";
+import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard, Image as ImageIcon, ChevronLeft } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import NextImage from "next/image";
 
@@ -134,6 +135,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="container mx-auto max-w-4xl py-12 px-4">
+        <Skeleton className="h-8 w-8 mb-4" />
         <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-20 w-20 rounded-full" />
             <div className="space-y-2">
@@ -154,6 +156,14 @@ export default function ProfilePage() {
   return (
     <>
       <div className="container mx-auto max-w-4xl py-12 px-4">
+         <div className="mb-4">
+            <Button variant="outline" size="sm" asChild>
+                <Link href="/">
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anasayfaya Dön
+                </Link>
+            </Button>
+        </div>
         <header className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-10">
           <Avatar className="h-24 w-24 border-4 border-primary/20">
              <AvatarImage 
