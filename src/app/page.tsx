@@ -36,7 +36,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative h-screen w-full overflow-hidden bg-black">
          <video
-          src="/videos/intro.mp4"
+          src="/anasayfa_video.mp4"
           autoPlay
           loop
           muted={muted}
@@ -534,7 +534,6 @@ export default function Home() {
 
         </main>
 
-        {/* Final Şelale */}
         <footer className="relative overflow-hidden py-20">
           <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/20 via-transparent to-transparent blur-3xl" />
           <div className="container mx-auto text-center text-muted-foreground">
