@@ -14,11 +14,9 @@ const firebaseConfig = {
   "messagingSenderId": "1098560766367"
 };
 
-
 // Initialize Firebase
-// This pattern prevents re-initializing the app on every render.
 const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db: Firestore = getFirestore(app);
 const auth: Auth = getAuth(app);
 
-export { db, auth };
+export { app, db, auth };
