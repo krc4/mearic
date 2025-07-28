@@ -52,7 +52,7 @@ export default function KuranMucizeleriPage() {
     
     const filtered = posts.filter(post => 
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return [...filtered].sort((a, b) => {
@@ -288,4 +288,3 @@ export default function KuranMucizeleriPage() {
     </>
   );
 }
-
