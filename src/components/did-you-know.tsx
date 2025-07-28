@@ -1,8 +1,9 @@
 "use client";
-import { Copy, Twitter, RotateCw, ArrowRight } from "lucide-react";
+import { Copy, RotateCw, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
 const funFacts = [
   {
@@ -51,6 +52,23 @@ export function DidYouKnowSection() {
     }
   };
 
+  const variants = {
+    enter: {
+      y: -30,
+      opacity: 0,
+    },
+    center: {
+      zIndex: 1,
+      y: 0,
+      opacity: 1,
+    },
+    exit: {
+      zIndex: 0,
+      y: 30,
+      opacity: 0,
+    },
+  };
+
   if (!fact) return null;
 
   return (
@@ -60,29 +78,36 @@ export function DidYouKnowSection() {
       <div className="absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-accent/10 blur-3xl -z-10" />
 
       {/* Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/30 bg-background/70 p-6 shadow-2xl backdrop-blur-xl">
-        {/* Arabic ornament */}
-        <span className="absolute -right-4 -top-4 text-[8rem] font-kufi text-foreground/5 dark:text-foreground/10 select-none -z-10">
-          ﷽
-        </span>
+      <div className="relative overflow-hidden rounded-3xl border border-border/30 bg-background/70 p-6 shadow-2xl backdrop-blur-xl min-h-[250px] flex flex-col justify-between">
+        <div>
+            <header className="flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
+                <RotateCw className="h-5 w-5" />
+            </span>
+            <h3 className="text-xl font-semibold text-foreground">
+                Biliyor muydunuz?
+            </h3>
+            </header>
 
-        <header className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-            <RotateCw className="h-5 w-5" />
-          </span>
-          <h3 className="text-xl font-semibold text-foreground">
-            Biliyor muydunuz?
-          </h3>
-        </header>
-
-        <div className="mt-4 space-y-2">
-          <p className="text-2xl font-kufi leading-relaxed text-primary">
-            {fact.ar}
-          </p>
-          <p className="text-base text-foreground/80">{fact.tr}</p>
-          <p className="text-sm text-muted-foreground">— {fact.ref}</p>
+            <AnimatePresence mode="wait">
+                 <motion.div
+                    key={idx}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="mt-4 space-y-2"
+                >
+                    <p className="text-2xl font-kufi leading-relaxed text-primary">
+                        {fact.ar}
+                    </p>
+                    <p className="text-base text-foreground/80">{fact.tr}</p>
+                    <p className="text-sm text-muted-foreground">— {fact.ref}</p>
+                 </motion.div>
+            </AnimatePresence>
         </div>
-
+        
         <footer className="mt-6 flex items-center justify-between">
           <div className="flex gap-2">
             <Button
