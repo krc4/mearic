@@ -49,15 +49,24 @@ export default function PostPage() {
 
       if (fetchedPost) {
         setPost(fetchedPost);
-        // Increment view count
-        await incrementPostView(fetchedPost.id);
+
+        // Unique view logic using sessionStorage
+        const viewedKey = `viewed-${fetchedPost.id}`;
+        const hasViewed = sessionStorage.getItem(viewedKey);
+
+        if (!hasViewed) {
+            await incrementPostView(fetchedPost.id);
+            setViewCount((fetchedPost.views || 0) + 1);
+            sessionStorage.setItem(viewedKey, 'true');
+        } else {
+            setViewCount(fetchedPost.views || 0);
+        }
         
         // Fetch counts
         const comments = await getCommentCount(fetchedPost.id);
         
         setCommentCount(comments);
         setLikeCount(fetchedPost.likes || 0);
-        setViewCount((fetchedPost.views || 0) + 1);
 
         // Check if liked from localStorage
         const isLiked = localStorage.getItem(`liked-${fetchedPost.id}`) === 'true';
