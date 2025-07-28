@@ -304,16 +304,6 @@ export default function ForumTopicPage() {
                                </div>
                             </CardContent>
                         </Card>
-                         <Card className="shadow-xl">
-                            <CardHeader>
-                                <h3 className="font-semibold text-lg">Etiketler</h3>
-                            </CardHeader>
-                            <CardContent className="flex flex-wrap gap-2">
-                                {["Kozmoloji", "Zariyat", "Mucize"].map(tag => (
-                                    <Badge key={tag} variant="secondary">{tag}</Badge>
-                                ))}
-                            </CardContent>
-                        </Card>
                     </div>
                 </motion.aside>
 
