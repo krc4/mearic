@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2 } from "lucide-react"
+import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2, Star } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
 import { addComment, getCommentsForPost, isAdmin, deleteComment, CommentPayload } from "@/lib/firebase/services"
@@ -23,53 +23,73 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
+import { motion } from "framer-motion"
 
 
 const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, isAdmin: boolean, onDeleteClick: (commentId: string) => void }) => (
-    <Card className={cn(
-        "bg-card/50 transition-all duration-300", 
-        comment.isAdmin && "border-primary/50 bg-primary/5 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.3)]"
-    )}>
+    <motion.div
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      whileHover={{ scale: 1.02 }}
+      className="relative"
+    >
+      <Card className={cn(
+        "border-2 border-transparent bg-gradient-to-br from-card/80 to-card/60 shadow-lg backdrop-blur-sm transition-all duration-300",
+        comment.isAdmin && "border-primary/50 bg-gradient-to-br from-primary/10 to-card/70 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.5)]"
+      )}>
         <CardContent className="p-5 flex items-start gap-4">
-            <Avatar className={cn(comment.isAdmin && "border-2 border-primary")}>
-                <AvatarImage src={comment.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${comment.userId}`} alt={comment.username} />
-                <AvatarFallback>{comment.username.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <p className="font-semibold">{comment.username}</p>
-                        {comment.isAdmin && (
-                            <Badge variant="default" className="flex items-center gap-1">
-                                <ShieldCheck className="h-3 w-3"/>
-                                Yönetici
-                            </Badge>
-                        )}
-                    </div>
-                     {isAdmin && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                 <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
-                                    className="text-destructive focus:text-destructive"
-                                    onClick={() => onDeleteClick(comment.id)}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Yorumu Sil
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
-                </div>
-                 <p className="text-xs text-muted-foreground">
-                    {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString() : 'Şimdi'}
-                </p>
-                <p className="mt-3 text-foreground/90">{comment.text}</p>
+          <Avatar className={cn(
+            "border-2 border-transparent",
+            comment.isAdmin && "border-primary ring-2 ring-primary/50"
+          )}>
+            <AvatarImage src={comment.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${comment.userId}`} />
+            <AvatarFallback>{comment.username.charAt(0)}</AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-foreground">{comment.username}</p>
+                {comment.isAdmin && (
+                  <Badge variant="default" className="text-xs font-bold">
+                    <ShieldCheck size={12} className="mr-1" /> Admin
+                  </Badge>
+                )}
+              </div>
+              {isAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
+                      <MoreVertical size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background border-border">
+                    <DropdownMenuItem onClick={() => onDeleteClick(comment.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                      <Trash2 size={14} className="mr-2" /> Sil
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
+
+            <p className="text-xs text-muted-foreground mt-1">
+              {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString() : 'Şimdi'}
+            </p>
+
+            <p className="mt-3 text-sm text-foreground/90 leading-relaxed">
+              {comment.text}
+            </p>
+
+            {comment.isAdmin && (
+              <div className="mt-3 flex items-center gap-1 text-xs text-primary">
+                <Star size={12} className="animate-pulse" />
+                <span>Yönetici yorumu</span>
+              </div>
+            )}
+          </div>
         </CardContent>
-    </Card>
+      </Card>
+    </motion.div>
 );
 
 const CommentSkeleton = () => (
