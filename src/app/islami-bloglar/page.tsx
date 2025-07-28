@@ -82,10 +82,10 @@ export default function IslamiBloglarPage() {
   };
 
   return (
-    <div ref={ref} className="bg-black">
+    <div ref={ref}>
       <Header />
       {/* Cinematic Hero */}
-      <section className="relative h-screen w-full overflow-hidden bg-black">
+      <section className="relative h-screen w-full overflow-hidden">
         <video
           src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4"
           autoPlay
@@ -146,34 +146,6 @@ export default function IslamiBloglarPage() {
         </button>
       </section>
 
-      {/* Particle Ayet */}
-      <motion.div
-        style={{ y }}
-        className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-      >
-        {Array.from({ length: 30 }).map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute text-2xl font-kufi text-emerald-400/20"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -(typeof window !== 'undefined' ? window.innerHeight : 1080)],
-              opacity: [0.2, 0.8, 0],
-            }}
-            transition={{
-              duration: 20 + Math.random() * 20,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-            }}
-          >
-            ﷽
-          </motion.span>
-        ))}
-      </motion.div>
-
       {/* 3D Masonry Grid */}
       <main id="grid" className="relative z-10 container mx-auto py-20 px-4">
         <motion.div
@@ -198,15 +170,6 @@ export default function IslamiBloglarPage() {
 
               {/* Neon Glass Layer */}
               <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
-
-              {/* Ayet Hologram */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileHover={{ opacity: 1, y: 0 }}
-                className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[90%] text-center"
-              >
-                <p className="text-4xl font-kufi text-emerald-300 drop-shadow-lg">{post.ayet}</p>
-              </motion.div>
 
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <Badge className="mb-2 bg-emerald-500/20 text-emerald-200 border-emerald-400">
