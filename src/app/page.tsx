@@ -14,7 +14,7 @@ import { HeroBackground } from '@/components/hero-background';
 import styles from './page.module.css';
 import { DidYouKnowSection } from '@/components/did-you-know';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 
 export default function Home() {
@@ -25,14 +25,19 @@ export default function Home() {
   const thirdArticle = mockPosts[1];
   const blogArticle1 = mockPosts[0]; // Corrected index
   const blogArticle2 = mockPosts[1]; // Corrected index
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [videoSrc, setVideoSrc] = useState('');
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4'];
 
   useEffect(() => {
     setVideoSrc(videos[Math.floor(Math.random() * videos.length)]);
   }, []);
+
+  const handleVideoEnd = () => {
+    setMuted(true);
+  };
 
   return (
     <>
@@ -43,11 +48,13 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative h-screen w-full overflow-hidden bg-black">
          {videoSrc && <video
+          ref={videoRef}
           key={videoSrc}
           src={videoSrc}
           autoPlay
           loop
           muted={muted}
+          onEnded={handleVideoEnd}
           className="absolute inset-0 w-full h-full object-cover brightness-50"
         />}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
