@@ -1,255 +1,269 @@
 "use client";
-import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Heart, Share2, Volume2, VolumeX, Play, Clock, Sparkles } from "lucide-react";
 import Link from "next/link";
-import {
-  Clock,
-  ArrowUpRight,
-  Heart,
-  Share2,
-  Filter,
-  Eye,
-  ChevronRight,
-  PenSquare,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Header } from "@/components/header";
-import { ReadingProgressBar } from "@/components/reading-progress-bar";
-import type { Post } from "@/lib/posts";
-import { getPostsByCategory } from "@/lib/firebase/services";
+
+const posts = [
+  {
+    id: 1,
+    slug: "evren",
+    title: "Evrenin Genişlemesi",
+    desc: "Zariyat 47 – 1400 yıl önce bildirildi.",
+    img: "https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    ayet: "وَالسَّمَاءَ بَنَيْنَاهَا بِأَيْيْدٍ وَإِنَّا لَمُوسِعُونَ",
+    category: "Kozmoloji",
+    readTime: 7,
+  },
+  {
+    id: 2,
+    slug: "daglar",
+    title: "Dağların Hareketi",
+    desc: "Neml 88 – Kayan kıtalar mucizesi.",
+    img: "https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    ayet: "وَتَرَى الْجِبَالَ تَحْسَبُهَا جَامِدَةً",
+    category: "Jeoloji",
+    readTime: 6,
+  },
+  {
+    id: 3,
+    slug: "embriyo",
+    title: "Embriyo Evreleri",
+    desc: "Müminun 12-14 – Tıbbi mucize.",
+    img: "https://images.unsplash.com/photo-1604363236113-a8a5f3b7381c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbWJyeW98ZW58MHx8fHwxNzUzMzgzNjgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    ayet: "ثُمَّ خَلَقْنَا النُّطْفَةَ عَلَقَةً",
+    category: "Tıp",
+    readTime: 8,
+  },
+];
 
 export default function IslamiBloglarPage() {
   const { toast } = useToast();
-  const [filter, setFilter] = useState<"trending" | "latest">("trending");
-  const [viewed, setViewed] = useState<Set<string>>(new Set());
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [muted, setMuted] = useState(true);
+  const [favs, setFavs] = useState<Set<number>>(new Set());
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      const fetchedPosts = await getPostsByCategory("İslami Bloglar");
-      const sortedByDate = [...fetchedPosts].sort((a, b) => {
-        const dateA = a.createdAt?.toDate() || 0;
-        const dateB = b.createdAt?.toDate() || 0;
-        return dateB.getTime() - dateA.getTime();
-      });
-      setPosts(sortedByDate);
-      setLoading(false);
-    };
-    fetchPosts();
-  }, []);
-
-  const sortedPosts = useMemo(() => {
-    if (loading) return [];
-    return [...posts].sort((a, b) => {
-      if (filter === "latest") {
-        const dateA = a.createdAt?.toDate() || 0;
-        const dateB = b.createdAt?.toDate() || 0;
-        return dateB.getTime() - dateA.getTime();
+    // This is a client component, window is available
+    const handleScroll = () => {
+      const video = document.querySelector('video');
+      if(video) {
+        const scrollPosition = window.scrollY;
+        video.style.transform = `translateY(${scrollPosition * 0.3}px)`;
       }
-      return (b.views || 0) - (a.views || 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  },[])
+
+  const toggleFav = (id: number) => {
+    setFavs(currentFavs => {
+      const newFavs = new Set(currentFavs);
+      if (newFavs.has(id)) {
+        newFavs.delete(id);
+      } else {
+        newFavs.add(id);
+      }
+      return newFavs;
     });
-  }, [filter, posts, loading]);
-
-  const toggleViewed = (id: string) =>
-    setViewed((v) => new Set(v).add(id));
-
-  const handleShare = async (postTitle: string, postSlug: string) => {
-    const url = `${window.location.origin}/posts/${postSlug}`;
-    if (navigator.share) {
-        try {
-            await navigator.share({ title: postTitle, url });
-        } catch (error) {
-            console.error('Error sharing:', error);
-            navigator.clipboard.writeText(url);
-            toast({ title: "Link panoya kopyalandı!" });
-        }
-    } else {
-        navigator.clipboard.writeText(url);
-        toast({ title: "Link panoya kopyalandı!" });
-    }
-  }
+    toast({ title: "Favori güncellendi!" });
+  };
+   
+  const handleShare = (title: string, slug: string) => {
+    const url = `${window.location.origin}/posts/${slug}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Link kopyalandı ✨", description: url });
+  };
 
   return (
-    <>
-      <ReadingProgressBar />
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        
-        <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
-           <div
-            className="absolute inset-0 -z-10 scale-125 bg-cover bg-center bg-fixed brightness-40"
-            style={{
-              backgroundImage: `url(https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=2070&auto=format&fit=crop)`,
-            }}
-            data-ai-hint="islamic knowledge"
-          />
-           <motion.div
-            animate={{ y: [0, -15, 0] }}
-            transition={{ duration: 6, repeat: Infinity }}
-            className="absolute inset-0 opacity-5 dark:opacity-10"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2300f2ff' fill-opacity='0.1'%3E%3Cpath d='M20 20h20v20H20z'/%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center text-white"
+    <div ref={ref} className="bg-black">
+      <Header />
+      {/* Cinematic Hero */}
+      <section className="relative h-screen w-full overflow-hidden bg-black">
+        <video
+          src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4"
+          autoPlay
+          loop
+          muted={muted}
+          className="absolute inset-0 w-full h-full object-cover brightness-50"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
+
+        {/* Floating Kandil */}
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-radial from-yellow-300 via-transparent to-transparent blur-2xl"
+        />
+
+        {/* Title */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 1 }}
+            className="font-black text-6xl md:text-8xl tracking-tighter"
           >
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
-              İslami Bloglar
-            </h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-white/80">
-                İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak yazılar.
-            </p>
+            İslami Bloglar
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 2 }}
+            className="mt-6 max-w-2xl text-xl text-white/80"
+          >
+            İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak yazılar.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 3 }}
+            className="mt-8"
+          >
+            <Button
+              size="lg"
+              className="rounded-full bg-gradient-to-r from-emerald-400 to-sky-500 text-black font-bold"
+              onClick={() => document.getElementById("grid")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Keşfet
+            </Button>
           </motion.div>
-             <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-r from-transparent via-black/5 to-transparent flex items-center justify-center">
-                <span className="font-kufi text-2xl text-white/20 select-none">
-                ﷽
-                </span>
-            </div>
-        </section>
-
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-primary">Anasayfa</Link>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground">İslami Bloglar</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant={filter === "trending" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setFilter("trending")}
-              >
-                <Eye className="mr-1.5 h-4 w-4" />
-                Popüler
-              </Button>
-              <Button
-                variant={filter === "latest" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setFilter("latest")}
-              >
-                <Filter className="mr-1.5 h-4 w-4" />
-                Yeni
-              </Button>
-            </div>
-          </div>
         </div>
 
-        <main className="container mx-auto flex-grow px-4 pb-20">
-          <motion.div
-            layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        {/* Sound Toggle */}
+        <button
+          onClick={() => setMuted(!muted)}
+          className="absolute top-6 right-6 text-white/70 hover:text-white"
+        >
+          {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+        </button>
+      </section>
+
+      {/* Particle Ayet */}
+      <motion.div
+        style={{ y }}
+        className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+      >
+        {Array.from({ length: 30 }).map((_, i) => (
+          <motion.span
+            key={i}
+            className="absolute text-2xl font-kufi text-emerald-400/20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -(typeof window !== 'undefined' ? window.innerHeight : 1080)],
+              opacity: [0.2, 0.8, 0],
+            }}
+            transition={{
+              duration: 20 + Math.random() * 20,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+            }}
           >
-            <AnimatePresence>
-               {loading ? (
-                 Array.from({ length: 3 }).map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 p-6 shadow-xl"
+            ﷽
+          </motion.span>
+        ))}
+      </motion.div>
+
+      {/* 3D Masonry Grid */}
+      <main id="grid" className="relative z-10 container mx-auto py-20 px-4">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          {posts.map((post) => (
+            <motion.article
+              key={post.id}
+              className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
+              whileHover={{ scale: 1.03 }}
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                style={{ backgroundImage: `url(${post.img})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+              {/* Neon Glass Layer */}
+              <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
+
+              {/* Ayet Hologram */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileHover={{ opacity: 1, y: 0 }}
+                className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[90%] text-center"
+              >
+                <p className="text-4xl font-kufi text-emerald-300 drop-shadow-lg">{post.ayet}</p>
+              </motion.div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <Badge className="mb-2 bg-emerald-500/20 text-emerald-200 border-emerald-400">
+                  {post.category}
+                </Badge>
+                <h3 className="text-2xl font-bold text-white leading-tight">
+                  {post.title}
+                </h3>
+                <p className="mt-2 text-sm text-white/80">{post.desc}</p>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-white/60 flex items-center gap-1">
+                    <Clock size={14} /> {post.readTime} dk
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-white hover:bg-white/10 rounded-full"
+                      onClick={() => toggleFav(post.id)}
                     >
-                        <Skeleton className="w-full h-full rounded-2xl"/>
-                    </motion.div>
-                 ))
-              ) : (
-                sortedPosts.map((post) => (
-                <motion.article
-                  key={post.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.4 }}
-                  className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-border/30 bg-background/60 shadow-xl backdrop-blur-md hover:shadow-2xl hover:shadow-primary/20 dark:bg-background/30 dark:hover:shadow-primary/20"
-                >
-                  <div
-                    style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
-                    className={`absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-110 ${viewed.has(post.id) ? "grayscale" : ""}`}
-                    data-ai-hint="islamic blog"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-                  <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
-                    {post.category}
-                  </Badge>
-
-                  <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-white hover:bg-white/20 hover:text-white"
-                        onClick={() => toast({ title: "Favorilere eklendi!"})}
+                      <motion.div
+                        animate={
+                          favs.has(post.id)
+                            ? { scale: [1, 1.4, 1] }
+                            : { scale: 1 }
+                        }
                       >
-                        <Heart className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-white hover:bg-white/20 hover:text-white"
-                        onClick={() => handleShare(post.title, post.slug)}
-                      >
-                        <Share2 className="h-5 w-5" />
-                      </Button>
-                    </div>
-
-                  <div className="relative z-10 flex flex-col justify-end p-6 h-full">
-                    <div className="mt-auto">
-                      <h3 className="text-xl font-bold text-white leading-tight">
-                        {post.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-white/80 line-clamp-2">
-                        {post.description}
-                      </p>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-xs text-white/70">
-                        <Clock className="h-3.5 w-3.5" />
-                        {post.readTime} dk
-                      </span>
-                      <Button
-                        asChild
-                        size="sm"
-                        onClick={() => toggleViewed(post.id)}
-                        className="rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/20"
-                      >
-                        <Link href={`/posts/${post.slug}`}>
-                          Oku
-                          <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                        </Link>
-                      </Button>
-                    </div>
+                        <Heart
+                          className={`h-5 w-5 ${favs.has(post.id) ? "text-red-500 fill-current" : ""}`}
+                        />
+                      </motion.div>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-white hover:bg-white/10 rounded-full"
+                      onClick={() => handleShare(post.title, post.slug)}
+                    >
+                      <Share2 size={16} />
+                    </Button>
                   </div>
-                </motion.article>
-              ))
-            )}
-            </AnimatePresence>
-          </motion.div>
-        </main>
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </motion.div>
+      </main>
 
-        <footer className="container mx-auto mt-12 py-8 px-4 border-t">
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/" className="hover:text-primary transition-colors">Anasayfa</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
-              <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
-            </div>
-          </div>
-        </footer>
-      </div>
-    </>
+      {/* Final Şelale */}
+      <footer className="relative overflow-hidden py-20">
+        <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/20 via-transparent to-transparent blur-3xl" />
+        <div className="container mx-auto text-center text-white/60">
+          <Sparkles className="mx-auto mb-4 h-12 w-12 text-yellow-300" />
+          <p className="text-sm">© 2025 Nurunyolu – Tasarım aşkıyla kodlandı.</p>
+        </div>
+      </footer>
+    </div>
   );
 }

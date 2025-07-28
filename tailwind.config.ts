@@ -20,7 +20,7 @@ export default {
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],
         serif: ['var(--font-serif)', 'serif'],
-        kufi: ['var(--font-kufi)', 'sans-serif'],
+        kufi: ['"Noto Kufi Arabic"', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
