@@ -1,7 +1,16 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Heart, Share2, Volume2, VolumeX, Play, Clock, ArrowUpRight } from "lucide-react";
+import {
+  Heart,
+  Share2,
+  Volume2,
+  VolumeX,
+  Play,
+  Clock,
+  ArrowUpRight,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
