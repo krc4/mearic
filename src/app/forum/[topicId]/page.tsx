@@ -75,7 +75,7 @@ export default function ForumTopicPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
-  const [commentCount, setCommentCount] = useState(0); // Assuming this comes from CommentSection, we'll mock it for now
+  const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -86,7 +86,7 @@ export default function ForumTopicPage() {
         if (fetchedTopic) {
             setTopic(fetchedTopic);
             setLikeCount(fetchedTopic.stats.likes);
-            setCommentCount(fetchedTopic.stats.replies); // Mock comment count
+            setCommentCount(fetchedTopic.stats.replies);
 
              if (typeof window !== 'undefined') {
                 // Handle view count with sessionStorage
@@ -142,13 +142,13 @@ export default function ForumTopicPage() {
             throw new Error("Share API not supported");
         }
     } catch (error: any) {
-         // This block will be entered if the user cancels the share dialog,
-         // or if the API is not supported. In either case, copy to clipboard.
-         navigator.clipboard.writeText(url);
-         toast({
-            title: "Link panoya kopyalandı!",
-            description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
-         });
+         if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+             navigator.clipboard.writeText(url);
+             toast({
+                title: "Link panoya kopyalandı!",
+                description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
+             });
+         }
     }
   };
 
