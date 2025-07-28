@@ -6,15 +6,11 @@ import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   MessageSquare,
   Heart,
   Eye,
-  User,
   Clock,
   Share2,
-  Send,
-  MoreVertical,
   ChevronRight,
   Home,
   Tag
@@ -23,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import styles from "@/app/page.module.css";
 import { CommentSection } from "@/components/comment-section";
@@ -66,12 +61,7 @@ export default function ForumTopicPage() {
   const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Interaction states, initialized to 0
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
-  const [viewCount, setViewCount] = useState(0);
-
 
   useEffect(() => {
     setLoading(true);
@@ -80,52 +70,12 @@ export default function ForumTopicPage() {
         const fetchedTopic = staticTopicData; // In a real app, this would be a fetch
         if (fetchedTopic && fetchedTopic.id === topicId) {
             setTopic(fetchedTopic);
-            const topicStorageId = `forum-topic-${fetchedTopic.id}`;
-
-            // --- View Logic (from posts page) ---
-            if (typeof window !== 'undefined') {
-                const hasViewed = sessionStorage.getItem(topicStorageId);
-                let currentViews = Number(localStorage.getItem(`${topicStorageId}-views`) || '0');
-                if (!hasViewed) {
-                    currentViews++;
-                    localStorage.setItem(`${topicStorageId}-views`, String(currentViews));
-                    sessionStorage.setItem(topicStorageId, 'true');
-                }
-                setViewCount(currentViews);
-            }
-
-            // --- Like Logic (from posts page) ---
-            if (typeof window !== 'undefined') {
-                 const currentLikes = Number(localStorage.getItem(`${topicStorageId}-likes`) || '0');
-                 setLikeCount(currentLikes);
-                 const isLiked = localStorage.getItem(`${topicStorageId}-isLiked`) === 'true';
-                 setLiked(isLiked);
-            }
         } else {
            notFound();
         }
         setLoading(false);
     }, 500);
   }, [topicId]);
-
-  const handleLikeToggle = async () => {
-    if (!topic) return;
-    const newLikedState = !liked;
-    const topicStorageId = `forum-topic-${topic.id}`;
-    
-    setLiked(newLikedState);
-    const newLikeCount = likeCount + (newLikedState ? 1 : -1);
-    setLikeCount(newLikeCount);
-
-    if (typeof window !== 'undefined') {
-        localStorage.setItem(`${topicStorageId}-likes`, String(newLikeCount));
-        localStorage.setItem(`${topicStorageId}-isLiked`, String(newLikedState));
-    }
-
-    toast({
-        title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
-    });
-  };
 
 
   const handleShare = async () => {
@@ -289,7 +239,7 @@ export default function ForumTopicPage() {
                             <CardContent className="space-y-4">
                                <div className="flex justify-around text-center">
                                    <div>
-                                       <p className="text-2xl font-bold">{viewCount}</p>
+                                       <p className="text-2xl font-bold">0</p>
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><Eye size={14}/>Görüntülenme</p>
                                    </div>
                                    <div>
@@ -297,13 +247,13 @@ export default function ForumTopicPage() {
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><MessageSquare size={14}/>Yorum</p>
                                    </div>
                                    <div>
-                                       <p className="text-2xl font-bold">{likeCount}</p>
+                                       <p className="text-2xl font-bold">0</p>
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><Heart size={14}/>Beğeni</p>
                                    </div>
                                </div>
                                <div className="flex gap-2 pt-4 border-t">
-                                    <Button className="w-full group" onClick={handleLikeToggle} variant={liked ? "default" : "outline"}>
-                                        <Heart className={`mr-2 h-4 w-4 ${liked ? "fill-current" : ""}`} /> {liked ? "Beğenildi" : "Beğen"}
+                                    <Button className="w-full group" variant={"outline"}>
+                                        <Heart className={`mr-2 h-4 w-4`} /> Beğen
                                     </Button>
                                      <Button className="w-full" variant="outline" onClick={handleShare}>
                                         <Share2 className="mr-2 h-4 w-4" /> Paylaş
@@ -334,5 +284,3 @@ export default function ForumTopicPage() {
     </>
   );
 }
-
-    
