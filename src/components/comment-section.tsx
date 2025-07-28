@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send, MoreVertical, ShieldCheck } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost, isAdmin } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
@@ -100,12 +100,16 @@ export function CommentSection({ postId }: { postId: string }) {
             return;
         }
 
+        // Check if the current user is an admin before submitting
+        const isAdminUser = await isAdmin(user.uid);
+
         const commentData = {
             postId,
             userId: user.uid,
             username: user.displayName || "Anonim",
             photoURL: user.photoURL || "",
             text: newComment,
+            isAdmin: isAdminUser, // Pass the admin status
         };
 
         const newCommentDoc = await addComment(commentData);

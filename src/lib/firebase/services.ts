@@ -153,8 +153,10 @@ export const deletePost = async (postId: string) => {
 
 export const addComment = async (comment: CommentPayload): Promise<Comment | null> => {
   try {
+    const isAdminUser = await isAdmin(comment.userId);
     const commentWithTimestamp = {
       ...comment,
+      isAdmin: isAdminUser, // Ensure isAdmin is part of the saved document
       createdAt: serverTimestamp(),
     };
     const docRef = await addDoc(
@@ -162,11 +164,12 @@ export const addComment = async (comment: CommentPayload): Promise<Comment | nul
       commentWithTimestamp
     );
     
+    // For immediate feedback, we create the full comment object to return
     const newComment: Comment = {
       id: docRef.id,
       ...comment,
+      isAdmin: isAdminUser, // Pass the correct admin status
       createdAt: new Timestamp(Date.now() / 1000, 0), // Estimate timestamp for immediate feedback
-      isAdmin: await isAdmin(comment.userId) // Check if the new commenter is an admin
     };
 
     return newComment;
@@ -179,20 +182,15 @@ export const addComment = async (comment: CommentPayload): Promise<Comment | nul
 
 export const getCommentsForPost = async (postId: string): Promise<Comment[]> => {
   try {
-    const adminsRef = collection(db, "admins");
-    const adminsSnapshot = await getDocs(adminsRef);
-    const adminUids = new Set(adminsSnapshot.docs.map(doc => doc.id));
-    
+    // This function is now simplified, as isAdmin is stored with the comment.
     const commentsRef = collection(db, 'posts', postId, 'comments');
     const q = query(commentsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map((doc) => {
-        const data = doc.data();
         return {
           id: doc.id,
-          ...data,
-          isAdmin: adminUids.has(data.userId),
+          ...doc.data(),
         } as Comment
     });
   } catch (error) {
