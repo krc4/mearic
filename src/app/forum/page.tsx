@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { getTopLikedPosts } from "@/lib/firebase/services";
+import type { Post } from "@/lib/posts";
 
 
 type Topic = {
@@ -52,48 +54,49 @@ const mockTopics: Topic[] = [
   },
 ];
 
-const featuredTopics = [
-  {
-    id: "f1",
-    title: "Ramazan Ayı Özel: Soru-Cevap Etkinliği",
-    image: "https://placehold.co/600x400.png",
-    category: "Duyurular",
-    link: "#",
-    hint: "ramadan lantern"
-  },
-  {
-    id: "f2",
-    title: "Yeni Başlayanlar İçin Hadis Okuma Rehberi",
-    image: "https://placehold.co/600x400.png",
-    category: "Rehberler",
-    link: "#",
-    hint: "islamic book"
-  },
+const staticFeaturedTopics = [
   {
     id: "f3",
-    title: "Tefsir Dersleri: Fatiha Suresi Analizi",
-    image: "https://placehold.co/600x400.png",
-    category: "Dersler",
-    link: "#",
-    hint: "quran calligraphy"
-  },
-  {
-    id: "f4",
     title: "Forum Kuralları ve Kullanım Kılavuzu",
     image: "https://placehold.co/600x400.png",
     category: "Bilgilendirme",
     link: "#",
     hint: "community rules"
+  },
+  {
+    id: "f4",
+    title: "Forum Hakkında Sıkça Sorulan Sorular",
+    image: "https://placehold.co/600x400.png",
+    category: "Yardım",
+    link: "#",
+    hint: "questions help"
   }
 ];
 
 
 export default function NurunyoluForum() {
   const [topics, setTopics] = useState(mockTopics);
+  const [featuredTopics, setFeaturedTopics] = useState<any[]>([]);
   const [filterTag, setFilterTag] = useState("All");
   const [search, setSearch] = useState("");
   const [newPostOpen, setNewPostOpen] = useState(false);
   const allTags = ["All", ...new Set(topics.flatMap((t) => t.tags))];
+
+  useEffect(() => {
+    const fetchTopPosts = async () => {
+      const topPosts = await getTopLikedPosts(2);
+      const dynamicTopics = topPosts.map(post => ({
+        id: post.id,
+        title: post.title,
+        image: post.image,
+        category: post.category,
+        link: `/posts/${post.slug}`,
+        hint: 'popular post'
+      }));
+      setFeaturedTopics([...dynamicTopics, ...staticFeaturedTopics]);
+    }
+    fetchTopPosts();
+  }, [])
 
   const filtered = topics.filter(
     (t) =>
@@ -132,7 +135,7 @@ export default function NurunyoluForum() {
 
       {/* Advertisement Section */}
       <div className="mb-12">
-        <Link href="#" className="block w-full aspect-video relative overflow-hidden rounded-lg group">
+        <Link href="#" className="block w-full aspect-[16/9] relative overflow-hidden rounded-lg group">
           <Image 
             src="https://placehold.co/1280x720.png"
             alt="Reklam"

@@ -1,6 +1,6 @@
 
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer, limit } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
 import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
@@ -94,6 +94,26 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
         return [];
     }
 };
+
+export const getTopLikedPosts = async (postLimit: number): Promise<Post[]> => {
+    try {
+        const q = query(collection(db, "posts"), orderBy("likes", "desc"), limit(postLimit));
+        const querySnapshot = await getDocs(q);
+        const posts: Post[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            posts.push({
+                id: doc.id,
+                ...data
+            } as Post);
+        });
+        return posts;
+    } catch (e) {
+        console.error("Error getting top liked posts: ", e);
+        return [];
+    }
+}
+
 
 export const getPostBySlug = async (slug: string): Promise<Post | null> => {
     try {
@@ -333,5 +353,3 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
         return false;
     }
 }
-
-    
