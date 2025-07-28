@@ -178,7 +178,7 @@ export default function PostPage() {
                         </CardContent>
                      </Card>
 
-                     <CommentSection />
+                     <CommentSection postId={post.id} />
                 </motion.main>
 
                  {/* Sidebar */}

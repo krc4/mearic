@@ -1,116 +1,176 @@
 "use client"
 
+import { useState, useEffect, FormEvent } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send, MoreVertical } from "lucide-react"
+import { onAuthStateChanged, User } from "firebase/auth"
+import { auth } from "@/lib/firebase/config"
+import { addComment, getCommentsForPost } from "@/lib/firebase/services"
+import type { Comment } from "@/lib/comments"
+import { Skeleton } from "./ui/skeleton"
+import Link from "next/link"
 
-const mockComments = [
-  {
-    id: 1,
-    author: "Ahmet Yılmaz",
-    avatar: "https://placehold.co/40x40/EFEFEF/333333.png?text=AY",
-    date: "2 gün önce",
-    text: "Subhanallah, ne büyük bir mucize! Kuran'ın her ayeti üzerinde tefekkür ettikçe insanın imanı daha da artıyor. Bu değerli paylaşım için teşekkür ederim.",
-  },
-  {
-    id: 2,
-    author: "Fatma Kaya",
-    avatar: "https://placehold.co/40x40/D8B4FE/FFFFFF.png?text=FK",
-    date: "1 gün önce",
-    text: "Gerçekten de bilim ve Kuran arasındaki bu uyumu görmek hayranlık verici. Evrenin genişlediği bilgisinin 1400 yıl önce bildirilmesi, aklı olan için büyük bir delil.",
-  },
-  {
-    id: 3,
-    author: "Mustafa Demir",
-    avatar: "https://placehold.co/40x40/A7F3D0/333333.png?text=MD",
-    date: "5 saat önce",
-    text: "Paylaşım çok güzel ve bilgilendirici olmuş. Bu tür konuların daha fazla insana ulaşması gerekiyor. Emeğinize sağlık.",
-  },
-];
+const CommentItem = ({ comment }: { comment: Comment }) => (
+    <Card className="bg-card/50">
+        <CardContent className="p-5 flex items-start gap-4">
+            <Avatar>
+                <AvatarImage src={comment.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${comment.userId}`} alt={comment.username} />
+                <AvatarFallback>{comment.username.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="font-semibold">{comment.username}</p>
+                        <p className="text-xs text-muted-foreground">
+                            {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString() : 'Şimdi'}
+                        </p>
+                    </div>
+                    <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                </div>
+                <p className="mt-2 text-foreground/90">{comment.text}</p>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const CommentSkeleton = () => (
+    <div className="p-5 flex items-start gap-4">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+        </div>
+    </div>
+);
 
 
-export function CommentSection() {
-    const { toast } = useToast()
+export function CommentSection({ postId }: { postId: string }) {
+    const { toast } = useToast();
+    const [user, setUser] = useState<User | null>(null);
+    const [authLoading, setAuthLoading] = useState(true);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [commentsLoading, setCommentsLoading] = useState(true);
+    const [newComment, setNewComment] = useState("");
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setAuthLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (!postId) return;
+        const fetchComments = async () => {
+            setCommentsLoading(true);
+            const fetchedComments = await getCommentsForPost(postId);
+            setComments(fetchedComments);
+            setCommentsLoading(false);
+        }
+        fetchComments();
+    }, [postId]);
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const comment = formData.get('comment');
-        if (comment) {
-            toast({
-                title: "Yorumunuz için teşekkürler!",
-                description: "Yorumunuz başarıyla gönderildi ve incelendikten sonra yayınlanacaktır.",
-            })
-            e.currentTarget.reset();
-        } else {
+        if (!user || !newComment.trim()) {
             toast({
                 title: "Hata",
-                description: "Lütfen yorumunuzu girin.",
+                description: !user ? "Yorum yapmak için giriş yapmalısınız." : "Lütfen yorumunuzu girin.",
                 variant: "destructive"
-            })
+            });
+            return;
+        }
+
+        const commentData = {
+            postId,
+            userId: user.uid,
+            username: user.displayName || "Anonim",
+            photoURL: user.photoURL || "",
+            text: newComment,
+        };
+
+        const newCommentDoc = await addComment(commentData);
+        if (newCommentDoc) {
+            setComments(prev => [newCommentDoc, ...prev]);
+            setNewComment("");
+            toast({
+                title: "Yorumunuz için teşekkürler!",
+                description: "Yorumunuz başarıyla gönderildi.",
+            });
+        } else {
+             toast({
+                title: "Hata",
+                description: "Yorumunuz gönderilirken bir sorun oluştu.",
+                variant: "destructive"
+            });
         }
     }
 
-  return (
-    <section className="w-full py-12">
-      <div className="space-y-8">
-        <div className="flex items-center gap-3">
-            <MessageCircle className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl font-bold tracking-tight">
-                Yorumlar ({mockComments.length})
-            </h2>
-        </div>
+    return (
+        <section className="w-full py-12">
+            <div className="space-y-8">
+                <div className="flex items-center gap-3">
+                    <MessageCircle className="w-8 h-8 text-primary" />
+                    <h2 className="text-3xl font-bold tracking-tight">
+                        Yorumlar ({comments.length})
+                    </h2>
+                </div>
 
-        <Card className="shadow-lg border-border/30">
-          <form onSubmit={handleSubmit}>
-            <CardHeader className="flex flex-row items-start gap-4 p-4">
-              <Avatar>
-                 <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                <AvatarFallback>Y</AvatarFallback>
-              </Avatar>
-              <div className="w-full space-y-2">
-                <Textarea
-                    name="comment"
-                    placeholder="Düşüncelerinizi paylaşın..."
-                    className="min-h-[100px] resize-y"
-                />
-              </div>
-            </CardHeader>
-            <CardFooter className="p-4 pt-0 flex justify-end">
-              <Button type="submit">
-                <Send className="mr-2 h-4 w-4" />
-                Yorum Yap
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-
-        <div className="space-y-6">
-          {mockComments.map((comment) => (
-             <Card key={comment.id} className="bg-card/50">
-                <CardContent className="p-5 flex items-start gap-4">
-                        <Avatar>
-                        <AvatarImage src={comment.avatar} alt={comment.author} />
-                        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-semibold">{comment.author}</p>
-                                <p className="text-xs text-muted-foreground">{comment.date}</p>
+                <Card className="shadow-lg border-border/30">
+                    <form onSubmit={handleSubmit}>
+                        <CardHeader className="flex flex-row items-start gap-4 p-4">
+                            <Avatar>
+                                <AvatarImage src={user?.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user?.uid || 'default'}`} />
+                                <AvatarFallback>{user?.displayName?.charAt(0) || 'Y'}</AvatarFallback>
+                            </Avatar>
+                            <div className="w-full space-y-2">
+                                <Textarea
+                                    name="comment"
+                                    placeholder={user ? "Düşüncelerinizi paylaşın..." : "Yorum yapmak için giriş yapmalısınız."}
+                                    className="min-h-[100px] resize-y"
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    disabled={!user || authLoading}
+                                />
                             </div>
-                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                        </div>
-                        <p className="mt-2 text-foreground/90">{comment.text}</p>
-                    </div>
-                </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
+                        </CardHeader>
+                        <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                            {!user && !authLoading ? (
+                                <p className="text-sm text-muted-foreground">
+                                    <Link href="/giris" className="text-primary hover:underline">Giriş yap</Link> veya <Link href="/kayit" className="text-primary hover:underline">kayıt ol</Link>.
+                                </p>
+                            ) : <div/>}
+                            <Button type="submit" disabled={!user || authLoading || !newComment.trim()}>
+                                <Send className="mr-2 h-4 w-4" />
+                                Yorum Yap
+                            </Button>
+                        </CardFooter>
+                    </form>
+                </Card>
+
+                <div className="space-y-6">
+                    {commentsLoading ? (
+                        <>
+                            <CommentSkeleton />
+                            <CommentSkeleton />
+                        </>
+                    ) : comments.length > 0 ? (
+                        comments.map((comment) => (
+                           <CommentItem key={comment.id} comment={comment} />
+                        ))
+                    ) : (
+                        <p className="text-center text-muted-foreground py-8">
+                            Henüz yorum yapılmamış. İlk yorumu siz yapın!
+                        </p>
+                    )}
+                </div>
+            </div>
+        </section>
+    )
 }

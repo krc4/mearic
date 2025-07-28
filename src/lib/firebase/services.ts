@@ -1,7 +1,8 @@
 
 import { db } from './config';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
+import type { Comment, CommentPayload } from '@/lib/comments';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt'> & {
     content: string;
@@ -104,3 +105,45 @@ export const deletePost = async (postId: string) => {
         return false;
     }
 }
+
+
+// Comments services
+
+export const addComment = async (comment: CommentPayload): Promise<Comment | null> => {
+  try {
+    const commentWithTimestamp = {
+      ...comment,
+      createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(
+      collection(db, 'posts', comment.postId, 'comments'),
+      commentWithTimestamp
+    );
+    return {
+      id: docRef.id,
+      ...comment,
+      createdAt: new Timestamp(Date.now() / 1000, 0), // Estimate timestamp for immediate feedback
+    };
+  } catch (error) {
+    console.error('Error adding comment: ', error);
+    return null;
+  }
+};
+
+export const getCommentsForPost = async (postId: string): Promise<Comment[]> => {
+  try {
+    const commentsRef = collection(db, 'posts', postId, 'comments');
+    const q = query(commentsRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as Comment)
+    );
+  } catch (error) {
+    console.error('Error getting comments: ', error);
+    return [];
+  }
+};
