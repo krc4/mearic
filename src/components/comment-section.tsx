@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { MessageCircle, Send } from "lucide-react"
+import { MessageCircle, Send, MoreVertical } from "lucide-react"
 
 const mockComments = [
   {
@@ -68,6 +68,7 @@ export function CommentSection() {
           <form onSubmit={handleSubmit}>
             <CardHeader className="flex flex-row items-start gap-4 p-4">
               <Avatar>
+                 <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
                 <AvatarFallback>Y</AvatarFallback>
               </Avatar>
               <div className="w-full space-y-2">
@@ -89,22 +90,24 @@ export function CommentSection() {
 
         <div className="space-y-6">
           {mockComments.map((comment) => (
-            <div key={comment.id} className="flex items-start gap-4">
-              <Avatar>
-                <AvatarImage src={comment.avatar} alt={comment.author} />
-                <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold">{comment.author}</p>
-                  <span className="text-xs text-muted-foreground">•</span>
-                  <p className="text-xs text-muted-foreground">{comment.date}</p>
-                </div>
-                <p className="text-sm text-foreground/90">
-                  {comment.text}
-                </p>
-              </div>
-            </div>
+             <Card key={comment.id} className="bg-card/50">
+                <CardContent className="p-5 flex items-start gap-4">
+                        <Avatar>
+                        <AvatarImage src={comment.avatar} alt={comment.author} />
+                        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-semibold">{comment.author}</p>
+                                <p className="text-xs text-muted-foreground">{comment.date}</p>
+                            </div>
+                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                        </div>
+                        <p className="mt-2 text-foreground/90">{comment.text}</p>
+                    </div>
+                </CardContent>
+            </Card>
           ))}
         </div>
       </div>
