@@ -11,6 +11,7 @@ import {
   Eye,
   ChevronRight,
   Sparkles,
+  Search,
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
 import { getPostsByCategory } from "@/lib/firebase/services";
@@ -21,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/header";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 
 export default function HadisMucizeleriPage() {
   const { toast } = useToast();
@@ -28,6 +30,7 @@ export default function HadisMucizeleriPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [favs, setFavs] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -46,7 +49,13 @@ export default function HadisMucizeleriPage() {
 
   const sortedPosts = useMemo(() => {
     if (loading) return [];
-    return [...posts].sort((a, b) => {
+    
+    const filtered = posts.filter(post => 
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return [...filtered].sort((a, b) => {
       if (filter === "latest") {
         const dateA = a.createdAt?.toDate() || 0;
         const dateB = b.createdAt?.toDate() || 0;
@@ -54,7 +63,7 @@ export default function HadisMucizeleriPage() {
       }
       return (b.views || 0) - (a.views || 0);
     });
-  }, [filter, posts, loading]);
+  }, [filter, posts, loading, searchTerm]);
   
   const toggleFav = (id: string) => {
     const isAlreadyFaved = favs.has(id);
@@ -125,21 +134,31 @@ export default function HadisMucizeleriPage() {
         </section>
 
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground self-start">
               <Link href="/" className="hover:text-primary">Anasayfa</Link>
               <ChevronRight className="h-4 w-4" />
               <span className="text-foreground">Hadislerdeki Mucizeler</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full md:w-auto">
+               <div className="relative w-full md:w-auto flex-grow">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Mucizelerde ara..."
+                        className="pl-9 w-full"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
               <Button
                 variant={filter === "trending" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setFilter("trending")}
               >
                 <Eye className="mr-1.5 h-4 w-4" />
-                Popüler
+                <span className="hidden sm:inline">Popüler</span>
               </Button>
               <Button
                 variant={filter === "latest" ? "default" : "ghost"}
@@ -147,7 +166,7 @@ export default function HadisMucizeleriPage() {
                 onClick={() => setFilter("latest")}
               >
                 <Filter className="mr-1.5 h-4 w-4" />
-                Yeni
+                <span className="hidden sm:inline">Yeni</span>
               </Button>
             </div>
           </div>
@@ -267,3 +286,5 @@ export default function HadisMucizeleriPage() {
     </>
   );
 }
+
+    
