@@ -1,6 +1,6 @@
 
 "use client"
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/header";
@@ -15,20 +15,18 @@ import { getPostBySlug } from "@/lib/firebase/services";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type PostPageProps = {
-  params: {
-    slug: string;
-  };
-};
+export default function PostPage() {
+  const params = useParams();
+  const slug = params.slug as string;
 
-export default function PostPage({ params }: PostPageProps) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!slug) return;
     const fetchPost = async () => {
       setLoading(true);
-      const fetchedPost = await getPostBySlug(params.slug);
+      const fetchedPost = await getPostBySlug(slug);
       if (fetchedPost) {
         setPost(fetchedPost);
       } else {
@@ -37,7 +35,7 @@ export default function PostPage({ params }: PostPageProps) {
       setLoading(false);
     };
     fetchPost();
-  }, [params.slug]);
+  }, [slug]);
 
   if (loading) {
     return (
