@@ -15,15 +15,10 @@ const firebaseConfig = {
 };
 
 
-// Initialize Firebase for client components
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-
-if (typeof window !== 'undefined') {
-  app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
+// Initialize Firebase
+// This pattern prevents re-initializing the app on every render.
+const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
 
 export { db, auth };
