@@ -26,9 +26,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
-import { auth } from "@/lib/firebase/config";
+import { auth } from "@/lib/firebase/config"; // Import auth from the centralized config
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-// import ReCAPTCHA from "react-google-recaptcha";
 import { useState } from "react";
 
 const registerSchema = z.object({
@@ -46,7 +45,6 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
   const { toast } = useToast();
   const router = useRouter();
-  // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -59,15 +57,6 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    // if (!recaptchaToken) {
-    //     toast({
-    //         title: "Doğrulama Hatası",
-    //         description: "Lütfen reCAPTCHA doğrulamasını tamamlayın.",
-    //         variant: "destructive"
-    //     })
-    //     return;
-    // }
-
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
@@ -170,12 +159,6 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
-                   {/* <div className="flex justify-center">
-                     <ReCAPTCHA
-                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-                        onChange={(token) => setRecaptchaToken(token)}
-                    />
-                   </div> */}
                   <Button type="submit" className="w-full !mt-6 group" size="lg">
                     Kayıt Ol
                     <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />

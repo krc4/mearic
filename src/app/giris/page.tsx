@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, ArrowRight } from "lucide-react";
-import { auth } from "@/lib/firebase/config";
+import { auth } from "@/lib/firebase/config"; // Import auth from the centralized config
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const loginSchema = z.object({
