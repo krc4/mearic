@@ -70,9 +70,10 @@ export default function RegisterPage() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      
-      if (auth.currentUser) {
-         await updateProfile(auth.currentUser, {
+      const user = userCredential.user;
+
+      if (user) {
+         await updateProfile(user, {
             displayName: data.username
          });
       }
@@ -83,6 +84,7 @@ export default function RegisterPage() {
       });
       router.push('/');
     } catch (error: any) {
+        console.error("Firebase registration error:", error);
         let description = "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.";
         if (error.code === 'auth/email-already-in-use') {
             description = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta ile deneyin veya giriş yapın."
