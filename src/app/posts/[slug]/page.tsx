@@ -1,4 +1,3 @@
-
 "use client"
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -68,15 +67,17 @@ export default function PostPage({ params }: PostPageProps) {
         <Header />
         <main className="flex-grow">
           {/* Hero Section */}
-          <section className="relative h-[50vh] flex items-end justify-center text-white overflow-hidden">
-            <Image
-              src={post.image}
-              alt={post.title}
-              fill
-              className="object-cover"
-              data-ai-hint="post image"
-              priority
-            />
+          <section className="relative h-[50vh] flex items-end justify-center text-white overflow-hidden bg-muted">
+             {post.image && (
+                <Image
+                src={post.image}
+                alt={post.title}
+                fill
+                className="object-cover"
+                data-ai-hint="post image"
+                priority
+                />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
             <div className="relative z-10 container mx-auto px-4 pb-12 text-center">
               <Badge className="mb-4">{post.category}</Badge>
