@@ -33,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 // Mock Data - In a real app, this would be fetched based on topicId
+// The stats are now handled dynamically below.
 const topicData = {
   id: "1",
   title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
@@ -87,24 +88,24 @@ export default function ForumTopicPage() {
             setTopic(fetchedTopic);
             
              if (typeof window !== 'undefined') {
+                const topicStorageId = `forum-${fetchedTopic.id}`;
+                
                 // Handle view count with sessionStorage
-                const viewedKey = `viewed-forum-${fetchedTopic.id}`;
+                const viewedKey = `viewed-${topicStorageId}`;
                 const hasViewed = sessionStorage.getItem(viewedKey);
-                // Initialize from localStorage or 0 if not present
-                let currentViews = Number(localStorage.getItem(`views-forum-${fetchedTopic.id}`)) || 0;
+                let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`)) || 0;
 
                 if (!hasViewed) {
                     currentViews += 1;
-                    localStorage.setItem(`views-forum-${fetchedTopic.id}`, String(currentViews));
+                    localStorage.setItem(`views-${topicStorageId}`, String(currentViews));
                     sessionStorage.setItem(viewedKey, 'true');
                 }
                 setViewCount(currentViews);
 
                 // Handle like state with localStorage
-                const isLiked = localStorage.getItem(`liked-forum-${fetchedTopic.id}`) === 'true';
+                const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
                 setLiked(isLiked);
-                // Initialize like count from localStorage or 0
-                setLikeCount(Number(localStorage.getItem(`likes-forum-${fetchedTopic.id}`)) || 0);
+                setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`)) || 0);
 
              } else {
                  setViewCount(fetchedTopic.stats.views);
@@ -118,15 +119,16 @@ export default function ForumTopicPage() {
 
   const handleLikeToggle = () => {
     if (!topic) return;
+    const topicStorageId = `forum-${topic.id}`;
     const newLikedState = !liked;
-    const newLikeCount = likeCount + (newLikedState ? 1 : -1);
     
     setLiked(newLikedState);
-    setLikeCount(newLikeCount);
+    setLikeCount(current => current + (newLikedState ? 1 : -1));
 
     if (typeof window !== 'undefined') {
-        localStorage.setItem(`liked-forum-${topic.id}`, String(newLikedState));
-        localStorage.setItem(`likes-forum-${topic.id}`, String(newLikeCount));
+        localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
+        const newLikeCount = likeCount + (newLikedState ? 1 : -1);
+        localStorage.setItem(`likes-${topicStorageId}`, String(newLikeCount));
     }
     toast({
         title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
@@ -149,6 +151,13 @@ export default function ForumTopicPage() {
         }
     } catch (error: any) {
          if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+             navigator.clipboard.writeText(url);
+             toast({
+                title: "Link panoya kopyalandı!",
+                description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
+             });
+         } else {
+            // If user cancels share, do nothing or maybe copy to clipboard as a fallback
              navigator.clipboard.writeText(url);
              toast({
                 title: "Link panoya kopyalandı!",
@@ -343,5 +352,3 @@ export default function ForumTopicPage() {
     </>
   );
 }
-
-    
