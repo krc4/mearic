@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, MessageSquare, Users, Star, Clock, Filter, Heart, Eye } from "lucide-react";
+import { Search, Plus, MessageSquare, Users, Star, Clock, Filter, Heart, Eye, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -144,8 +144,9 @@ export default function NurunyoluForum() {
                 </div>
               </div>
               <Link href={`/forum/${topic.id}`} className="w-full sm:w-auto">
-                <Button size="sm" variant="ghost" className="text-foreground hover:text-primary w-full sm:w-auto">
+                 <Button size="sm" variant="ghost" className="w-full sm:w-auto text-muted-foreground group-hover:text-primary transition-colors">
                   Gör
+                  <ArrowUpRight className="ml-1.5 h-4 w-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"/>
                 </Button>
               </Link>
             </motion.div>
