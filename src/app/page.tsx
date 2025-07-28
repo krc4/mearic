@@ -75,7 +75,8 @@ export default function Home() {
           >
             <Button
               size="lg"
-              className="rounded-full bg-gradient-to-r from-emerald-400 to-sky-500 text-black font-bold"
+              variant="outline"
+              className="rounded-full bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20 hover:text-white"
               onClick={() => document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth" })}
             >
               <Play className="mr-2 h-5 w-5" />
@@ -545,3 +546,5 @@ export default function Home() {
     </>
   );
 }
+
+    
