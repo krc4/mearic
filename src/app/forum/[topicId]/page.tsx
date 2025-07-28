@@ -45,6 +45,11 @@ const staticTopicData = {
   category: 'Kozmoloji',
   createdAt: "2 gün önce",
   tags: ["Kozmoloji", "Zariyat", "Mucize"],
+  stats: {
+    replies: 0,
+    views: 0,
+    likes: 0,
+  },
   content: `
     <p class="text-xl leading-relaxed text-foreground/90">Modern bilimin en çarpıcı keşiflerinden biri, evrenin sürekli olarak genişlediği gerçeğidir. Bu keşif, 20. yüzyılın başlarında Edwin Hubble'ın gözlemleriyle bilim dünyasına kazandırılmıştır. Ancak, bu kozmolojik gerçek, Kuran-ı Kerim'de 1400 yıl önce Zariyat Suresi'nde mucizevi bir şekilde haber verilmiştir.</p>
     <p>Hubble, teleskopuyla uzak galaksileri gözlemlerken, bu galaksilerin bizden uzaklaştığını ve bu uzaklaşma hızının mesafeyle doğru orantılı olduğunu keşfetti. Bu, evrenin statik bir yapıda olmadığını, aksine bir balon gibi sürekli şiştiğini gösteriyordu. Bu buluş, "Büyük Patlama" (Big Bang) teorisinin de en güçlü delillerinden biri haline geldi.</p>
@@ -65,59 +70,20 @@ export default function ForumTopicPage() {
   
   const [topic, setTopic] = useState<typeof staticTopicData | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [viewCount, setViewCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
     setLoading(true);
+    // Simulate fetching data
     setTimeout(() => {
         const fetchedTopic = staticTopicData;
         if (fetchedTopic) {
             setTopic(fetchedTopic);
-            
-            const topicStorageId = `forum-${fetchedTopic.id}`;
-            
-            const viewedKey = `viewed-${topicStorageId}`;
-            let currentViews = Number(localStorage.getItem(`views-${topicStorageId}`)) || 0;
-            const hasViewedInSession = sessionStorage.getItem(viewedKey);
-
-            if (!hasViewedInSession) {
-                currentViews += 1;
-                localStorage.setItem(`views-${topicStorageId}`, String(currentViews));
-                sessionStorage.setItem(viewedKey, 'true');
-            }
-            setViewCount(currentViews);
-
-            const isLiked = localStorage.getItem(`liked-${topicStorageId}`) === 'true';
-            setLiked(isLiked);
-            setLikeCount(Number(localStorage.getItem(`likes-${topicStorageId}`)) || 0);
-
-            setCommentCount(0); 
+            setCommentCount(0); // Initial comment count
         }
         setLoading(false);
     }, 500);
   }, [topicId]);
-
-  const handleLikeToggle = () => {
-    if (!topic) return;
-    const topicStorageId = `forum-${topic.id}`;
-    const newLikedState = !liked;
-    
-    setLiked(newLikedState);
-    const newLikeCount = likeCount + (newLikedState ? 1 : -1);
-    const finalLikeCount = newLikeCount < 0 ? 0 : newLikeCount;
-    setLikeCount(finalLikeCount);
-
-    localStorage.setItem(`liked-${topicStorageId}`, String(newLikedState));
-    localStorage.setItem(`likes-${topicStorageId}`, String(finalLikeCount));
-    
-    toast({
-        title: newLikedState ? "Konuyu beğendiniz!" : "Beğeni geri çekildi",
-    });
-  };
 
   const handleShare = async () => {
     if (!topic) return;
@@ -134,19 +100,11 @@ export default function ForumTopicPage() {
             throw new Error("Share API not supported");
         }
     } catch (error: any) {
-         if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
-             navigator.clipboard.writeText(url);
-             toast({
-                title: "Link panoya kopyalandı!",
-                description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
-             });
-         } else {
-             navigator.clipboard.writeText(url);
-             toast({
-                title: "Link panoya kopyalandı!",
-                description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
-             });
-         }
+         navigator.clipboard.writeText(url);
+         toast({
+            title: "Link panoya kopyalandı!",
+            description: "Bu içeriği arkadaşlarınla kolayca paylaşabilirsin.",
+         });
     }
   };
 
@@ -288,7 +246,7 @@ export default function ForumTopicPage() {
                             <CardContent className="space-y-4">
                                <div className="flex justify-around text-center">
                                    <div>
-                                       <p className="text-2xl font-bold">{viewCount}</p>
+                                       <p className="text-2xl font-bold">{topic.stats.views}</p>
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><Eye size={14}/>Görüntülenme</p>
                                    </div>
                                    <div>
@@ -296,13 +254,13 @@ export default function ForumTopicPage() {
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><MessageSquare size={14}/>Yorum</p>
                                    </div>
                                    <div>
-                                       <p className="text-2xl font-bold">{likeCount}</p>
+                                       <p className="text-2xl font-bold">{topic.stats.likes}</p>
                                        <p className="text-sm text-muted-foreground flex items-center gap-1"><Heart size={14}/>Beğeni</p>
                                    </div>
                                </div>
                                <div className="flex gap-2 pt-4 border-t">
-                                    <Button className="w-full group" onClick={handleLikeToggle} variant={liked ? "default" : "outline"}>
-                                        <Heart className={`mr-2 h-4 w-4 ${liked ? "fill-current" : ""}`} /> {liked ? "Beğenildi" : "Beğen"}
+                                    <Button className="w-full group" variant={"outline"}>
+                                        <Heart className={`mr-2 h-4 w-4`} /> Beğen
                                     </Button>
                                      <Button className="w-full" variant="outline" onClick={handleShare}>
                                         <Share2 className="mr-2 h-4 w-4" /> Paylaş
@@ -333,3 +291,5 @@ export default function ForumTopicPage() {
     </>
   );
 }
+
+    
