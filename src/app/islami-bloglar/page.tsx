@@ -1,29 +1,21 @@
 "use client";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import {
-  Heart,
-  Share2,
-  Volume2,
-  VolumeX,
-  Play,
-  Clock,
-  ArrowUpRight,
-  Sparkles,
-} from "lucide-react";
+import { Heart, Share2, Volume2, VolumeX, Play, Clock, ArrowUpRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const islamiPosts = [
+const posts = [
   {
     id: 1,
     slug: "evren",
     title: "Evrenin Genişlemesi",
     desc: "Zariyat 47 – 1400 yıl önce bildirildi.",
     img: "https://images.unsplash.com/photo-1566345984367-fa2ba5cedc17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8c3BhY2V8ZW58MHx8fHwxNzUzMzgyMDMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    ayet: "وَالسَّمَاءَ بَنَيْنَاهَا بِأَيْيْدٍ وَإِنَّا لَمُوسِعُونَ",
     category: "Blog",
     readTime: 7,
   },
@@ -33,6 +25,7 @@ const islamiPosts = [
     title: "Dağların Hareketi",
     desc: "Neml 88 – Kayan kıtalar mucizesi.",
     img: "https://images.unsplash.com/photo-1669632236861-bea1095c866e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxM3x8ZGElQzQlOUZ8ZW58MHx8fHwxNzUzMzgxOTczfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    ayet: "وَتَرَى الْجِبَالَ تَحْسَبُهَا جَامِدَةً",
     category: "Blog",
     readTime: 6,
   },
@@ -42,6 +35,7 @@ const islamiPosts = [
     title: "Embriyo Evreleri",
     desc: "Müminun 12-14 – Tıbbi mucize.",
     img: "https://images.unsplash.com/photo-1604363236113-a8a5f3b7381c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbWJyeW98ZW58MHx8fHwxNzUzMzgzNjgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    ayet: "ثُمَّ خَلَقْنَا النُّطْفَةَ عَلَقَةً",
     category: "Blog",
     readTime: 8,
   },
@@ -52,8 +46,6 @@ export default function IslamiBloglarPage() {
   const [muted, setMuted] = useState(true);
   const [favs, setFavs] = useState<Set<number>>(new Set());
   const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   const toggleFav = (id: number) => {
     setFavs(currentFavs => {
@@ -75,11 +67,11 @@ export default function IslamiBloglarPage() {
   };
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="bg-background">
       <Header />
       {/* Cinematic Hero */}
       <section className="relative h-screen w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
+         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
         {/* Floating Kandil */}
         <motion.div
@@ -141,7 +133,7 @@ export default function IslamiBloglarPage() {
           viewport={{ once: true }}
           transition={{ duration: 1 }}
         >
-          {islamiPosts.map((post) => (
+          {posts.map((post) => (
             <motion.article
               key={post.id}
               className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
@@ -159,7 +151,7 @@ export default function IslamiBloglarPage() {
               <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
 
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <Badge className="mb-2 bg-emerald-500/20 text-emerald-200 border-emerald-400">
+                <Badge variant="secondary" className="mb-2">
                   Blog
                 </Badge>
                 <h3 className="text-2xl font-bold text-white leading-tight">
