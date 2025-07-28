@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { HeroBackground } from '@/components/hero-background';
 import styles from './page.module.css';
 import { DidYouKnowSection } from '@/components/did-you-know';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { ScrollAnimationWrapper } from '@/components/ScrollAnimationWrapper';
 
@@ -79,10 +79,21 @@ export default function Home() {
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
           <motion.h1
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 1 }}
-            className="font-black text-6xl md:text-8xl tracking-tighter"
+            className="font-black text-6xl md:text-8xl tracking-tighter text-[#F9FAFB]"
+            animate={{
+              scale: [1, 1.03, 1],
+              textShadow: [
+                "0 0 0px #C0C0C0",
+                "0 0 12px #C0C0C0, 0 0 24px #F9FAFB",
+                "0 0 0px #C0C0C0",
+              ],
+              filter: ["brightness(1)", "brightness(1.3)", "brightness(1)"],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           >
             Nurunyolu
           </motion.h1>
