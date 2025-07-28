@@ -35,12 +35,12 @@ const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, is
     >
       <Card className={cn(
         "border-2 border-transparent bg-gradient-to-br from-card/80 to-card/60 shadow-lg backdrop-blur-sm transition-all duration-300",
-        comment.isAdmin && "border-primary/50 bg-gradient-to-br from-primary/10 to-card/70 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.5)]"
+        comment.isAdmin && "border-amber-400/50 bg-gradient-to-br from-amber-500/10 to-card/70 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.5)] shadow-amber-400/30 animate-pulse"
       )}>
         <CardContent className="p-5 flex items-start gap-4">
           <Avatar className={cn(
             "border-2 border-transparent",
-            comment.isAdmin && "border-primary ring-2 ring-primary/50"
+            comment.isAdmin && "border-amber-400 ring-2 ring-amber-400/50"
           )}>
             <AvatarImage src={comment.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${comment.userId}`} />
             <AvatarFallback>{comment.username.charAt(0)}</AvatarFallback>
@@ -51,13 +51,13 @@ const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, is
               <div className="flex items-center gap-2">
                 <p className="font-bold text-foreground">{comment.username}</p>
                 {comment.isAdmin && (
-                  <Badge variant="default" className="text-xs font-bold">
-                    <ShieldCheck size={12} className="mr-1" /> Admin
+                  <Badge variant="default" className="bg-amber-400 text-amber-950 text-xs font-bold hover:bg-amber-400/90">
+                    <ShieldCheck size={12} className="mr-1" /> Yönetici
                   </Badge>
                 )}
               </div>
               {isAdmin && (
-                <DropdownMenu>
+                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
                       <MoreVertical size={16} />
@@ -81,8 +81,8 @@ const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, is
             </p>
 
             {comment.isAdmin && (
-              <div className="mt-3 flex items-center gap-1 text-xs text-primary">
-                <Star size={12} className="animate-pulse" />
+              <div className="mt-3 flex items-center gap-1 text-xs text-amber-400">
+                <Star size={12} className="fill-amber-400" />
                 <span>Yönetici yorumu</span>
               </div>
             )}
