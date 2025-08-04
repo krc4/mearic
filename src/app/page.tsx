@@ -32,7 +32,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
 
-  const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4', '/anasayfa_video3.mp4'];
+  const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4', '/anasayfa_video3.mp4', '/anasayfa_video4.mp4', '/anasayfa_video5.mp4', '/anasayfa_video6.mp4'];
 
   useEffect(() => {
     // This effect runs only on the client
