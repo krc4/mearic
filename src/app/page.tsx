@@ -43,7 +43,6 @@ export default function Home() {
   const handleVideoEnd = () => {
     if (videoRef.current) {
         if (!hasPlayedOnce) {
-            videoRef.current.muted = true;
             setMuted(true);
             setHasPlayedOnce(true);
         }
@@ -52,11 +51,7 @@ export default function Home() {
   };
 
   const toggleMute = () => {
-    if (videoRef.current) {
-      const currentMuted = !videoRef.current.muted;
-      videoRef.current.muted = currentMuted;
-      setMuted(currentMuted);
-    }
+    setMuted(currentMuted => !currentMuted);
   };
 
   return (
@@ -69,7 +64,6 @@ export default function Home() {
         <section className="relative h-screen w-full overflow-hidden bg-black">
          {isClient && videoSrc && <video
           ref={videoRef}
-          key={videoSrc}
           src={videoSrc}
           autoPlay
           muted={muted}
