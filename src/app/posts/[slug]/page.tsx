@@ -279,7 +279,7 @@ export default function PostPage() {
                                     <AvatarFallback>NY</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-bold text-lg">Nurunyolu Ekibi</p>
+                                    <p className="font-bold text-lg">Mearic Ekibi</p>
                                     <p className="text-sm text-muted-foreground">İçerik Editörleri</p>
                                 </div>
                             </CardContent>
@@ -321,7 +321,7 @@ export default function PostPage() {
         </div>
 
          <footer className="text-center py-16 mt-12 text-sm text-muted-foreground border-t">
-            <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
+            <p>&copy; {new Date().getFullYear()} Mearic. Tüm hakları saklıdır.</p>
         </footer>
       </div>
     </>

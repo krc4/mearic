@@ -83,7 +83,7 @@ export default function Home() {
           <motion.h1
             className="font-black text-6xl md:text-8xl tracking-tighter text-[#F9FAFB]"
           >
-            Nurunyolu
+            Mearic
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -590,7 +590,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/20 via-transparent to-transparent blur-3xl" />
           <div className="container mx-auto text-center text-muted-foreground">
             <Sparkles className="mx-auto mb-4 h-12 w-12 text-yellow-300" />
-            <p className="text-sm">© {new Date().getFullYear()} Nurunyolu</p>
+            <p className="text-sm">© {new Date().getFullYear()} Mearic</p>
           </div>
         </footer>
       </div>

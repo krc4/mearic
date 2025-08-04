@@ -88,7 +88,7 @@ const featuredTopics = [
 ];
 
 
-export default function NurunyoluForum() {
+export default function MearicForum() {
   const [topics, setTopics] = useState(mockTopics);
   const [filterTag, setFilterTag] = useState("All");
   const [search, setSearch] = useState("");
@@ -108,7 +108,7 @@ export default function NurunyoluForum() {
       {/* Header */}
       <header className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-lg bg-card border mb-8">
         <h1 className="text-3xl font-black tracking-tight text-center md:text-left">
-          Nurunyolu <span className="text-primary">Forum</span>
+          Mearic <span className="text-primary">Forum</span>
         </h1>
         <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
           <div className="relative w-full md:w-auto flex-grow">
@@ -256,7 +256,7 @@ export default function NurunyoluForum() {
       {/* Footer */}
       <footer className="relative z-20 text-center py-8 text-muted-foreground">
         <Heart className="mx-auto mb-2 h-6 w-6 text-red-500" />
-        <p className="text-sm">© {new Date().getFullYear()} Nurunyolu</p>
+        <p className="text-sm">© {new Date().getFullYear()} Mearic</p>
       </footer>
     </section>
   );

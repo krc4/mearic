@@ -31,7 +31,6 @@ import { getPostBySlug, incrementPostView, toggleLikePost } from "@/lib/firebase
 
 export default function ForumTopicPage() {
   const params = useParams();
-  // We use a static slug for this example forum page.
   const slug = "kuran-da-evrenin-genislemesi-zariyat-47";
   const { toast } = useToast();
   
@@ -311,7 +310,7 @@ export default function ForumTopicPage() {
         </div>
 
          <footer className="text-center py-16 mt-12 text-sm text-muted-foreground border-t">
-            <p>&copy; {new Date().getFullYear()} Nurunyolu. Tüm hakları saklıdır.</p>
+            <p>&copy; {new Date().getFullYear()} Mearic. Tüm hakları saklıdır.</p>
         </footer>
       </div>
     </>
