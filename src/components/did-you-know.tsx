@@ -1,5 +1,6 @@
+
 "use client";
-import { Copy, RotateCw, ArrowRight } from "lucide-react";
+import { Copy, Lightbulb, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
@@ -82,7 +83,7 @@ export function DidYouKnowSection() {
         <div>
             <header className="flex items-center gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-                <RotateCw className="h-5 w-5" />
+                <Lightbulb className="h-5 w-5" />
             </span>
             <h3 className="text-xl font-semibold text-foreground">
                 Biliyor muydunuz?
