@@ -333,17 +333,18 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
         return false;
     }
 }
-async function seedForumTopic() {
-    const slug = "kuran-da-evrenin-genislemesi-zariyat-47";
+async function seedInitialData() {
+    // Seed Forum Topic
+    const topicSlug = "kuran-da-evrenin-genislemesi-zariyat-47";
     const postsRef = collection(db, "posts");
-    const q = query(postsRef, where("slug", "==", slug));
-    const existing = await getDocs(q);
+    const topicQuery = query(postsRef, where("slug", "==", topicSlug));
+    const topicExists = await getDocs(topicQuery);
 
-    if (existing.empty) {
+    if (topicExists.empty) {
         console.log("Seeding forum topic...");
         const forumTopicData = {
             title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
-            slug: slug,
+            slug: topicSlug,
             image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
             readTime: 8,
             category: 'Forum',
@@ -365,9 +366,25 @@ async function seedForumTopic() {
         };
         await addDoc(postsRef, forumTopicData);
         console.log("Forum topic seeded successfully.");
-    } else {
-        console.log("Forum topic already exists.");
+    }
+
+    // Ensure fatihkoruc36@gmail.com is an admin
+    const adminEmail = "fatihkoruc36@gmail.com";
+    const user = await findUserByEmail(adminEmail);
+    if (user) {
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnap = await getDoc(adminRef);
+        if (!adminSnap.exists()) {
+             console.log(`Making ${adminEmail} an admin...`);
+             await setDoc(adminRef, {
+                email: adminEmail,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                addedAt: serverTimestamp(),
+            });
+            console.log(`${adminEmail} is now an admin.`);
+        }
     }
 }
 
-seedForumTopic();
+seedInitialData();
