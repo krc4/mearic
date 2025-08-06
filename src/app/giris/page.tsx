@@ -110,7 +110,15 @@ export default function LoginPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Şifre</FormLabel>
+                        <div className="flex justify-between items-center">
+                          <FormLabel>Şifre</FormLabel>
+                           <Link
+                              href="/sifremi-unuttum"
+                              className="text-sm font-medium text-primary hover:underline"
+                            >
+                              Şifreni mi unuttun?
+                            </Link>
+                        </div>
                         <FormControl>
                           <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
