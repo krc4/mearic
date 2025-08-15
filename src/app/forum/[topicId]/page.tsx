@@ -31,7 +31,7 @@ import { getPostBySlug, incrementPostView, toggleLikePost } from "@/lib/firebase
 
 export default function ForumTopicPage() {
   const params = useParams();
-  const slug = "kuran-da-evrenin-genislemesi-zariyat-47";
+  const slug = params.topicId as string;
   const { toast } = useToast();
   
   const [post, setPost] = useState<Post | null>(null);
