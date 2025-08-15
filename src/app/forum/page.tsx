@@ -1,6 +1,6 @@
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Plus, MessageSquare, Users, Star, Clock, Filter, Heart, Eye, ArrowUpRight, Pin } from "lucide-react";
 import Link from "next/link";
@@ -8,49 +8,11 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import type { Post } from "@/lib/posts";
+import { getPostsByCategory } from "@/lib/firebase/services";
+import { Skeleton } from "@/components/ui/skeleton";
+import { NewTopicDialog } from "@/components/new-topic-dialog";
 
-
-type Topic = {
-  id: string;
-  title: string;
-  author: string;
-  replies: number;
-  views: number;
-  lastReply: string;
-  tags: string[];
-  pinned?: boolean;
-};
-
-const mockTopics: Topic[] = [
-  {
-    id: "1",
-    title: "Kur’an’da Evrenin Genişlemesi – Zariyat 47",
-    author: "Dr. Emre",
-    replies: 42,
-    views: 1240,
-    lastReply: "2 saat önce",
-    tags: ["Kozmoloji", "Zariyat"],
-    pinned: true,
-  },
-  {
-    id: "2",
-    title: "Hadislerdeki Tıbbi Mucizeler",
-    author: "Zeynep H.",
-    replies: 27,
-    views: 890,
-    lastReply: "5 saat önce",
-    tags: ["Tıp", "Nebevi"],
-  },
-  {
-    id: "3",
-    title: "Sabır ve Tevekkül – Ayet & Hadis",
-    author: "Yusuf A.",
-    replies: 19,
-    views: 540,
-    lastReply: "1 gün önce",
-    tags: ["Tasavvuf", "Ayet"],
-  },
-];
 
 const featuredTopics = [
     {
@@ -58,7 +20,7 @@ const featuredTopics = [
         title: "Kur’an’da Evrenin Genişlemesi Tartışması",
         image: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop",
         category: "Popüler Konu",
-        link: "/forum/1",
+        link: "/forum/kuran-da-evrenin-genislemesi-zariyat-47",
         hint: "galaxy stars"
     },
     {
@@ -66,7 +28,7 @@ const featuredTopics = [
         title: "Tıbb-ı Nebevi: Hadislerdeki Sağlık Öğütleri",
         image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop",
         category: "Popüler Konu",
-        link: "/forum/2",
+        link: "#",
         hint: "medicine health"
     },
     {
@@ -87,22 +49,50 @@ const featuredTopics = [
     }
 ];
 
+const TopicRowSkeleton = () => (
+    <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+        </div>
+        <Skeleton className="h-9 w-20 rounded-md" />
+    </div>
+);
+
 
 export default function MearicForum() {
-  const [topics, setTopics] = useState(mockTopics);
+  const [topics, setTopics] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filterTag, setFilterTag] = useState("All");
   const [search, setSearch] = useState("");
-  const [newPostOpen, setNewPostOpen] = useState(false);
-  const allTags = ["All", ...new Set(topics.flatMap((t) => t.tags))];
+  const [newTopicOpen, setNewTopicOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+        setLoading(true);
+        const fetchedTopics = await getPostsByCategory("Forum");
+        const sorted = fetchedTopics.sort((a, b) => {
+            const dateA = a.createdAt?.toDate() || 0;
+            const dateB = b.createdAt?.toDate() || 0;
+            return dateB.getTime() - dateA.getTime();
+        });
+        setTopics(sorted);
+        setLoading(false);
+    }
+    fetchTopics();
+  }, []);
+
+  const allTags = ["All", ...new Set(topics.flatMap((t) => ["Kozmoloji", "Ayet"]))];
 
 
   const filtered = topics.filter(
     (t) =>
-      (filterTag === "All" || t.tags.includes(filterTag)) &&
+      // (filterTag === "All" || t.tags.includes(filterTag)) &&
       t.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
+    <>
     <section className="container mx-auto py-8">
 
       {/* Header */}
@@ -124,7 +114,7 @@ export default function MearicForum() {
           <Button
             size="sm"
             className="flex items-center gap-2 rounded-full font-bold"
-            onClick={() => setNewPostOpen(true)}
+            onClick={() => setNewTopicOpen(true)}
           >
             <Plus size={16} /> <span className="hidden sm:inline">Yeni Konu</span>
           </Button>
@@ -207,49 +197,50 @@ export default function MearicForum() {
       {/* Topics */}
       <AnimatePresence>
         <motion.div className="relative z-20 px-4 md:px-6 py-4 space-y-4">
-          {filtered.map((topic) => (
-            <motion.div
-              key={topic.id}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              whileHover={{ scale: 1.01 }}
-              className="group relative rounded-2xl border bg-card/50 backdrop-blur-md p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:bg-accent/80 hover:shadow-lg"
-            >
-              <div className="flex-1">
-                <h3 className="font-bold text-lg">
-                  {topic.pinned && <Star className="inline-block mr-2 h-4 w-4 text-amber-400" />}
-                  {topic.title}
-                </h3>
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                  <span>@{topic.author}</span>
-                  <span className="flex items-center gap-1">
-                    <MessageSquare size={14} /> {topic.replies} yorum
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Eye size={14} /> {topic.views} görüntüleme
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock size={14} /> {topic.lastReply}
-                  </span>
-                </div>
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  {topic.tags.map((t) => (
-                    <span key={t} className="text-xs bg-primary/10 text-primary rounded px-2 py-0.5">
-                      # {t}
+          {loading ? (
+             <>
+                <TopicRowSkeleton />
+                <TopicRowSkeleton />
+                <TopicRowSkeleton />
+             </>
+          ) : (
+            filtered.map((topic) => (
+              <motion.div
+                key={topic.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                whileHover={{ scale: 1.01 }}
+                className="group relative rounded-2xl border bg-card/50 backdrop-blur-md p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:bg-accent/80 hover:shadow-lg"
+              >
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg">
+                    {/* {topic.pinned && <Star className="inline-block mr-2 h-4 w-4 text-amber-400" />} */}
+                    {topic.title}
+                  </h3>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <span>@{topic.author || 'Mearic Ekibi'}</span>
+                    <span className="flex items-center gap-1">
+                      <MessageSquare size={14} /> {topic.replies || 0} yorum
                     </span>
-                  ))}
+                    <span className="flex items-center gap-1">
+                      <Eye size={14} /> {topic.views || 0} görüntüleme
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock size={14} /> {topic.createdAt ? new Date(topic.createdAt.seconds * 1000).toLocaleDateString() : 'Bilinmiyor'}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <Link href={`/forum/${topic.id}`} className="w-full sm:w-auto">
-                 <Button size="sm" variant="outline" className="w-full sm:w-auto transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  Gör
-                  <ArrowUpRight className="ml-1.5 h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"/>
-                </Button>
-              </Link>
-            </motion.div>
-          ))}
+                <Link href={`/forum/${topic.slug}`} className="w-full sm:w-auto">
+                   <Button size="sm" variant="outline" className="w-full sm:w-auto transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    Gör
+                    <ArrowUpRight className="ml-1.5 h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"/>
+                  </Button>
+                </Link>
+              </motion.div>
+            ))
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -259,5 +250,8 @@ export default function MearicForum() {
         <p className="text-sm">© {new Date().getFullYear()} Mearic</p>
       </footer>
     </section>
+
+    <NewTopicDialog isOpen={newTopicOpen} onOpenChange={setNewTopicOpen} />
+    </>
   );
 }
