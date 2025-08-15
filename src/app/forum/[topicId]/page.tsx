@@ -180,7 +180,7 @@ export default function ForumTopicPage() {
     <>
       <ReadingProgressBar />
       <Header />
-      <div className="text-foreground">
+      <div>
         {/* Header Image */}
         <div className="relative h-72 md:h-96 w-full">
             {post.image ? (

@@ -32,6 +32,7 @@ interface NewTopicDialogProps {
 
 const topicSchema = z.object({
   title: z.string().min(5, { message: "Başlık en az 5 karakter olmalıdır." }),
+  imageUrl: z.string().url({ message: "Lütfen geçerli bir resim URL'si girin." }).min(1, "Resim URL'si boş bırakılamaz."),
 });
 
 type TopicFormValues = z.infer<typeof topicSchema>;
@@ -49,6 +50,7 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
     resolver: zodResolver(topicSchema),
     defaultValues: {
       title: "",
+      imageUrl: "",
     },
   });
 
@@ -86,7 +88,7 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
       category: "Forum",
       description: content.substring(0, 150),
       readTime: Math.ceil(content.split(" ").length / 200),
-      image: "https://placehold.co/1280x720.png", // Placeholder image
+      image: data.imageUrl,
       author: user.displayName || 'Anonim',
       authorId: user.uid,
       authorPhotoURL: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`
@@ -141,6 +143,19 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
                 {form.formState.errors.title && (
                   <p className="text-sm text-destructive">
                     {form.formState.errors.title.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="imageUrl">Kapak Resmi URL'si</Label>
+                <Input
+                  id="imageUrl"
+                  placeholder="https://ornek.com/resim.jpg"
+                  {...form.register("imageUrl")}
+                />
+                {form.formState.errors.imageUrl && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.imageUrl.message}
                   </p>
                 )}
               </div>
