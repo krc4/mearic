@@ -87,6 +87,9 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
       description: content.substring(0, 150),
       readTime: Math.ceil(content.split(" ").length / 200),
       image: "https://placehold.co/1280x720.png", // Placeholder image
+      author: user.displayName || 'Anonim',
+      authorId: user.uid,
+      authorPhotoURL: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`
     };
 
     try {

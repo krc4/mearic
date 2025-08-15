@@ -56,7 +56,10 @@ export default function NewPostPage() {
         image: imageUrl,
         readTime: Number(readTime),
         description,
-        content, 
+        content,
+        author: "Mearic Ekibi",
+        authorId: "system-admin",
+        authorPhotoURL: "https://github.com/shadcn.png" 
     };
 
     try {

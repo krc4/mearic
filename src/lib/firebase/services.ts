@@ -6,7 +6,7 @@ import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
 import type { AdminUser } from '@/lib/admin';
 
-export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes'> & {
+export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes' | 'content'> & {
     content: string;
 };
 
@@ -86,6 +86,9 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
                 views: data.views,
                 likes: data.likes || 0,
                 createdAt: data.createdAt,
+                author: data.author,
+                authorId: data.authorId,
+                authorPhotoURL: data.authorPhotoURL
             } as Post);
         });
         return posts;
@@ -362,7 +365,10 @@ async function seedInitialData() {
             `,
             views: 0,
             likes: 0,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            author: 'Mearic Ekibi',
+            authorId: 'system',
+            authorPhotoURL: 'https://github.com/shadcn.png'
         };
         await addDoc(postsRef, forumTopicData);
         console.log("Forum topic seeded successfully.");

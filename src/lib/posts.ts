@@ -12,6 +12,9 @@ export interface Post {
   views: number;
   likes: number;
   createdAt?: Timestamp; // Optional timestamp
+  authorId?: string;
+  author?: string;
+  authorPhotoURL?: string;
 }
 
 export const mainArticle: Omit<Post, 'id' | 'views' | 'createdAt' | 'likes'> = {

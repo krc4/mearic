@@ -264,12 +264,12 @@ export default function ForumTopicPage() {
                             </CardHeader>
                             <CardContent className="flex items-center gap-4">
                                 <Avatar className="h-16 w-16 border-2 border-primary">
-                                     <AvatarImage src={"https://github.com/shadcn.png"} alt={"Dr. Emre"} />
-                                    <AvatarFallback>DE</AvatarFallback>
+                                     <AvatarImage src={post.authorPhotoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${post.authorId}`} alt={post.author || 'Yazar'} />
+                                    <AvatarFallback>{post.author ? post.author.substring(0, 2).toUpperCase() : 'Y'}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-bold text-lg">Dr. Emre</p>
-                                    <p className="text-sm text-muted-foreground">İlahiyat Araştırmacısı</p>
+                                    <p className="font-bold text-lg">{post.author || 'Mearic Ekibi'}</p>
+                                    <p className="text-sm text-muted-foreground">Topluluk Üyesi</p>
                                 </div>
                             </CardContent>
                         </Card>
