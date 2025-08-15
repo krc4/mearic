@@ -191,7 +191,7 @@ export default function PostPage() {
     <>
       <ReadingProgressBar />
       <Header />
-      <div className="bg-background text-foreground">
+      <div className="text-foreground">
         {/* Header Image */}
         <div className="relative h-72 md:h-96 w-full">
             {post.image ? (
