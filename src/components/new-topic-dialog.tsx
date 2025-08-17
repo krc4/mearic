@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { addPost, PostPayload } from "@/lib/firebase/services";
+import { addPost, PostPayload, getUserDoc } from "@/lib/firebase/services";
 import { Editor } from "@/components/editor";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -82,19 +82,24 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
     }
     setIsSubmitting(true);
 
-    const newTopicPayload: PostPayload = {
-      title: data.title,
-      content: content,
-      category: "Forum",
-      description: content.substring(0, 150),
-      readTime: Math.ceil(content.split(" ").length / 200),
-      image: data.imageUrl,
-      author: user.displayName || 'Anonim',
-      authorId: user.uid,
-      authorPhotoURL: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`
-    };
-
     try {
+      // Get the most up-to-date user data from Firestore
+      const userDoc = await getUserDoc(user.uid);
+      const displayName = userDoc?.displayName || user.displayName || 'Anonim';
+      const photoURL = userDoc?.photoURL || user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`;
+
+      const newTopicPayload: PostPayload = {
+        title: data.title,
+        content: content,
+        category: "Forum",
+        description: content.substring(0, 150),
+        readTime: Math.ceil(content.split(" ").length / 200),
+        image: data.imageUrl,
+        author: displayName,
+        authorId: user.uid,
+        authorPhotoURL: photoURL
+      };
+
       const postId = await addPost(newTopicPayload);
       if (postId) {
         toast({
