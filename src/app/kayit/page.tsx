@@ -63,16 +63,17 @@ export default function RegisterPage() {
       const user = userCredential.user;
 
       if (user) {
+         // Set the display name for the user in Firebase Auth
          await updateProfile(user, {
             displayName: data.username
          });
 
-         // Create a document in the 'users' collection
+         // Create a document in the 'users' collection in Firestore
          const userRef = doc(db, "users", user.uid);
          await setDoc(userRef, {
             email: user.email,
-            displayName: data.username,
-            photoURL: user.photoURL,
+            displayName: data.username, // Save the username here as well
+            photoURL: user.photoURL, // This will be null initially
             createdAt: serverTimestamp()
          });
       }
@@ -169,8 +170,8 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full !mt-6 group" size="lg">
-                    Kayıt Ol
+                  <Button type="submit" className="w-full !mt-6 group" size="lg" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? 'Kaydediliyor...' : 'Kayıt Ol'}
                     <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </form>
