@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { auth } from "@/lib/firebase/config";
+import { auth, db } from "@/lib/firebase/config";
 import { onAuthStateChanged, User, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "firebase/auth";
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,8 +34,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard, Image as ImageIcon, ChevronLeft } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import NextImage from "next/image";
-import { isAdmin } from "@/lib/firebase/services";
+import { isAdmin, getUserDoc, updateUserDoc } from "@/lib/firebase/services";
 
+const profileSchema = z.object({
+    displayName: z.string()
+        .min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." })
+        .max(20, { message: "Kullanıcı adı en fazla 20 karakter olabilir." })
+        .regex(/^[a-zA-Z0-9_]+$/, { message: "Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz." }),
+});
 
 const photoSchema = z.object({
     photoURL: z.string().url({ message: "Lütfen geçerli bir URL girin." }).min(1, { message: "URL alanı boş bırakılamaz." }),
@@ -49,6 +56,7 @@ const passwordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+type ProfileFormValues = z.infer<typeof profileSchema>;
 type PhotoFormValues = z.infer<typeof photoSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
@@ -57,6 +65,8 @@ export default function ProfilePage() {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [canChangeUsername, setCanChangeUsername] = useState(false);
+  const [timeUntilNextChange, setTimeUntilNextChange] = useState("");
   const router = useRouter();
   const { toast } = useToast();
 
@@ -66,6 +76,26 @@ export default function ProfilePage() {
         setUser(currentUser);
         const adminStatus = await isAdmin(currentUser.uid);
         setIsUserAdmin(adminStatus);
+        
+        const userDocData = await getUserDoc(currentUser.uid);
+        if (userDocData && userDocData.displayNameLastChanged) {
+          const lastChanged = userDocData.displayNameLastChanged.toDate();
+          const now = new Date();
+          const diff = now.getTime() - lastChanged.getTime();
+          const hoursPassed = diff / (1000 * 60 * 60);
+          
+          if (hoursPassed < 24) {
+            setCanChangeUsername(false);
+            const hoursLeft = 24 - hoursPassed;
+            const minutesLeft = (hoursLeft % 1) * 60;
+            setTimeUntilNextChange(`${Math.floor(hoursLeft)} saat ${Math.floor(minutesLeft)} dakika sonra`);
+          } else {
+            setCanChangeUsername(true);
+          }
+        } else {
+            setCanChangeUsername(true);
+        }
+
       } else {
         router.push("/giris");
       }
@@ -73,6 +103,13 @@ export default function ProfilePage() {
     });
     return () => unsubscribe();
   }, [router]);
+
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    values: {
+        displayName: user?.displayName || ""
+    }
+  });
 
   const photoForm = useForm<PhotoFormValues>({
     resolver: zodResolver(photoSchema),
@@ -92,13 +129,31 @@ export default function ProfilePage() {
   
   const watchedPhotoURL = photoForm.watch("photoURL");
 
+  const onProfileSubmit = async (data: ProfileFormValues) => {
+    if (!user || !canChangeUsername) return;
+    try {
+        await updateProfile(user, { displayName: data.displayName });
+        await updateUserDoc(user.uid, { 
+            displayName: data.displayName,
+            displayNameLastChanged: serverTimestamp() 
+        });
+        toast({ title: "Başarılı!", description: "Kullanıcı adınız güncellendi." });
+        setUser({ ...user, displayName: data.displayName });
+        setCanChangeUsername(false); // Immediately block until page reloads or state updates
+        router.refresh();
+    } catch(error) {
+        console.error(error);
+        toast({ title: "Hata!", description: "Kullanıcı adı güncellenirken bir sorun oluştu.", variant: "destructive" });
+    }
+  };
+
   const onPhotoSubmit = async (data: PhotoFormValues) => {
     if (!user) return;
     try {
         await updateProfile(user, { photoURL: data.photoURL });
+        await updateUserDoc(user.uid, { photoURL: data.photoURL });
         toast({ title: "Başarılı!", description: "Profil fotoğrafınız güncellendi." });
-        // Force a re-render to show the new avatar
-        setUser({...user});
+        setUser({...user, photoURL: data.photoURL }); // Force a re-render to show the new avatar
         router.refresh();
     } catch(error) {
         console.error(error);
@@ -193,6 +248,45 @@ export default function ProfilePage() {
         </header>
 
         <main className="space-y-12">
+            {/* Change Username Card */}
+            <Card>
+                <CardHeader>
+                <CardTitle className="flex items-center gap-2"><UserIcon/> Kullanıcı Adı</CardTitle>
+                <CardDescription>
+                    Kullanıcı adınızı günde bir kez değiştirebilirsiniz. Sadece harf, rakam ve alt çizgi (_) kullanın.
+                </CardDescription>
+                </CardHeader>
+                <Form {...profileForm}>
+                    <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
+                        <CardContent>
+                             <FormField
+                                control={profileForm.control}
+                                name="displayName"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Yeni Kullanıcı Adı</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="Yeni kullanıcı adınız..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                        <CardFooter className="border-t px-6 py-4 flex justify-between items-center">
+                            <Button type="submit" disabled={!canChangeUsername || profileForm.formState.isSubmitting}>
+                                {profileForm.formState.isSubmitting ? 'Kaydediliyor...' : 'Kullanıcı Adını Kaydet'}
+                            </Button>
+                             {!canChangeUsername && (
+                                <p className="text-sm text-destructive">
+                                    Tekrar değiştirmek için beklemeniz gerekiyor: {timeUntilNextChange}
+                                </p>
+                            )}
+                        </CardFooter>
+                    </form>
+                </Form>
+            </Card>
+
           {/* Change Photo Card */}
           <Card>
             <CardHeader>
@@ -224,12 +318,18 @@ export default function ProfilePage() {
                                     alt="Resim Önizlemesi" 
                                     fill 
                                     className="object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        toast({ variant: 'destructive', title: 'Geçersiz Resim URL', description: 'Lütfen geçerli bir resim URLsi girin.'})
+                                    }}
                                 />
                             </div>
                         )}
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
-                        <Button type="submit">Fotoğrafı Kaydet</Button>
+                        <Button type="submit" disabled={photoForm.formState.isSubmitting}>
+                            {photoForm.formState.isSubmitting ? 'Kaydediliyor...' : 'Fotoğrafı Kaydet'}
+                        </Button>
                     </CardFooter>
                 </form>
             </Form>
@@ -287,7 +387,9 @@ export default function ProfilePage() {
                         />
                     </CardContent>
                     <CardFooter className="border-t px-6 py-4">
-                        <Button type="submit">Şifreyi Değiştir</Button>
+                        <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+                            {passwordForm.formState.isSubmitting ? 'Değiştiriliyor...' : 'Şifreyi Değiştir'}
+                        </Button>
                     </CardFooter>
                 </form>
             </Form>

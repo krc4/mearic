@@ -32,7 +32,10 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
 const registerSchema = z.object({
-  username: z.string().min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." }),
+  username: z.string()
+    .min(3, { message: "Kullanıcı adı en az 3 karakter olmalıdır." })
+    .max(20, { message: "Kullanıcı adı en fazla 20 karakter olabilir." })
+    .regex(/^[a-zA-Z0-9_]+$/, { message: "Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz." }),
   email: z.string().email({ message: "Lütfen geçerli bir e-posta adresi girin." }),
   password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
   confirmPassword: z.string()
@@ -65,7 +68,8 @@ export default function RegisterPage() {
       if (user) {
          // Set the display name for the user in Firebase Auth
          await updateProfile(user, {
-            displayName: data.username
+            displayName: data.username,
+            photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`
          });
 
          // Create a document in the 'users' collection in Firestore
@@ -73,8 +77,9 @@ export default function RegisterPage() {
          await setDoc(userRef, {
             email: user.email,
             displayName: data.username, // Save the username here as well
-            photoURL: user.photoURL, // This will be null initially
-            createdAt: serverTimestamp()
+            photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
+            createdAt: serverTimestamp(),
+            displayNameLastChanged: null
          });
       }
       

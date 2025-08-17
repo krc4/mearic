@@ -40,13 +40,25 @@ export const ensureUserDocument = async (user: import('firebase/auth').User) => 
                 email: user.email,
                 displayName: user.displayName,
                 photoURL: user.photoURL,
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp(),
+                displayNameLastChanged: null,
             });
              console.log("User document created for:", user.email);
         } catch (error) {
             console.error("Error creating user document:", error);
         }
     }
+};
+
+export const getUserDoc = async (uid: string) => {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+    return userSnap.exists() ? userSnap.data() : null;
+};
+
+export const updateUserDoc = async (uid: string, data: object) => {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, data);
 };
 
 
