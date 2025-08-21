@@ -13,7 +13,8 @@ import {
   Share2,
   ChevronRight,
   Home,
-  Tag
+  Tag,
+  ShieldCheck
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ import { ReadingProgressBar } from "@/components/reading-progress-bar";
 import { Header } from "@/components/header";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Post } from "@/lib/posts";
-import { getPostBySlug, incrementPostView, toggleLikePost } from "@/lib/firebase/services";
+import { getPostBySlug, incrementPostView, toggleLikePost, isAdmin } from "@/lib/firebase/services";
 
 
 export default function ForumTopicPage() {
@@ -35,6 +36,7 @@ export default function ForumTopicPage() {
   const { toast } = useToast();
   
   const [post, setPost] = useState<Post | null>(null);
+  const [isAuthorAdmin, setIsAuthorAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -50,6 +52,11 @@ export default function ForumTopicPage() {
 
       if (fetchedPost) {
         setPost(fetchedPost);
+
+        if (fetchedPost.authorId) {
+            const adminStatus = await isAdmin(fetchedPost.authorId);
+            setIsAuthorAdmin(adminStatus);
+        }
 
         if (typeof window !== 'undefined') {
           const viewedKey = `viewed-${fetchedPost.id}`;
@@ -269,7 +276,14 @@ export default function ForumTopicPage() {
                                 </Avatar>
                                 <div>
                                     <p className="font-bold text-lg">{post.author || 'Mearic Ekibi'}</p>
-                                    <p className="text-sm text-muted-foreground">Topluluk Üyesi</p>
+                                    {isAuthorAdmin ? (
+                                        <p className="text-sm font-semibold text-amber-500 flex items-center gap-1">
+                                            <ShieldCheck size={14} />
+                                            Admin
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">Topluluk Üyesi</p>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
