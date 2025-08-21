@@ -1,3 +1,4 @@
+
 import { Timestamp } from 'firebase/firestore';
 
 export interface Post {
@@ -15,6 +16,7 @@ export interface Post {
   authorId?: string;
   author?: string;
   authorPhotoURL?: string;
+  tags?: string[];
 }
 
 export const mainArticle: Omit<Post, 'id' | 'views' | 'createdAt' | 'likes'> = {

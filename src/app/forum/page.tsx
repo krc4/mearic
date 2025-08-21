@@ -82,12 +82,12 @@ export default function MearicForum() {
     fetchTopics();
   }, []);
 
-  const allTags = ["Tümü", "Teknoloji", "Kuran", "Tarih", "Genel"];
+  const allTags = ["Tümü", "Teknoloji", "Kuran", "Tarih", "Genel", "Diğer"];
 
 
   const filtered = topics.filter(
     (t) =>
-      // (filterTag === "Tümü" || t.tags.includes(filterTag)) && // Add t.tags to your Post type and data to enable this
+      (filterTag === "Tümü" || (t.tags && t.tags.includes(filterTag))) &&
       t.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -220,6 +220,7 @@ export default function MearicForum() {
                   </h3>
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     <span>@{topic.author || 'Mearic Ekibi'}</span>
+                     {topic.tags && topic.tags[0] && <Badge variant="outline">{topic.tags[0]}</Badge>}
                     <span className="flex items-center gap-1">
                       <MessageSquare size={14} /> {(topic as any).replies || 0} yorum
                     </span>
@@ -254,5 +255,3 @@ export default function MearicForum() {
     </>
   );
 }
-
-    

@@ -100,7 +100,8 @@ export const getPostsByCategory = async (category: string): Promise<Post[]> => {
                 createdAt: data.createdAt,
                 author: data.author,
                 authorId: data.authorId,
-                authorPhotoURL: data.authorPhotoURL
+                authorPhotoURL: data.authorPhotoURL,
+                tags: data.tags
             } as Post);
         });
         return posts;

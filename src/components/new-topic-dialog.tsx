@@ -24,6 +24,15 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import Link from "next/link";
 import { Send } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem } from "./ui/form";
+
 
 interface NewTopicDialogProps {
   isOpen: boolean;
@@ -33,6 +42,7 @@ interface NewTopicDialogProps {
 const topicSchema = z.object({
   title: z.string().min(5, { message: "Başlık en az 5 karakter olmalıdır." }),
   imageUrl: z.string().url({ message: "Lütfen geçerli bir resim URL'si girin." }).min(1, "Resim URL'si boş bırakılamaz."),
+  tag: z.string({ required_error: "Lütfen bir kategori seçin." }),
 });
 
 type TopicFormValues = z.infer<typeof topicSchema>;
@@ -97,7 +107,8 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
         image: data.imageUrl,
         author: displayName,
         authorId: user.uid,
-        authorPhotoURL: photoURL
+        authorPhotoURL: photoURL,
+        tags: [data.tag]
       };
 
       const postId = await addPost(newTopicPayload);
@@ -137,6 +148,7 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
         {authLoading ? (
             <p>Yükleniyor...</p>
         ) : user ? (
+            <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="title">Başlık</Label>
@@ -151,7 +163,7 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
                   </p>
                 )}
               </div>
-              <div className="grid gap-2">
+               <div className="grid gap-2">
                 <Label htmlFor="imageUrl">Kapak Resmi URL'si</Label>
                 <Input
                   id="imageUrl"
@@ -164,6 +176,34 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
                   </p>
                 )}
               </div>
+                <FormField
+                  control={form.control}
+                  name="tag"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label>Kategori</Label>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Bir kategori seçin..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Teknoloji">Teknoloji</SelectItem>
+                          <SelectItem value="Kuran">Kuran</SelectItem>
+                          <SelectItem value="Tarih">Tarih</SelectItem>
+                          <SelectItem value="Genel">Genel</SelectItem>
+                          <SelectItem value="Diğer">Diğer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                       {form.formState.errors.tag && (
+                        <p className="text-sm text-destructive">
+                            {form.formState.errors.tag.message}
+                        </p>
+                        )}
+                    </FormItem>
+                  )}
+                />
               <div className="grid gap-2">
                 <Label htmlFor="content">İçerik</Label>
                 <Editor onUpdate={setContent} />
@@ -174,6 +214,7 @@ export function NewTopicDialog({ isOpen, onOpenChange }: NewTopicDialogProps) {
                 </Button>
               </DialogFooter>
             </form>
+            </Form>
         ) : (
              <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">Konu açabilmek için lütfen giriş yapın veya kayıt olun.</p>
