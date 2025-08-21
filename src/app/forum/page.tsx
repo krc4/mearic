@@ -63,7 +63,7 @@ const TopicRowSkeleton = () => (
 export default function MearicForum() {
   const [topics, setTopics] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterTag, setFilterTag] = useState("All");
+  const [filterTag, setFilterTag] = useState("Tümü");
   const [search, setSearch] = useState("");
   const [newTopicOpen, setNewTopicOpen] = useState(false);
 
@@ -82,12 +82,12 @@ export default function MearicForum() {
     fetchTopics();
   }, []);
 
-  const allTags = ["All", ...new Set(topics.flatMap((t) => ["Kozmoloji", "Ayet"]))];
+  const allTags = ["Tümü", "Teknoloji", "Kuran", "Tarih", "Genel"];
 
 
   const filtered = topics.filter(
     (t) =>
-      // (filterTag === "All" || t.tags.includes(filterTag)) &&
+      // (filterTag === "Tümü" || t.tags.includes(filterTag)) && // Add t.tags to your Post type and data to enable this
       t.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -254,3 +254,5 @@ export default function MearicForum() {
     </>
   );
 }
+
+    
