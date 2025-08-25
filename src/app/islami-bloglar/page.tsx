@@ -14,7 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
-import { getPostsByCategory } from "@/lib/firebase/services";
+import { getPostsByCategory, toggleLikePost } from "@/lib/firebase/services";
 import { ReadingProgressBar } from "@/components/reading-progress-bar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,7 @@ export default function IslamiBloglarPage() {
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [favs, setFavs] = useState<Set<string>>(new Set());
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -42,6 +42,17 @@ export default function IslamiBloglarPage() {
         return dateB.getTime() - dateA.getTime();
       });
       setPosts(sortedByDate);
+
+      if (typeof window !== 'undefined') {
+        const liked = new Set<string>();
+        sortedByDate.forEach(post => {
+            if(localStorage.getItem(`liked-${post.id}`) === 'true') {
+                liked.add(post.id);
+            }
+        });
+        setLikedPosts(liked);
+      }
+      
       setLoading(false);
     };
     fetchPosts();
@@ -65,23 +76,50 @@ export default function IslamiBloglarPage() {
     });
   }, [filter, posts, loading, searchTerm]);
 
-  const toggleFav = (id: string) => {
-    const isAlreadyFaved = favs.has(id);
-    setFavs(currentFavs => {
-      const newFavs = new Set(currentFavs);
-      if (newFavs.has(id)) {
-        newFavs.delete(id);
-      } else {
-        newFavs.add(id);
-      }
-      return newFavs;
+  const handleLikeToggle = async (postId: string) => {
+    const newLikedState = !likedPosts.has(postId);
+    
+    setLikedPosts(currentLiked => {
+        const newSet = new Set(currentLiked);
+        if (newLikedState) {
+            newSet.add(postId);
+        } else {
+            newSet.delete(postId);
+        }
+        return newSet;
     });
-     if (isAlreadyFaved) {
-        toast({ title: "Beğeni geri çekildi" });
-    } else {
-        toast({ title: "Gönderi beğenildi!" });
+
+    if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked-${postId}`, String(newLikedState));
+    }
+
+    toast({
+        title: newLikedState ? "Yazıyı beğendiniz!" : "Beğeni geri çekildi",
+    });
+
+    const serverLikeCount = await toggleLikePost(postId, newLikedState);
+
+    if (serverLikeCount === null) {
+        setLikedPosts(currentLiked => {
+            const newSet = new Set(currentLiked);
+            if (newLikedState) {
+                newSet.delete(postId);
+            } else {
+                newSet.add(postId);
+            }
+            return newSet;
+        });
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`liked-${postId}`, String(!newLikedState));
+        }
+        toast({
+            title: "Hata!",
+            description: "Beğeni durumu güncellenemedi.",
+            variant: "destructive"
+        });
     }
   };
+
 
   const handleShare = async (postTitle: string, postSlug: string) => {
     const url = `${window.location.origin}/posts/${postSlug}`;
@@ -242,17 +280,17 @@ export default function IslamiBloglarPage() {
                                       size="icon"
                                       variant="ghost"
                                       className="text-white hover:bg-white/10 rounded-full"
-                                      onClick={() => toggleFav(post.id)}
+                                      onClick={() => handleLikeToggle(post.id)}
                                     >
                                       <motion.div
                                         animate={
-                                          favs.has(post.id)
+                                          likedPosts.has(post.id)
                                             ? { scale: [1, 1.4, 1] }
                                             : { scale: 1 }
                                         }
                                       >
                                         <Heart
-                                          className={`h-5 w-5 ${favs.has(post.id) ? "text-red-500 fill-current" : ""}`}
+                                          className={`h-5 w-5 ${likedPosts.has(post.id) ? "text-red-500 fill-current" : ""}`}
                                         />
                                       </motion.div>
                                     </Button>
