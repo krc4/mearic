@@ -2,51 +2,39 @@
 'use client';
 import Image from 'next/image';
 import { Clock, Rss, ArrowUpRight, Bot, BookOpen, Star, HeartPulse, Edit3, Volume2, VolumeX, Play, Sparkles } from 'lucide-react';
-import { mockPosts, mainArticle } from '@/lib/posts';
+import { mainArticle, hadithArticle1, hadithArticle2, blogArticle1, blogArticle2, secondArticle, thirdArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
-import { PostCard } from '@/components/post-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ReadingProgressBar } from '@/components/reading-progress-bar';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { HeroBackground } from '@/components/hero-background';
-import styles from './page.module.css';
 import { DidYouKnowSection } from '@/components/did-you-know';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { ScrollAnimationWrapper } from '@/components/ScrollAnimationWrapper';
+import { cn } from '@/lib/utils';
 
 
 export default function Home() {
-  const secondArticle = mockPosts[0];
-  const hadithArticle1 = mockPosts[0]; // Corrected index
-  const hadithArticle2 = mockPosts[1]; // Corrected index
-  const hadithArticle3 = mockPosts[0]; // Corrected index, re-using for safety.
-  const thirdArticle = mockPosts[1];
-  const blogArticle1 = mockPosts[0]; // Corrected index
-  const blogArticle2 = mockPosts[1]; // Corrected index
-  const [muted, setMuted] = useState(false); // Start unmuted
-  const [videoSrc, setVideoSrc] = useState('');
-  const [isClient, setIsClient] = useState(false); // State to track client-side mount
+  const [showVideo, setShowVideo] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
 
-  const videos = ['/anasayfa_video.mp4', '/anasayfa_video2.mp4', '/anasayfa_video3.mp4', '/anasayfa_video4.mp4', '/anasayfa_video5.mp4', '/anasayfa_video6.mp4'];
+  const videoSrc = '/anasayfa_video.mp4'; // Using a single, optimized video
 
   useEffect(() => {
-    // This effect runs only on the client
     setIsClient(true);
-    setVideoSrc(videos[Math.floor(Math.random() * videos.length)]);
   }, []);
+  
+  const handlePlayVideo = () => {
+    setShowVideo(true);
+    setMuted(false);
+  };
 
   const handleVideoEnd = () => {
     if (videoRef.current) {
-        if (!hasPlayedOnce) {
-            setMuted(true);
-            setHasPlayedOnce(true);
-        }
-        videoRef.current.play();
+      videoRef.current.play();
     }
   };
 
@@ -62,25 +50,66 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="relative h-screen w-full overflow-hidden bg-black">
-         {isClient && videoSrc && <video
-          ref={videoRef}
-          src={videoSrc}
-          autoPlay
-          muted={muted}
-          playsInline
-          onEnded={handleVideoEnd}
-          className="absolute inset-0 w-full h-full object-cover brightness-50"
-        />}
+         <Image
+            src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop"
+            alt="Mearic Arkaplan"
+            fill
+            priority
+            className="absolute inset-0 w-full h-full object-cover brightness-50"
+            data-ai-hint="galaxy stars"
+         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
+        <AnimatePresence>
+          {showVideo && isClient && (
+             <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                autoPlay
+                muted={muted}
+                playsInline
+                onEnded={handleVideoEnd}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30" />
+               <button
+                  onClick={toggleMute}
+                  className="absolute top-6 right-6 z-30 text-white/70 hover:text-white transition-colors"
+                >
+                  {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                </button>
+                 <button
+                  onClick={() => setShowVideo(false)}
+                  className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 text-white/70 hover:text-white transition-colors text-sm bg-black/30 px-3 py-1 rounded-full"
+                >
+                  Videoyu Kapat
+                </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
         <motion.div
           animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 4, repeat: Infinity }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-radial from-yellow-300 via-transparent to-transparent blur-2xl"
         />
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
+        <div className={cn(
+            "relative z-20 flex flex-col items-center justify-center h-full text-center text-white transition-opacity duration-500",
+            showVideo && "opacity-0 pointer-events-none"
+          )}
+        >
           <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="font-black text-6xl md:text-8xl tracking-tighter text-[#F9FAFB]"
           >
             Mearic
@@ -88,35 +117,28 @@ export default function Home() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 2 }}
+            transition={{ duration: 1, delay: 0.2 }}
             className="mt-6 max-w-2xl text-xl text-white/80"
           >
             İslam'ın ışığında, Kuran ve Sünnetin rehberliğinde bir yolculuk.
           </motion.p>
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 3 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.4, type: "spring" }}
             className="mt-8"
           >
             <Button
               size="lg"
               variant="outline"
               className="rounded-full bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20 hover:text-white"
-              onClick={() => document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={handlePlayVideo}
             >
               <Play className="mr-2 h-5 w-5" />
               Keşfet
             </Button>
           </motion.div>
         </div>
-
-        <button
-          onClick={toggleMute}
-          className="absolute top-6 right-6 text-white/70 hover:text-white z-20"
-        >
-          {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-        </button>
       </section>
 
         <main id="main-content" className="flex-grow container mx-auto px-4 py-16 md:py-24">
