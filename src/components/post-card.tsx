@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Post } from '@/lib/posts';
@@ -11,9 +12,10 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, orientation = 'vertical', compact = false }: PostCardProps) {
+  const postUrl = post.category === 'Forum' ? `/forum/${post.slug}` : `/posts/${post.slug}`;
   if (orientation === 'vertical') {
     return (
-      <Link href="#" className="group block bg-card rounded-lg overflow-hidden shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1">
+      <Link href={postUrl} className="group block bg-card rounded-lg overflow-hidden shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1">
         <div className="overflow-hidden">
           <Image
             src={post.image}
@@ -21,7 +23,7 @@ export function PostCard({ post, orientation = 'vertical', compact = false }: Po
             width={300}
             height={200}
             className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
-            data-ai-hint={post.id === 2 ? "desert sand" : "mountain sky"}
+            data-ai-hint={post.id === "2" ? "desert sand" : "mountain sky"}
           />
         </div>
         <div className="p-4">
@@ -36,7 +38,7 @@ export function PostCard({ post, orientation = 'vertical', compact = false }: Po
   }
 
   return (
-    <Link href="#" className="group flex items-center gap-4 transition-all duration-200 hover:bg-accent/50 p-2 rounded-md">
+    <Link href={postUrl} className="group flex items-center gap-4 transition-all duration-200 hover:bg-accent/50 p-2 rounded-md">
       <div className="flex-shrink-0">
         <Image
           src={post.image}
@@ -47,7 +49,7 @@ export function PostCard({ post, orientation = 'vertical', compact = false }: Po
             "object-cover rounded-md",
              compact ? "w-12 h-12" : "w-20 h-20"
           )}
-          data-ai-hint={post.id === 4 ? "earth space" : "human brain"}
+          data-ai-hint={post.id === "4" ? "earth space" : "human brain"}
         />
       </div>
       <div>
