@@ -110,7 +110,13 @@ export default function AdminDashboard() {
         const querySnapshot = await getDocs(q);
         const posts: Post[] = [];
         querySnapshot.forEach(doc => {
-            posts.push({ id: doc.id, ...doc.data() } as Post);
+            const data = doc.data();
+            const post: Post = { 
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : undefined,
+             } as Post;
+            posts.push(post);
         });
         setRecentPosts(posts);
         setLoadingPosts(false);

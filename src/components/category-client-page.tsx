@@ -30,16 +30,16 @@ export function CategoryClientPage({ initialPosts, pageTitle }: CategoryClientPa
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [loading, setLoading] = useState(false); // Initial posts are already loaded
+  const [loading, setLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     // Set posts from server props
     const sortedByDate = [...initialPosts].sort((a, b) => {
-      const dateA = a.createdAt?.toDate() || 0;
-      const dateB = b.createdAt?.toDate() || 0;
-      return dateB.getTime() - dateA.getTime();
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
     });
     setPosts(sortedByDate);
 
@@ -65,9 +65,9 @@ export function CategoryClientPage({ initialPosts, pageTitle }: CategoryClientPa
 
     return [...filtered].sort((a, b) => {
       if (filter === "latest") {
-        const dateA = a.createdAt?.toDate() || 0;
-        const dateB = b.createdAt?.toDate() || 0;
-        return dateB.getTime() - dateA.getTime();
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
       }
       return (b.views || 0) - (a.views || 0);
     });

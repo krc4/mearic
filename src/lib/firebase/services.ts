@@ -79,32 +79,34 @@ export const addPost = async (post: PostPayload) => {
     }
 };
 
+const serializePost = (doc: any): Post => {
+    const data = doc.data();
+    const createdAt = data.createdAt;
+
+    return {
+        id: doc.id,
+        slug: data.slug,
+        title: data.title,
+        image: data.image,
+        readTime: data.readTime,
+        category: data.category,
+        content: data.content,
+        description: data.description,
+        views: data.views || 0,
+        likes: data.likes || 0,
+        createdAt: createdAt instanceof Timestamp ? createdAt.toDate().toISOString() : createdAt,
+        author: data.author,
+        authorId: data.authorId,
+        authorPhotoURL: data.authorPhotoURL,
+        tags: data.tags,
+    };
+};
+
 export const getPostsByCategory = async (category: string): Promise<Post[]> => {
     try {
         const q = query(collection(db, "posts"), where("category", "==", category));
         const querySnapshot = await getDocs(q);
-        const posts: Post[] = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            posts.push({
-                id: doc.id,
-                slug: data.slug,
-                title: data.title,
-                image: data.image,
-                readTime: data.readTime,
-                category: data.category,
-                content: data.content,
-                description: data.description,
-                views: data.views,
-                likes: data.likes || 0,
-                createdAt: data.createdAt,
-                author: data.author,
-                authorId: data.authorId,
-                authorPhotoURL: data.authorPhotoURL,
-                tags: data.tags
-            } as Post);
-        });
-        return posts;
+        return querySnapshot.docs.map(serializePost);
     } catch (e) {
         console.error("Error getting documents: ", e);
         return [];
@@ -120,13 +122,7 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
             return null;
         }
         const postDoc = querySnapshot.docs[0];
-        const data = postDoc.data();
-        return {
-            id: postDoc.id,
-            ...data,
-            image: data.image,
-            likes: data.likes || 0,
-        } as Post;
+        return serializePost(postDoc);
     } catch (e) {
         console.error("Error getting document by slug: ", e);
         return null;
@@ -407,3 +403,4 @@ async function seedInitialData() {
 }
 
 seedInitialData();
+

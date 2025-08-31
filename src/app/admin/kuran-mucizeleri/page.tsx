@@ -69,7 +69,7 @@ const PostTable = ({ posts, loading, onDeleteClick }: { posts: Post[], loading: 
             <Badge variant="outline">Yayında</Badge>
             </TableCell>
             <TableCell className="hidden md:table-cell">
-                 {post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString() : 'Tarih yok'}
+                 {post.createdAt ? new Date(post.createdAt as string).toLocaleDateString() : 'Tarih yok'}
             </TableCell>
             <TableCell>
             <DropdownMenu>
@@ -108,9 +108,9 @@ export default function KuranMucizeleriAdminPage() {
             setLoading(true);
             const fetchedPosts = await getPostsByCategory("Kuran Mucizeleri");
             const sortedPosts = fetchedPosts.sort((a, b) => {
-                 const dateA = a.createdAt?.toDate() || new Date(0);
-                 const dateB = b.createdAt?.toDate() || new Date(0);
-                 return dateB.getTime() - dateA.getTime();
+                 const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+                 const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+                 return dateB - dateA;
             });
             setPosts(sortedPosts);
             setLoading(false);

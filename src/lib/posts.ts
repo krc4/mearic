@@ -2,7 +2,7 @@
 import { Timestamp } from 'firebase/firestore';
 
 export interface Post {
-  id: string; // Changed to string to accommodate Firestore document IDs
+  id: string;
   title: string;
   slug: string;
   image: string;
@@ -12,7 +12,7 @@ export interface Post {
   description: string;
   views: number;
   likes: number;
-  createdAt?: Timestamp; // Optional timestamp
+  createdAt?: string | Timestamp; 
   authorId?: string;
   author?: string;
   authorPhotoURL?: string;
