@@ -24,9 +24,18 @@ import { Input } from "@/components/ui/input";
 interface CategoryClientPageProps {
     initialPosts: Post[];
     pageTitle: string;
+    pageDescription: string;
+    headerImage: string;
+    headerImageHint: string;
 }
 
-export function CategoryClientPage({ initialPosts, pageTitle }: CategoryClientPageProps) {
+export function CategoryClientPage({ 
+  initialPosts, 
+  pageTitle,
+  pageDescription,
+  headerImage,
+  headerImageHint
+}: CategoryClientPageProps) {
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -135,6 +144,34 @@ export function CategoryClientPage({ initialPosts, pageTitle }: CategoryClientPa
 
   return (
     <>
+       <section className="relative isolate flex items-center justify-center overflow-hidden py-24 md:py-36">
+           <div
+            className="absolute inset-0 -z-10 scale-125"
+            style={{
+              backgroundImage: `url(${headerImage})`,
+              backgroundAttachment: "fixed",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "brightness(.4)",
+            }}
+            data-ai-hint={headerImageHint}
+          />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="text-center text-white"
+          >
+            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
+              {pageTitle}
+            </h1>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-white/80">
+              {pageDescription}
+            </p>
+          </motion.div>
+        </section>
+
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground self-start">
