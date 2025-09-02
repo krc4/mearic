@@ -48,9 +48,9 @@ const featuredTopics = [
 export default async function MearicForum() {
   const initialTopics = await getPostsByCategory("Forum");
   const sorted = initialTopics.sort((a, b) => {
-      const dateA = a.createdAt?.toDate() || 0;
-      const dateB = b.createdAt?.toDate() || 0;
-      return dateB.getTime() - dateA.getTime();
+      const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+      return dateB - dateA;
   });
 
   return (
