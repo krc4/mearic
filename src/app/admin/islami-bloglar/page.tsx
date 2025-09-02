@@ -69,7 +69,7 @@ const PostTable = ({ posts, loading, onDeleteClick }: { posts: Post[], loading: 
             <Badge variant="outline">Yayında</Badge>
             </TableCell>
             <TableCell className="hidden md:table-cell">
-                {post.createdAt ? new Date(post.createdAt as string).toLocaleDateString() : 'Tarih yok'}
+                {post.createdAt ? new Date(post.createdAt as string).toLocaleDateString('tr-TR') : 'Tarih yok'}
             </TableCell>
             <TableCell>
             <DropdownMenu>

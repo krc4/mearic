@@ -125,7 +125,7 @@ export function ForumClientPage({ initialTopics }: ForumClientPageProps) {
                       <Eye size={14} /> {topic.views || 0} görüntüleme
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock size={14} /> {topic.createdAt ? new Date(topic.createdAt as string).toLocaleDateString() : 'Bilinmiyor'}
+                      <Clock size={14} /> {topic.createdAt ? new Date(topic.createdAt as string).toLocaleDateString('tr-TR') : 'Bilinmiyor'}
                     </span>
                   </div>
                 </div>
