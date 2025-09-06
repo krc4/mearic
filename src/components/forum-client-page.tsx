@@ -16,6 +16,24 @@ interface ForumClientPageProps {
     initialTopics: Post[];
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+  },
+};
+
 const TopicRowSkeleton = () => (
     <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex-1 space-y-2">
@@ -92,8 +110,12 @@ export function ForumClientPage({ initialTopics }: ForumClientPageProps) {
       </div>
 
       {/* Topics */}
-      <AnimatePresence>
-        <motion.div className="relative z-20 px-4 md:px-6 py-4 space-y-4">
+        <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="relative z-20 px-4 md:px-6 py-4 space-y-4"
+        >
           {loading ? (
              <>
                 <TopicRowSkeleton />
@@ -104,11 +126,7 @@ export function ForumClientPage({ initialTopics }: ForumClientPageProps) {
             filtered.map((topic) => (
               <motion.div
                 key={topic.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                whileHover={{ scale: 1.01 }}
+                variants={itemVariants}
                 className="group relative rounded-2xl border bg-card/50 backdrop-blur-md p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:bg-accent/80 hover:shadow-lg"
               >
                 <div className="flex-1">
@@ -139,7 +157,6 @@ export function ForumClientPage({ initialTopics }: ForumClientPageProps) {
             ))
           )}
         </motion.div>
-      </AnimatePresence>
 
       {/* Footer */}
       <footer className="relative z-20 text-center py-8 text-muted-foreground">

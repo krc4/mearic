@@ -29,6 +29,25 @@ interface CategoryClientPageProps {
     headerImageHint: string;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+  },
+};
+
+
 export function CategoryClientPage({ 
   initialPosts, 
   pageTitle,
@@ -46,8 +65,8 @@ export function CategoryClientPage({
   useEffect(() => {
     // Set posts from server props
     const sortedByDate = [...initialPosts].sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
       return dateB - dateA;
     });
     setPosts(sortedByDate);
@@ -74,8 +93,8 @@ export function CategoryClientPage({
 
     return [...filtered].sort((a, b) => {
       if (filter === "latest") {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
         return dateB - dateA;
       }
       return (b.views || 0) - (a.views || 0);
@@ -213,7 +232,9 @@ export function CategoryClientPage({
 
         <main className="container mx-auto flex-grow px-4 pb-20">
           <motion.div
-            layout
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           >
             <AnimatePresence>
@@ -221,9 +242,7 @@ export function CategoryClientPage({
                  Array.from({ length: 3 }).map((_, i) => (
                     <motion.div
                       key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      variants={itemVariants}
                       className="group relative aspect-[3/4] overflow-hidden rounded-3xl"
                     >
                       <Skeleton className="w-full h-full rounded-2xl"/>
@@ -233,13 +252,8 @@ export function CategoryClientPage({
                 sortedPosts.map((post) => (
                     <motion.article
                         key={post.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.4 }}
+                        variants={itemVariants}
                         className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
-                        whileHover={{ scale: 1.03 }}
                         style={{ transformStyle: "preserve-3d" }}
                     >
                         <div
