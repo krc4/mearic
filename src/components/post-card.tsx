@@ -12,7 +12,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, orientation = 'vertical', compact = false }: PostCardProps) {
-  const postUrl = post.category === 'Forum' ? `/forum/${post.slug}` : `/posts/${post.slug}`;
+  const postUrl = `/posts/${post.slug}`;
   if (orientation === 'vertical') {
     return (
       <Link href={postUrl} className="group block bg-card rounded-lg overflow-hidden shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1">

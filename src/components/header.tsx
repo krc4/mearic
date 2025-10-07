@@ -72,12 +72,6 @@ export function Header() {
             >
               İslami Bloglar
             </Link>
-            <Link
-              href="/forum"
-              className="transition-colors hover:text-primary text-foreground"
-            >
-              Forum
-            </Link>
           </nav>
         </div>
 

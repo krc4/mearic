@@ -14,7 +14,7 @@ import {
   Eye
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
-import { getPostBySlug, incrementPostView, toggleLikePost } from "@/lib/firebase/services";
+import { getPostBySlug, incrementPostView, toggleLikePost, isAdmin } from "@/lib/firebase/services";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/header";
@@ -26,6 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import styles from "@/app/page.module.css";
 import { motion } from "framer-motion";
 import { CommentSection } from "@/components/comment-section";
+import { ShieldCheck } from "lucide-react";
+
 
 export default function PostPage() {
   const params = useParams();
@@ -33,6 +35,7 @@ export default function PostPage() {
   const { toast } = useToast();
 
   const [post, setPost] = useState<Post | null>(null);
+  const [isAuthorAdmin, setIsAuthorAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -49,6 +52,10 @@ export default function PostPage() {
 
       if (fetchedPost) {
         setPost(fetchedPost);
+         if (fetchedPost.authorId) {
+            const adminStatus = await isAdmin(fetchedPost.authorId);
+            setIsAuthorAdmin(adminStatus);
+        }
 
         // Unique view logic using sessionStorage
         if (typeof window !== 'undefined') {
@@ -275,12 +282,19 @@ export default function PostPage() {
                             </CardHeader>
                             <CardContent className="flex items-center gap-4">
                                 <Avatar className="h-16 w-16 border-2 border-primary">
-                                     <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                                    <AvatarFallback>NY</AvatarFallback>
+                                     <AvatarImage src={post.authorPhotoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${post.authorId}`} alt={post.author || 'Yazar'} />
+                                    <AvatarFallback>{post.author ? post.author.substring(0, 2).toUpperCase() : 'Y'}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-bold text-lg">Mearic Ekibi</p>
-                                    <p className="text-sm text-muted-foreground">İçerik Editörleri</p>
+                                    <p className="font-bold text-lg">{post.author || 'Mearic Ekibi'}</p>
+                                     {isAuthorAdmin ? (
+                                        <p className="text-sm font-semibold text-amber-500 flex items-center gap-1">
+                                            <ShieldCheck size={14} />
+                                            Admin
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">Topluluk Üyesi</p>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
