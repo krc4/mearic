@@ -13,7 +13,7 @@ import {
   Search,
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
-import { toggleLikePost } from "@/lib/firebase/services";
+import { toggleLikePost, getPostsByCategory } from "@/lib/firebase/services";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 
 interface CategoryClientPageProps {
     initialPosts: Post[];
+    category: string;
     pageTitle: string;
     pageDescription: string;
     headerImage: string;
@@ -50,6 +51,7 @@ const itemVariants = {
 
 export function CategoryClientPage({ 
   initialPosts, 
+  category,
   pageTitle,
   pageDescription,
   headerImage,
@@ -58,12 +60,14 @@ export function CategoryClientPage({
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(initialPosts.length === 9);
+  const [lastVisiblePost, setLastVisiblePost] = useState<any>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Set posts from server props
+    // Set posts from server props and sort them by date initially
     const sortedByDate = [...initialPosts].sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
@@ -83,9 +87,7 @@ export function CategoryClientPage({
     }
   }, [initialPosts]);
 
-  const sortedPosts = useMemo(() => {
-    if (loading) return [];
-    
+  const sortedAndFilteredPosts = useMemo(() => {
     const filtered = posts.filter(post => 
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -97,9 +99,29 @@ export function CategoryClientPage({
         const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
         return dateB - dateA;
       }
+      // "trending"
       return (b.views || 0) - (a.views || 0);
     });
-  }, [filter, posts, loading, searchTerm]);
+  }, [filter, posts, searchTerm]);
+
+  const fetchMorePosts = async () => {
+    if (!hasMore || loadingMore) return;
+
+    setLoadingMore(true);
+    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastVisiblePost);
+    
+    // Sort new posts by date before adding
+    const sortedNewPosts = newPosts.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+    });
+
+    setPosts(prevPosts => [...prevPosts, ...sortedNewPosts]);
+    setLastVisiblePost(lastVisible);
+    setHasMore(newPosts.length === 9);
+    setLoadingMore(false);
+  };
   
   const handleLikeToggle = async (postId: string) => {
     const newLikedState = !likedPosts.has(postId);
@@ -113,6 +135,13 @@ export function CategoryClientPage({
         }
         return newSet;
     });
+
+     setPosts(currentPosts => currentPosts.map(p => {
+        if (p.id === postId) {
+            return { ...p, likes: p.likes + (newLikedState ? 1 : -1) };
+        }
+        return p;
+    }));
 
     if (typeof window !== 'undefined') {
         localStorage.setItem(`liked-${postId}`, String(newLikedState));
@@ -137,6 +166,12 @@ export function CategoryClientPage({
         if (typeof window !== 'undefined') {
             localStorage.setItem(`liked-${postId}`, String(!newLikedState));
         }
+         setPosts(currentPosts => currentPosts.map(p => {
+            if (p.id === postId) {
+                return { ...p, likes: p.likes + (newLikedState ? -1 : 1) };
+            }
+            return p;
+        }));
         toast({
             title: "Hata!",
             description: "Beğeni durumu güncellenemedi.",
@@ -230,102 +265,113 @@ export function CategoryClientPage({
           </div>
         </div>
 
-        <main className="container mx-auto flex-grow px-4 pb-20">
+        <main className="container mx-auto flex-grow px-4 pb-12">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           >
-            <AnimatePresence>
-               {loading ? (
-                 Array.from({ length: 3 }).map((_, i) => (
-                    <motion.div
-                      key={i}
-                      variants={itemVariants}
-                      className="group relative aspect-[3/4] overflow-hidden rounded-3xl"
-                    >
-                      <Skeleton className="w-full h-full rounded-2xl"/>
-                    </motion.div>
-                 ))
-              ) : (
-                sortedPosts.map((post) => (
-                    <motion.article
-                        key={post.id}
-                        variants={itemVariants}
-                        className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
-                        style={{ transformStyle: "preserve-3d" }}
-                    >
-                        <div
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                            style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
-                            data-ai-hint="hadith miracle"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            {sortedAndFilteredPosts.map((post) => (
+                <motion.article
+                    key={post.id}
+                    variants={itemVariants}
+                    className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
+                    style={{ transformStyle: "preserve-3d" }}
+                >
+                    <div
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                        style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
+                        data-ai-hint="hadith miracle"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                        <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
+                    <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
 
-                        <div className="absolute bottom-0 left-0 right-0 p-6">
-                            <Badge variant="secondary" className="mb-2">
-                                {post.category}
-                            </Badge>
-                            <h3 className="text-2xl font-bold text-white leading-tight">
-                                {post.title}
-                            </h3>
-                            <p className="mt-2 text-sm text-white/80 line-clamp-2">
-                                {post.description}
-                            </p>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                        <Badge variant="secondary" className="mb-2">
+                            {post.category}
+                        </Badge>
+                        <h3 className="text-2xl font-bold text-white leading-tight">
+                            {post.title}
+                        </h3>
+                        <p className="mt-2 text-sm text-white/80 line-clamp-2">
+                            {post.description}
+                        </p>
 
-                            <div className="mt-4 flex items-center justify-between">
-                                <span className="text-xs text-white/60 flex items-center gap-1">
-                                    <Clock size={14} /> {post.readTime} dk
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                      asChild
-                                      size="sm"
-                                      variant="ghost"
-                                      className="rounded-full text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                        <div className="mt-4 flex items-center justify-between">
+                            <span className="text-xs text-white/60 flex items-center gap-1">
+                                <Clock size={14} /> {post.readTime} dk
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    variant="ghost"
+                                    className="rounded-full text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                                >
+                                    <Link href={`/posts/${post.slug}`}>
+                                    Oku <ArrowUpRight className="h-4 w-4 ml-1" />
+                                    </Link>
+                                </Button>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="text-white hover:bg-white/10 rounded-full"
+                                    onClick={() => handleLikeToggle(post.id)}
+                                >
+                                    <motion.div
+                                    animate={
+                                        likedPosts.has(post.id)
+                                        ? { scale: [1, 1.4, 1] }
+                                        : { scale: 1 }
+                                    }
                                     >
-                                      <Link href={`/posts/${post.slug}`}>
-                                        Oku <ArrowUpRight className="h-4 w-4 ml-1" />
-                                      </Link>
-                                    </Button>
-                                    <Button
-                                      size="icon"
-                                      variant="ghost"
-                                      className="text-white hover:bg-white/10 rounded-full"
-                                      onClick={() => handleLikeToggle(post.id)}
-                                    >
-                                      <motion.div
-                                        animate={
-                                          likedPosts.has(post.id)
-                                            ? { scale: [1, 1.4, 1] }
-                                            : { scale: 1 }
-                                        }
-                                      >
-                                        <Heart
-                                          className={`h-5 w-5 ${likedPosts.has(post.id) ? "text-red-500 fill-current" : ""}`}
-                                        />
-                                      </motion.div>
-                                    </Button>
-                                    <Button
-                                      size="icon"
-                                      variant="ghost"
-                                      className="text-white hover:bg-white/10 rounded-full"
-                                      onClick={() => handleShare(post.title, post.slug)}
-                                    >
-                                      <Share2 size={16} />
-                                    </Button>
-                                </div>
+                                    <Heart
+                                        className={`h-5 w-5 ${likedPosts.has(post.id) ? "text-red-500 fill-current" : ""}`}
+                                    />
+                                    </motion.div>
+                                </Button>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="text-white hover:bg-white/10 rounded-full"
+                                    onClick={() => handleShare(post.title, post.slug)}
+                                >
+                                    <Share2 size={16} />
+                                </Button>
                             </div>
                         </div>
-                    </motion.article>
-              ))
-            )}
-            </AnimatePresence>
+                    </div>
+                </motion.article>
+            ))}
           </motion.div>
+          
+          <AnimatePresence>
+            {loadingMore && (
+                <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <motion.div
+                        key={i}
+                        variants={itemVariants}
+                        className="group relative aspect-[3/4] overflow-hidden rounded-3xl"
+                        >
+                        <Skeleton className="w-full h-full rounded-2xl"/>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            )}
+          </AnimatePresence>
+
+
         </main>
+        {hasMore && !loadingMore && (
+            <div className="container mx-auto text-center pb-20">
+                <Button onClick={fetchMorePosts} disabled={loadingMore} size="lg">
+                    {loadingMore ? "Yükleniyor..." : "Daha Fazla Yükle"}
+                </Button>
+            </div>
+        )}
     </>
   );
 }

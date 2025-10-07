@@ -109,22 +109,14 @@ export const getPostsByCategory = async (
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         let q;
+        const postsRef = collection(db, "posts");
+        const constraints = [where("category", "==", category), limit(postsLimit)];
+
         if (lastVisible) {
-            q = query(
-                collection(db, "posts"),
-                where("category", "==", category),
-                orderBy("createdAt", "desc"),
-                startAfter(lastVisible),
-                limit(postsLimit)
-            );
-        } else {
-            q = query(
-                collection(db, "posts"),
-                where("category", "==", category),
-                orderBy("createdAt", "desc"),
-                limit(postsLimit)
-            );
+            constraints.push(startAfter(lastVisible));
         }
+
+        q = query(postsRef, ...constraints);
 
         const querySnapshot = await getDocs(q);
         const posts = querySnapshot.docs.map(serializePost);
@@ -136,6 +128,7 @@ export const getPostsByCategory = async (
         return { posts: [], lastVisible: null };
     }
 };
+
 
 
 export const getPostBySlug = async (slug: string): Promise<Post | null> => {
