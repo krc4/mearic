@@ -34,7 +34,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
+      staggerChildren: 0.1,
     },
   },
 };
@@ -58,7 +58,6 @@ export function CategoryClientPage({
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [sortedAndFilteredPosts, setSortedAndFilteredPosts] = useState<Post[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length >= 9);
   const [lastVisiblePost, setLastVisiblePost] = useState<any>(null);
@@ -78,13 +77,13 @@ export function CategoryClientPage({
     }
   }, [posts]);
 
-  useEffect(() => {
+  const sortedAndFilteredPosts = useMemo(() => {
     const filtered = posts.filter(post => 
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const sorted = [...filtered].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (filter === "latest") {
         const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
         const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
@@ -93,8 +92,6 @@ export function CategoryClientPage({
       // "trending"
       return (b.views || 0) - (a.views || 0);
     });
-    setSortedAndFilteredPosts(sorted);
-
   }, [posts, filter, searchTerm]);
 
 
@@ -108,7 +105,10 @@ export function CategoryClientPage({
         return;
     };
     
-    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastVisiblePost || initialPosts[initialPosts.length - 1]);
+    // Pass the last document from the *unsorted* `posts` array
+    const lastPostInCurrentList = posts.length > 0 ? posts[posts.length-1] : null;
+
+    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastPostInCurrentList);
     
     setPosts(prevPosts => [...prevPosts, ...newPosts]);
     setLastVisiblePost(lastVisible);
@@ -266,7 +266,7 @@ export function CategoryClientPage({
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           >
             {sortedAndFilteredPosts.map((post) => (
-                <motion.article
+                <motion.div
                     key={post.id}
                     variants={itemVariants}
                     layout
@@ -337,7 +337,7 @@ export function CategoryClientPage({
                             </div>
                         </div>
                     </div>
-                </motion.article>
+                </motion.div>
             ))}
           </motion.div>
           
@@ -369,7 +369,3 @@ export function CategoryClientPage({
     </>
   );
 }
-
-    
-
-    
