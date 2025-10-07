@@ -23,7 +23,6 @@ import { Input } from "@/components/ui/input";
 
 interface CategoryClientPageProps {
     initialPosts: Post[];
-    category: string;
     pageTitle: string;
     pageDescription: string;
     headerImage: string;
@@ -51,7 +50,6 @@ const itemVariants = {
 
 export function CategoryClientPage({ 
   initialPosts, 
-  category,
   pageTitle,
   pageDescription,
   headerImage,
@@ -67,18 +65,10 @@ export function CategoryClientPage({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Set posts from server props and sort them by date initially
-    const sortedByDate = [...initialPosts].sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
-      return dateB - dateA;
-    });
-    setPosts(sortedByDate);
-
     // Load liked posts from local storage on client
     if (typeof window !== 'undefined') {
       const liked = new Set<string>();
-      sortedByDate.forEach(post => {
+      initialPosts.forEach(post => {
           if(localStorage.getItem(`liked-${post.id}`) === 'true') {
               liked.add(post.id);
           }
@@ -108,16 +98,15 @@ export function CategoryClientPage({
     if (!hasMore || loadingMore) return;
 
     setLoadingMore(true);
+    const category = initialPosts[0]?.category;
+    if (!category) {
+        setLoadingMore(false);
+        return;
+    };
+    
     const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastVisiblePost);
     
-    // Sort new posts by date before adding
-    const sortedNewPosts = newPosts.sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-    });
-
-    setPosts(prevPosts => [...prevPosts, ...sortedNewPosts]);
+    setPosts(prevPosts => [...prevPosts, ...newPosts]);
     setLastVisiblePost(lastVisible);
     setHasMore(newPosts.length === 9);
     setLoadingMore(false);
@@ -138,7 +127,7 @@ export function CategoryClientPage({
 
      setPosts(currentPosts => currentPosts.map(p => {
         if (p.id === postId) {
-            return { ...p, likes: p.likes + (newLikedState ? 1 : -1) };
+            return { ...p, likes: (p.likes || 0) + (newLikedState ? 1 : -1) };
         }
         return p;
     }));
@@ -168,7 +157,7 @@ export function CategoryClientPage({
         }
          setPosts(currentPosts => currentPosts.map(p => {
             if (p.id === postId) {
-                return { ...p, likes: p.likes + (newLikedState ? -1 : 1) };
+                return { ...p, likes: (p.likes || 0) + (newLikedState ? -1 : 1) };
             }
             return p;
         }));
@@ -375,3 +364,5 @@ export function CategoryClientPage({
     </>
   );
 }
+
+    
