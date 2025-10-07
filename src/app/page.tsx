@@ -1,7 +1,7 @@
 
 'use client';
 import Image from 'next/image';
-import { Clock, Rss, ArrowUpRight, Bot, BookOpen, Star, HeartPulse, Edit3, Volume2, VolumeX, Play, Sparkles } from 'lucide-react';
+import { Clock, ArrowUpRight, Bot, BookOpen, Star, HeartPulse, Edit3, Volume2, VolumeX, Play, Sparkles, ArrowRight } from 'lucide-react';
 import { mainArticle, hadithArticle1, hadithArticle2, blogArticle1, blogArticle2, secondArticle, thirdArticle } from '@/lib/posts';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
@@ -524,26 +524,34 @@ export default function Home() {
             <DidYouKnowSection />
           </ScrollAnimationWrapper>
 
-          {/* Newsletter */}
+          {/* Popular Topics Section */}
           <section>
             <ScrollAnimationWrapper>
               <Card className="bg-primary/10 border-primary/20">
-                <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="text-center md:text-left">
-                    <h3 className="flex items-center justify-center md:justify-start gap-3 text-2xl font-bold text-primary">
-                      <Rss className="w-7 h-7"/>
-                      <span>Bültenimize Katılın</span>
+                <CardContent className="p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-8">
+                  <div className="text-center lg:text-left">
+                    <h3 className="flex items-center justify-center lg:justify-start gap-3 text-2xl font-bold text-primary">
+                      <Star className="w-7 h-7"/>
+                      <span>Popüler Konular</span>
                     </h3>
                     <p className="text-muted-foreground mt-2 max-w-lg">
-                      En son yazılardan, İslami içeriklerden ve gelişmelerden ilk siz haberdar olun.
+                      En çok merak edilen ve okunan konularımıza göz atın.
                     </p>
                   </div>
-                  <form className="w-full md:w-auto flex items-center gap-2">
-                    <input type="email" placeholder="E-posta adresiniz" className="flex-grow md:min-w-[300px] bg-background p-2 rounded-md" />
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      Abone Ol
-                    </Button>
-                  </form>
+                  <div className="w-full lg:w-auto flex flex-col items-stretch sm:items-center gap-3">
+                      <Link href={`/posts/${mainArticle.slug}`} className="flex items-center justify-between p-3 rounded-lg hover:bg-primary/10 transition-colors group">
+                          <span>{mainArticle.title}</span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                      <Link href={`/posts/${secondArticle.slug}`} className="flex items-center justify-between p-3 rounded-lg hover:bg-primary/10 transition-colors group">
+                          <span>{secondArticle.title}</span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                      <Link href={`/posts/${thirdArticle.slug}`} className="flex items-center justify-between p-3 rounded-lg hover:bg-primary/10 transition-colors group">
+                          <span>{thirdArticle.title}</span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                  </div>
                 </CardContent>
               </Card>
             </ScrollAnimationWrapper>
@@ -562,5 +570,3 @@ export default function Home() {
     </>
   );
 }
-
-    
