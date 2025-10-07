@@ -6,7 +6,7 @@ import { CategoryClientPage } from "@/components/category-client-page";
 import { Sparkles } from "lucide-react";
 
 export default async function KuranMucizeleriPage() {
-  const initialPosts = await getPostsByCategory("Kuran Mucizeleri");
+  const { posts } = await getPostsByCategory("Kuran Mucizeleri");
 
   return (
     <>
@@ -15,7 +15,7 @@ export default async function KuranMucizeleriPage() {
         <Header />
         
         <CategoryClientPage 
-          initialPosts={initialPosts} 
+          initialPosts={posts} 
           pageTitle="Kuran Mucizeleri"
           pageDescription="1400 yıl önce bildirilmiş bilimsel, sayısal ve edebi mucizeleri keşfet."
           headerImage="/kuran-mucizeleri.png"

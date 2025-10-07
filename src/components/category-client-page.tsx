@@ -11,6 +11,7 @@ import {
   Eye,
   ChevronRight,
   Search,
+  BookOpen,
 } from "lucide-react";
 import type { Post } from "@/lib/posts";
 import { toggleLikePost, getPostsByCategory } from "@/lib/firebase/services";
@@ -76,22 +77,31 @@ export function CategoryClientPage({
       setLikedPosts(liked);
     }
   }, [posts]);
-
+  
+  // This memoizes the final list of posts to be rendered.
+  // It re-calculates only when posts, filter, or searchTerm change.
   const sortedAndFilteredPosts = useMemo(() => {
-    const filtered = posts.filter(post => 
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let tempPosts = [...posts];
 
-    return [...filtered].sort((a, b) => {
-      if (filter === "latest") {
-        const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
-        return dateB - dateA;
-      }
-      // "trending"
-      return (b.views || 0) - (a.views || 0);
-    });
+    // Filter posts by search term first
+    if (searchTerm) {
+        tempPosts = tempPosts.filter(post => 
+            post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+    
+    // Then, sort the filtered posts
+    if (filter === "latest") {
+      // The default order from Firebase is already 'latest'
+      return tempPosts;
+    }
+    
+    if (filter === "trending") {
+      return tempPosts.sort((a, b) => (b.views || 0) - (a.views || 0));
+    }
+    
+    return tempPosts;
   }, [posts, filter, searchTerm]);
 
 
@@ -99,19 +109,21 @@ export function CategoryClientPage({
     if (!hasMore || loadingMore) return;
 
     setLoadingMore(true);
+    // Assuming the category is the same for all initial posts
     const category = initialPosts[0]?.category;
     if (!category) {
         setLoadingMore(false);
         return;
     };
     
-    // Pass the last document from the *unsorted* `posts` array
-    const lastPostInCurrentList = posts.length > 0 ? posts[posts.length-1] : null;
-
-    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastPostInCurrentList);
+    // `lastVisiblePost` is the actual DocumentSnapshot from the previous query
+    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastVisiblePost);
     
-    setPosts(prevPosts => [...prevPosts, ...newPosts]);
-    setLastVisiblePost(lastVisible);
+    if (newPosts.length > 0) {
+        setPosts(prevPosts => [...prevPosts, ...newPosts]);
+        setLastVisiblePost(lastVisible);
+    }
+    
     setHasMore(newPosts.length === 9);
     setLoadingMore(false);
   };
@@ -210,6 +222,11 @@ export function CategoryClientPage({
             transition={{ duration: 0.7 }}
             className="text-center text-white"
           >
+            <div className="mb-4 flex justify-center">
+                 <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <BookOpen className="w-8 h-8"/>
+                 </div>
+            </div>
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
               {pageTitle}
             </h1>
@@ -266,7 +283,7 @@ export function CategoryClientPage({
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           >
             {sortedAndFilteredPosts.map((post) => (
-                <motion.div
+                <motion.article
                     key={post.id}
                     variants={itemVariants}
                     layout
@@ -337,7 +354,7 @@ export function CategoryClientPage({
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </motion.article>
             ))}
           </motion.div>
           
@@ -359,7 +376,7 @@ export function CategoryClientPage({
 
 
         </main>
-        {hasMore && !loadingMore && (
+        {hasMore && !loadingMore && sortedAndFilteredPosts.length > 0 && (
             <div className="container mx-auto text-center pb-20">
                 <Button onClick={fetchMorePosts} disabled={loadingMore} size="lg">
                     {loadingMore ? "Yükleniyor..." : "Daha Fazla Yükle"}

@@ -7,7 +7,7 @@ import { Sparkles } from "lucide-react";
 
 
 export default async function IslamiBloglarPage() {
-  const initialPosts = await getPostsByCategory("İslami Bloglar");
+  const { posts } = await getPostsByCategory("İslami Bloglar");
 
   return (
     <>
@@ -16,7 +16,7 @@ export default async function IslamiBloglarPage() {
         <Header />
         
         <CategoryClientPage 
-          initialPosts={initialPosts}
+          initialPosts={posts}
           pageTitle="İslami Bloglar"
           pageDescription="İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak yazılar."
           headerImage="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop"

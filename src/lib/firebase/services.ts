@@ -110,7 +110,8 @@ export const getPostsByCategory = async (
     try {
         let q;
         const postsRef = collection(db, "posts");
-        const constraints = [where("category", "==", category), limit(postsLimit)];
+        // We order by creation date descendingly for pagination to work correctly
+        const constraints = [where("category", "==", category), orderBy("createdAt", "desc"), limit(postsLimit)];
 
         if (lastVisible) {
             constraints.push(startAfter(lastVisible));
@@ -363,25 +364,3 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
         return false;
     }
 }
-
-async function seedInitialData() {
-    // Ensure fatihkoruc36@gmail.com is an admin
-    const adminEmail = "fatihkoruc36@gmail.com";
-    const user = await findUserByEmail(adminEmail);
-    if (user) {
-        const adminRef = doc(db, "admins", user.uid);
-        const adminSnap = await getDoc(adminRef);
-        if (!adminSnap.exists()) {
-             console.log(`Making ${adminEmail} an admin...`);
-             await setDoc(adminRef, {
-                email: adminEmail,
-                displayName: user.displayName,
-                photoURL: user.photoURL,
-                addedAt: serverTimestamp(),
-            });
-            console.log(`${adminEmail} is now an admin.`);
-        }
-    }
-}
-
-seedInitialData();

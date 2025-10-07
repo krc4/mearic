@@ -7,7 +7,7 @@ import { Sparkles } from "lucide-react";
 
 
 export default async function HadisMucizeleriPage() {
-  const initialPosts = await getPostsByCategory("Hadis Mucizeleri");
+  const { posts } = await getPostsByCategory("Hadis Mucizeleri");
 
   return (
     <>
@@ -16,7 +16,7 @@ export default async function HadisMucizeleriPage() {
         <Header />
         
         <CategoryClientPage 
-          initialPosts={initialPosts}
+          initialPosts={posts}
           pageTitle="Hadislerdeki Mucizeler"
           pageDescription="Peygamber Efendimiz'in (S.A.V) 1400 yıl önce bildirdiği bilimsel ve tıbbi gerçekleri keşfedin."
           headerImage="/hadis-mucizeleri.png"
