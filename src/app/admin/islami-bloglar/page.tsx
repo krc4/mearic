@@ -106,7 +106,7 @@ export default function IslamiBloglarAdminPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             setLoading(true);
-            const fetchedPosts = await getPostsByCategory("İslami Bloglar");
+            const { posts: fetchedPosts } = await getPostsByCategory("İslami Bloglar", 1000); // Fetch all for admin
             const sortedPosts = fetchedPosts.sort((a, b) => {
                  const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
                  const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
