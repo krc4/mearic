@@ -34,7 +34,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.05,
     },
   },
 };
@@ -58,8 +58,9 @@ export function CategoryClientPage({
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [sortedAndFilteredPosts, setSortedAndFilteredPosts] = useState<Post[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(initialPosts.length === 9);
+  const [hasMore, setHasMore] = useState(initialPosts.length >= 9);
   const [lastVisiblePost, setLastVisiblePost] = useState<any>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,22 +69,22 @@ export function CategoryClientPage({
     // Load liked posts from local storage on client
     if (typeof window !== 'undefined') {
       const liked = new Set<string>();
-      initialPosts.forEach(post => {
+      posts.forEach(post => {
           if(localStorage.getItem(`liked-${post.id}`) === 'true') {
               liked.add(post.id);
           }
       });
       setLikedPosts(liked);
     }
-  }, [initialPosts]);
+  }, [posts]);
 
-  const sortedAndFilteredPosts = useMemo(() => {
+  useEffect(() => {
     const filtered = posts.filter(post => 
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (post.description || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    return [...filtered].sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
       if (filter === "latest") {
         const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
         const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
@@ -92,7 +93,10 @@ export function CategoryClientPage({
       // "trending"
       return (b.views || 0) - (a.views || 0);
     });
-  }, [filter, posts, searchTerm]);
+    setSortedAndFilteredPosts(sorted);
+
+  }, [posts, filter, searchTerm]);
+
 
   const fetchMorePosts = async () => {
     if (!hasMore || loadingMore) return;
@@ -104,7 +108,7 @@ export function CategoryClientPage({
         return;
     };
     
-    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastVisiblePost);
+    const { posts: newPosts, lastVisible } = await getPostsByCategory(category, 9, lastVisiblePost || initialPosts[initialPosts.length - 1]);
     
     setPosts(prevPosts => [...prevPosts, ...newPosts]);
     setLastVisiblePost(lastVisible);
@@ -265,6 +269,7 @@ export function CategoryClientPage({
                 <motion.article
                     key={post.id}
                     variants={itemVariants}
+                    layout
                     className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
                     style={{ transformStyle: "preserve-3d" }}
                 >
@@ -364,5 +369,7 @@ export function CategoryClientPage({
     </>
   );
 }
+
+    
 
     
