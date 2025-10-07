@@ -16,30 +16,12 @@ import { cn } from '@/lib/utils';
 
 
 export default function Home() {
-  const [showVideo, setShowVideo] = useState(false);
-  const [muted, setMuted] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const videoSrc = '/anasayfa_video.mp4'; // Using a single, optimized video
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
   
-  const handlePlayVideo = () => {
-    setShowVideo(true);
-    setMuted(false);
-  };
-
-  const handleVideoEnd = () => {
-    if (videoRef.current) {
-      videoRef.current.play();
+  const handleDiscoverClick = () => {
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  const toggleMute = () => {
-    setMuted(currentMuted => !currentMuted);
   };
 
   return (
@@ -60,52 +42,13 @@ export default function Home() {
          />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90" />
 
-        <AnimatePresence>
-          {showVideo && isClient && (
-             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0 w-full h-full"
-            >
-              <video
-                ref={videoRef}
-                src={videoSrc}
-                autoPlay
-                muted={muted}
-                playsInline
-                onEnded={handleVideoEnd}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/30" />
-               <button
-                  onClick={toggleMute}
-                  className="absolute top-6 right-6 z-30 text-white/70 hover:text-white transition-colors"
-                >
-                  {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-                </button>
-                 <button
-                  onClick={() => setShowVideo(false)}
-                  className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 text-white/70 hover:text-white transition-colors text-sm bg-black/30 px-3 py-1 rounded-full"
-                >
-                  Videoyu Kapat
-                </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-radial from-yellow-300 via-transparent to-transparent blur-2xl"
         />
 
-        <div className={cn(
-            "relative z-20 flex flex-col items-center justify-center h-full text-center text-white transition-opacity duration-500",
-            showVideo && "opacity-0 pointer-events-none"
-          )}
-        >
+        <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -132,7 +75,7 @@ export default function Home() {
               size="lg"
               variant="outline"
               className="rounded-full bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20 hover:text-white"
-              onClick={handlePlayVideo}
+              onClick={handleDiscoverClick}
             >
               <Play className="mr-2 h-5 w-5" />
               Keşfet
@@ -619,3 +562,5 @@ export default function Home() {
     </>
   );
 }
+
+    
