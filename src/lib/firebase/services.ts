@@ -108,16 +108,14 @@ export const getPostsByCategory = async (
     lastVisible: any = null
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
-        let q;
         const postsRef = collection(db, "posts");
-        // We order by creation date descendingly for pagination to work correctly
-        const constraints = [where("category", "==", category), orderBy("createdAt", "desc"), limit(postsLimit)];
+        const constraints = [where("category", "==", category), limit(postsLimit)];
 
         if (lastVisible) {
             constraints.push(startAfter(lastVisible));
         }
 
-        q = query(postsRef, ...constraints);
+        const q = query(postsRef, ...constraints);
 
         const querySnapshot = await getDocs(q);
         const posts = querySnapshot.docs.map(serializePost);
