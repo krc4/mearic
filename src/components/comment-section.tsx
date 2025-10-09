@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2, Star } from "lucide-react"
+import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2, Star, Flag } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost, getAdminPermissions, deleteComment, CommentPayload } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost, getAdminPermissions, deleteComment, reportComment, CommentPayload } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
@@ -22,13 +22,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 import { motion } from "framer-motion"
 import { AdminPermissions } from "@/lib/admin"
 
 
-const CommentItem = ({ comment, currentUserId, canDelete, onDeleteClick }: { comment: Comment, currentUserId: string | null, canDelete: boolean, onDeleteClick: (commentId: string) => void }) => {
+const CommentItem = ({ comment, currentUserId, canDelete, onDeleteClick, onReportClick }: { comment: Comment, currentUserId: string | null, canDelete: boolean, onDeleteClick: (commentId: string) => void, onReportClick: (commentId: string) => void }) => {
     const isOwner = comment.userId === currentUserId;
     const showDelete = canDelete || isOwner;
 
@@ -62,7 +63,7 @@ const CommentItem = ({ comment, currentUserId, canDelete, onDeleteClick }: { com
                   </Badge>
                 )}
               </div>
-              {showDelete && (
+              
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
@@ -70,12 +71,20 @@ const CommentItem = ({ comment, currentUserId, canDelete, onDeleteClick }: { com
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background border-border">
-                    <DropdownMenuItem onClick={() => onDeleteClick(comment.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                      <Trash2 size={14} className="mr-2" /> Sil
+                    <DropdownMenuItem onClick={() => onReportClick(comment.id)}>
+                      <Flag size={14} className="mr-2" /> Şikayet Et
                     </DropdownMenuItem>
+                    {showDelete && (
+                        <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onDeleteClick(comment.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                <Trash2 size={14} className="mr-2" /> Sil
+                            </DropdownMenuItem>
+                        </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              
             </div>
 
             <p className="text-xs text-muted-foreground mt-1">
@@ -118,7 +127,7 @@ interface CommentSectionProps {
 export function CommentSection({ postId, onCommentCountChange }: CommentSectionProps) {
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
-    const [permissions, setPermissions] = useState<AdminPermissions>({ canDeleteComments: false });
+    const [permissions, setPermissions] = useState<AdminPermissions>({ canDeleteComments: false, canCreatePosts: false, canEditPosts: false, canDeletePosts: false, canManageAdmins: false });
     const [authLoading, setAuthLoading] = useState(true);
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
@@ -134,7 +143,7 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
                 const adminPerms = await getAdminPermissions(currentUser.uid);
                 setPermissions(adminPerms);
             } else {
-                setPermissions({ canDeleteComments: false });
+                setPermissions({ canDeleteComments: false, canCreatePosts: false, canEditPosts: false, canDeletePosts: false, canManageAdmins: false });
             }
             setAuthLoading(false);
         });
@@ -165,7 +174,7 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
             return;
         }
 
-        const isCurrentUserAdmin = permissions.canDeleteComments; // A simple proxy for admin status
+        const isCurrentUserAdmin = await getAdminPermissions(user.uid);
 
         const commentData: CommentPayload = {
             postId,
@@ -173,7 +182,8 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
             username: user.displayName || "Anonim",
             photoURL: user.photoURL || "",
             text: newComment,
-            isAdmin: isCurrentUserAdmin, 
+            isAdmin: Object.values(isCurrentUserAdmin).some(p => p), 
+            isReported: false,
         };
 
         const newCommentDoc = await addComment(commentData);
@@ -202,6 +212,23 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
         setCommentToDelete(commentId);
         setIsAlertOpen(true);
     };
+    
+    const handleReportClick = async (commentId: string) => {
+        const success = await reportComment(postId, commentId);
+        if (success) {
+            toast({
+                title: "Şikayetiniz Alındı",
+                description: "Yorum incelenmek üzere ekibimize iletildi. Desteğiniz için teşekkürler.",
+            });
+        } else {
+            toast({
+                title: "Hata",
+                description: "Şikayetiniz gönderilirken bir sorun oluştu.",
+                variant: "destructive"
+            });
+        }
+    };
+
 
     const handleDeleteConfirm = async () => {
         if (!commentToDelete || !postId) return;
@@ -277,6 +304,7 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
                                 currentUserId={user?.uid || null}
                                 canDelete={permissions.canDeleteComments} 
                                 onDeleteClick={handleDeleteClick}
+                                onReportClick={handleReportClick}
                             />
                         ))
                     ) : (

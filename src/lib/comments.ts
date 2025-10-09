@@ -9,6 +9,7 @@ export interface Comment {
   text: string;
   createdAt: Timestamp;
   isAdmin?: boolean;
+  isReported?: boolean;
 }
 
 export type CommentPayload = Omit<Comment, 'id' | 'createdAt'>;

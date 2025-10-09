@@ -14,6 +14,7 @@ import {
   Sparkles,
   PenSquare,
   Shield,
+  ShieldAlert,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -113,6 +114,14 @@ function AdminSidebar() {
                 <Link href="/admin/islami-bloglar">
                   <PenSquare />
                   <span>İslami Bloglar</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Şikayetler">
+                <Link href="/admin/sikayetler">
+                  <ShieldAlert />
+                  <span>Şikayetler</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

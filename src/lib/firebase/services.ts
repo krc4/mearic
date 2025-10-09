@@ -220,6 +220,7 @@ export const addComment = async (commentData: CommentPayload): Promise<Comment |
     const commentWithTimestamp = {
       ...commentData,
       createdAt: serverTimestamp(),
+      isReported: false, // Ensure new comments are not reported
     };
     
     const docRef = await addDoc(
@@ -240,6 +241,7 @@ export const addComment = async (commentData: CommentPayload): Promise<Comment |
       text: commentData.text,
       createdAt: newCommentData?.createdAt as Timestamp,
       isAdmin: commentData.isAdmin,
+      isReported: false,
     };
 
     return newComment;
@@ -295,6 +297,80 @@ export const deleteComment = async (postId: string, commentId: string): Promise<
     } catch (error) {
         console.error('Error deleting comment: ', error);
         return false;
+    }
+};
+
+export const reportComment = async (postId: string, commentId: string): Promise<boolean> => {
+    try {
+        const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+        await updateDoc(commentRef, { isReported: true });
+        return true;
+    } catch (error) {
+        console.error('Error reporting comment: ', error);
+        return false;
+    }
+};
+
+export const unreportComment = async (postId: string, commentId: string): Promise<boolean> => {
+    try {
+        const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+        await updateDoc(commentRef, { isReported: false });
+        return true;
+    } catch (error) {
+        console.error('Error un-reporting comment: ', error);
+        return false;
+    }
+};
+
+export type CommentWithPostInfo = Comment & {
+    postTitle: string;
+    postSlug: string;
+};
+
+export const getPostTitle = async (postId: string): Promise<{title: string, slug: string} | null> => {
+    try {
+        const postRef = doc(db, "posts", postId);
+        const postSnap = await getDoc(postRef);
+        if (postSnap.exists()) {
+            return {
+                title: postSnap.data().title || 'Başlıksız Yazı',
+                slug: postSnap.data().slug || postId,
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error("Error getting post title: ", error);
+        return null;
+    }
+};
+
+
+export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> => {
+    try {
+        const commentsGroupRef = collectionGroup(db, 'comments');
+        const q = query(commentsGroupRef, where('isReported', '==', true), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+
+        const comments: CommentWithPostInfo[] = [];
+
+        for (const docSnap of querySnapshot.docs) {
+            const comment = docSnap.data() as Comment;
+            const postInfo = await getPostTitle(comment.postId);
+            
+            if (postInfo) {
+                 comments.push({
+                    id: docSnap.id,
+                    ...comment,
+                    postTitle: postInfo.title,
+                    postSlug: postInfo.slug
+                });
+            }
+        }
+
+        return comments;
+    } catch (error) {
+        console.error('Error getting all reported comments: ', error);
+        return [];
     }
 };
 
@@ -539,5 +615,3 @@ export const deleteUserByAdmin = async (uid: string): Promise<{ success: boolean
         return { success: false, message: "Kullanıcı silinirken bir hata oluştu." };
     }
 };
-
-
