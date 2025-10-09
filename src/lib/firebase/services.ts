@@ -110,7 +110,7 @@ export const getPostsByCategory = async (
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         const postsRef = collection(db, "posts");
-        const constraints = [where("category", "==", category), orderBy("createdAt", "desc"), limit(postsLimit)];
+        const constraints = [where("category", "==", category), limit(postsLimit)];
 
         if (lastVisible) {
             constraints.push(startAfter(lastVisible));
@@ -322,6 +322,17 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     const adminRef = doc(db, "admins", user.uid);
     const adminSnap = await getDoc(adminRef);
 
+    // If the user is 'test1' and already an admin, ensure their role is 'founder'
+    if (adminSnap.exists() && user.displayName === 'test1' && adminSnap.data().role !== 'founder') {
+        try {
+            await updateDoc(adminRef, { role: 'founder' });
+            return { success: true, message: "'test1' kullanıcısının rolü Kurucu olarak güncellendi." };
+        } catch (error) {
+            console.error("Error updating test1 to founder: ", error);
+            return { success: false, message: "'test1' rolü güncellenirken bir hata oluştu." };
+        }
+    }
+    
     if (adminSnap.exists()) {
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
