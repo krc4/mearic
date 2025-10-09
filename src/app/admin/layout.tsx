@@ -132,14 +132,6 @@ function AdminSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Yorumlar">
-                <Link href="/admin/yorumlar">
-                  <MessageSquare />
-                  <span>Yorumlar</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Ayarlar">
                 <Link href="#">

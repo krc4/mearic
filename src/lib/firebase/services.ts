@@ -3,7 +3,7 @@
 import { db } from './config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer, limit, startAfter, collectionGroup } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
-import type { Comment, CommentWithPostInfo } from '@/lib/comments';
+import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
 import type { AdminUser, AdminRole, AdminPermissions } from '@/lib/admin';
 import type { SiteUser } from '@/lib/users';
@@ -274,44 +274,6 @@ export const getCommentsForPost = async (postId: string): Promise<Comment[]> => 
   }
 };
 
-export const getAllComments = async (): Promise<CommentWithPostInfo[]> => {
-    try {
-        // 1. Get all comments from all posts
-        const commentsQuery = query(collectionGroup(db, 'comments'), orderBy('createdAt', 'desc'));
-        const commentSnapshots = await getDocs(commentsQuery);
-        
-        // 2. Get all posts to create a lookup map
-        const postsQuery = query(collection(db, 'posts'));
-        const postSnapshots = await getDocs(postsQuery);
-        const postMap = new Map<string, { title: string, slug: string }>();
-        postSnapshots.forEach(doc => {
-            postMap.set(doc.id, { title: doc.data().title, slug: doc.data().slug });
-        });
-
-        // 3. Combine comment with post info
-        const allComments: CommentWithPostInfo[] = [];
-        commentSnapshots.forEach(commentDoc => {
-            const commentData = commentDoc.data() as Comment;
-            const postInfo = postMap.get(commentData.postId);
-
-            if (postInfo) {
-                allComments.push({
-                    ...commentData,
-                    id: commentDoc.id,
-                    postTitle: postInfo.title,
-                    postSlug: postInfo.slug
-                });
-            }
-        });
-        
-        return allComments;
-
-    } catch (error) {
-        console.error('Error getting all comments: ', error);
-        return [];
-    }
-}
-
 
 export const getCommentCount = async (postId: string): Promise<number> => {
     try {
@@ -577,4 +539,5 @@ export const deleteUserByAdmin = async (uid: string): Promise<{ success: boolean
         return { success: false, message: "Kullanıcı silinirken bir hata oluştu." };
     }
 };
+
 

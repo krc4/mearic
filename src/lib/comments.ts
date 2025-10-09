@@ -12,8 +12,3 @@ export interface Comment {
 }
 
 export type CommentPayload = Omit<Comment, 'id' | 'createdAt'>;
-
-export interface CommentWithPostInfo extends Comment {
-    postTitle: string;
-    postSlug: string;
-}
