@@ -5,7 +5,7 @@ import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, 
 import type { Post } from '@/lib/posts';
 import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
-import type { AdminUser, AdminRole } from '@/lib/admin';
+import type { AdminUser, AdminRole, AdminPermissions } from '@/lib/admin';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes' | 'content'> & {
     content: string;
@@ -105,12 +105,12 @@ const serializePost = (doc: any): Post => {
 
 export const getPostsByCategory = async (
     category: string,
-    postsLimit: number = 9,
+    postsLimit: number = 1000, // Increased limit for admin pages
     lastVisible: any = null
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         const postsRef = collection(db, "posts");
-        const constraints = [where("category", "==", category), limit(postsLimit)];
+        let constraints = [where("category", "==", category), limit(postsLimit)];
 
         if (lastVisible) {
             constraints.push(startAfter(lastVisible));
@@ -120,7 +120,7 @@ export const getPostsByCategory = async (
 
         const querySnapshot = await getDocs(q);
         const posts = querySnapshot.docs.map(serializePost);
-        const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+        const newLastVisible = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null;
 
         return { posts, lastVisible: newLastVisible };
     } catch (e) {
@@ -128,6 +128,7 @@ export const getPostsByCategory = async (
         return { posts: [], lastVisible: null };
     }
 };
+
 
 
 
@@ -304,17 +305,26 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
         const q = query(adminsRef, orderBy('addedAt', 'desc'));
         const querySnapshot = await getDocs(q);
         
-        const admins = querySnapshot.docs.map(doc => ({
-            uid: doc.id,
-            ...doc.data()
-        } as AdminUser));
-
-        // Ensure 'test1' is always a founder in the returned array, regardless of DB state
-        const test1Admin = admins.find(admin => admin.displayName === 'test1');
-        if (test1Admin) {
-            test1Admin.role = 'founder';
-        }
-
+        const admins = querySnapshot.docs.map(docSnap => {
+            const data = docSnap.data();
+            // Ensure every admin has a permissions object
+            const permissions = data.permissions || { canDeleteComments: false };
+            const admin: AdminUser = {
+                uid: docSnap.id,
+                email: data.email,
+                displayName: data.displayName,
+                photoURL: data.photoURL,
+                addedAt: data.addedAt,
+                role: data.role,
+                permissions: permissions,
+            };
+            // Force 'test1' to always be a founder in the returned data
+            if (admin.displayName === 'test1') {
+                admin.role = 'founder';
+            }
+            return admin;
+        });
+        
         return admins;
     } catch (error) {
         console.error("Error getting admins: ", error);
@@ -361,6 +371,9 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
             photoURL: user.photoURL,
             addedAt: serverTimestamp(),
             role: role,
+            permissions: {
+                canDeleteComments: role === 'founder' ? true : false,
+            }
         });
         const roleMessage = role === 'founder' ? "Kurucu yönetici" : "Yönetici";
         return { success: true, message: `${email} başarıyla ${roleMessage} olarak atandı.` };
@@ -403,3 +416,38 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
         return false;
     }
 }
+
+export const getAdminPermissions = async (uid: string): Promise<AdminPermissions> => {
+    const defaultPermissions: AdminPermissions = { canDeleteComments: false };
+    try {
+        if (!uid) return defaultPermissions;
+        const adminRef = doc(db, "admins", uid);
+        const adminSnap = await getDoc(adminRef);
+        if (adminSnap.exists()) {
+            const data = adminSnap.data();
+            // Founders always have all permissions
+            if (data.role === 'founder') {
+                return { canDeleteComments: true };
+            }
+            return { ...defaultPermissions, ...data.permissions };
+        }
+        return defaultPermissions;
+    } catch (error) {
+        console.error("Error checking admin permissions: ", error);
+        return defaultPermissions;
+    }
+};
+
+
+export const updateAdminPermissions = async (uid: string, permissions: Partial<AdminPermissions>): Promise<{ success: boolean; message: string }> => {
+    try {
+        const adminRef = doc(db, "admins", uid);
+        await updateDoc(adminRef, {
+            permissions: permissions
+        });
+        return { success: true, message: "Yetkiler başarıyla güncellendi." };
+    } catch (error) {
+        console.error("Error updating admin permissions: ", error);
+        return { success: false, message: "Yetkiler güncellenirken bir hata oluştu." };
+    }
+};

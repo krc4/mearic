@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect, FormEvent } from "react"
@@ -10,7 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2, Star } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost, isAdmin, deleteComment, CommentPayload } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost, getAdminPermissions, deleteComment, CommentPayload } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
@@ -24,9 +25,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 import { motion } from "framer-motion"
+import { AdminPermissions } from "@/lib/admin"
 
 
-const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, isAdmin: boolean, onDeleteClick: (commentId: string) => void }) => (
+const CommentItem = ({ comment, currentUserId, canDelete, onDeleteClick }: { comment: Comment, currentUserId: string | null, canDelete: boolean, onDeleteClick: (commentId: string) => void }) => {
+    const isOwner = comment.userId === currentUserId;
+    const showDelete = canDelete || isOwner;
+
+    return (
     <motion.div
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -56,7 +62,7 @@ const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, is
                   </Badge>
                 )}
               </div>
-              {isAdmin && (
+              {showDelete && (
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
@@ -90,7 +96,8 @@ const CommentItem = ({ comment, isAdmin, onDeleteClick }: { comment: Comment, is
         </CardContent>
       </Card>
     </motion.div>
-);
+    )
+};
 
 const CommentSkeleton = () => (
     <div className="p-5 flex items-start gap-4">
@@ -111,7 +118,7 @@ interface CommentSectionProps {
 export function CommentSection({ postId, onCommentCountChange }: CommentSectionProps) {
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
-    const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
+    const [permissions, setPermissions] = useState<AdminPermissions>({ canDeleteComments: false });
     const [authLoading, setAuthLoading] = useState(true);
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
@@ -124,10 +131,10 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
-                const adminStatus = await isAdmin(currentUser.uid);
-                setIsCurrentUserAdmin(adminStatus);
+                const adminPerms = await getAdminPermissions(currentUser.uid);
+                setPermissions(adminPerms);
             } else {
-                setIsCurrentUserAdmin(false);
+                setPermissions({ canDeleteComments: false });
             }
             setAuthLoading(false);
         });
@@ -157,6 +164,8 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
             });
             return;
         }
+
+        const isCurrentUserAdmin = permissions.canDeleteComments; // A simple proxy for admin status
 
         const commentData: CommentPayload = {
             postId,
@@ -265,7 +274,8 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
                            <CommentItem 
                                 key={comment.id} 
                                 comment={comment} 
-                                isAdmin={isCurrentUserAdmin} 
+                                currentUserId={user?.uid || null}
+                                canDelete={permissions.canDeleteComments} 
                                 onDeleteClick={handleDeleteClick}
                             />
                         ))

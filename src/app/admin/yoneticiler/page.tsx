@@ -11,6 +11,8 @@ import {
   Trash2,
   Crown,
   ShieldCheck,
+  Settings,
+  MessageSquare,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -29,13 +31,17 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import type { AdminUser } from "@/lib/admin"
-import { getAdmins, addAdmin, removeAdmin } from "@/lib/firebase/services"
+import type { AdminUser, AdminPermissions } from "@/lib/admin"
+import { getAdmins, addAdmin, removeAdmin, updateAdminPermissions } from "@/lib/firebase/services"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+
 
 const addAdminSchema = z.object({
   email: z.string().email({ message: "Lütfen geçerli bir e-posta adresi girin." }),
@@ -43,7 +49,7 @@ const addAdminSchema = z.object({
 
 type AddAdminFormValues = z.infer<typeof addAdminSchema>;
 
-const AdminList = ({ admins, onRemoveClick }: { admins: AdminUser[], onRemoveClick: (admin: AdminUser) => void }) => {
+const AdminList = ({ admins, onRemoveClick, onSettingsClick }: { admins: AdminUser[], onRemoveClick: (admin: AdminUser) => void, onSettingsClick: (admin: AdminUser) => void }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {admins.map((admin) => (
@@ -67,9 +73,16 @@ const AdminList = ({ admins, onRemoveClick }: { admins: AdminUser[], onRemoveCli
                             Eklendi: {admin.addedAt ? new Date(admin.addedAt.seconds * 1000).toLocaleDateString() : '-'}
                         </p>
                     </div>
-                     <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => onRemoveClick(admin)}>
-                        <Trash2 className="h-4 w-4" />
-                     </Button>
+                    <div className="flex flex-col gap-1">
+                      {admin.role !== 'founder' && (
+                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => onSettingsClick(admin)}>
+                            <Settings className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => onRemoveClick(admin)}>
+                          <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                 </CardContent>
             </Card>
         ))}
@@ -77,11 +90,65 @@ const AdminList = ({ admins, onRemoveClick }: { admins: AdminUser[], onRemoveCli
   )
 }
 
+const PermissionsDialog = ({ 
+    isOpen, 
+    onOpenChange, 
+    admin, 
+    onPermissionsChange 
+}: { 
+    isOpen: boolean, 
+    onOpenChange: (open: boolean) => void, 
+    admin: AdminUser | null, 
+    onPermissionsChange: (uid: string, permissions: AdminPermissions) => void 
+}) => {
+    if (!admin) return null;
+
+    const handleSwitchChange = (permission: keyof AdminPermissions, value: boolean) => {
+        const updatedPermissions = { ...admin.permissions, [permission]: value };
+        onPermissionsChange(admin.uid, updatedPermissions);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Yönetici Yetkileri: {admin.displayName}</DialogTitle>
+                    <DialogDescription>{admin.email}</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="delete-comments" className="flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4 text-muted-foreground"/>
+                                Yorum Silme Yetkisi
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                Bu yönetici, sitedeki herhangi bir yorumu silebilir.
+                            </p>
+                        </div>
+                        <Switch
+                            id="delete-comments"
+                            checked={admin.permissions.canDeleteComments}
+                            onCheckedChange={(checked) => handleSwitchChange('canDeleteComments', checked)}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={() => onOpenChange(false)}>Kapat</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+
 export default function YoneticilerAdminPage() {
     const [admins, setAdmins] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [adminToRemove, setAdminToRemove] = useState<AdminUser | null>(null);
     const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
+    const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
     const { toast } = useToast();
 
     const form = useForm<AddAdminFormValues>({
@@ -137,6 +204,30 @@ export default function YoneticilerAdminPage() {
              toast({ title: "Hata!", description: message, variant: "destructive" });
         }
     }
+
+    const handleSettingsClick = (admin: AdminUser) => {
+        setSelectedAdmin(admin);
+        setIsPermissionsDialogOpen(true);
+    };
+    
+    const handlePermissionsChange = async (uid: string, permissions: AdminPermissions) => {
+        // Optimistic UI update
+        setAdmins(currentAdmins => 
+            currentAdmins.map(admin => 
+                admin.uid === uid ? { ...admin, permissions } : admin
+            )
+        );
+        setSelectedAdmin(prev => prev ? { ...prev, permissions } : null);
+
+        const { success, message } = await updateAdminPermissions(uid, permissions);
+        if (success) {
+            toast({ title: "Başarılı!", description: message });
+        } else {
+            toast({ title: "Hata!", description: message, variant: "destructive" });
+            // Revert UI on failure
+            fetchAdmins(); 
+        }
+    };
 
 
   return (
@@ -198,7 +289,7 @@ export default function YoneticilerAdminPage() {
                     <Skeleton className="h-20 w-full" />
                 </div>
             ) : (
-                <AdminList admins={admins} onRemoveClick={handleRemoveClick} />
+                <AdminList admins={admins} onRemoveClick={handleRemoveClick} onSettingsClick={handleSettingsClick} />
             )}
         </CardContent>
       </Card>
@@ -209,6 +300,12 @@ export default function YoneticilerAdminPage() {
         title={`'${adminToRemove?.displayName || adminToRemove?.email}' yönetici yetkilerini kaldırmak istediğinizden emin misiniz?`}
         description="Bu işlem kullanıcıyı sistemden silmez, sadece yönetici yetkilerini kaldırır. Bu işlem geri alınamaz."
         confirmText="Evet, Yetkilerini Kaldır"
+      />
+      <PermissionsDialog
+        isOpen={isPermissionsDialogOpen}
+        onOpenChange={setIsPermissionsDialogOpen}
+        admin={selectedAdmin}
+        onPermissionsChange={handlePermissionsChange}
       />
     </>
   )

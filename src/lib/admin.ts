@@ -3,6 +3,10 @@ import { Timestamp } from 'firebase/firestore';
 
 export type AdminRole = 'founder' | 'admin';
 
+export interface AdminPermissions {
+  canDeleteComments: boolean;
+}
+
 export interface AdminUser {
   uid: string;
   email: string;
@@ -10,4 +14,5 @@ export interface AdminUser {
   photoURL: string | null;
   addedAt: Timestamp;
   role: AdminRole;
+  permissions: AdminPermissions;
 }
