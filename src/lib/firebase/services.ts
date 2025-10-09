@@ -303,10 +303,19 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
         const adminsRef = collection(db, "admins");
         const q = query(adminsRef, orderBy('addedAt', 'desc'));
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
+        
+        const admins = querySnapshot.docs.map(doc => ({
             uid: doc.id,
             ...doc.data()
         } as AdminUser));
+
+        // Ensure 'test1' is always a founder in the returned array, regardless of DB state
+        const test1Admin = admins.find(admin => admin.displayName === 'test1');
+        if (test1Admin) {
+            test1Admin.role = 'founder';
+        }
+
+        return admins;
     } catch (error) {
         console.error("Error getting admins: ", error);
         return [];
@@ -322,18 +331,17 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     const adminRef = doc(db, "admins", user.uid);
     const adminSnap = await getDoc(adminRef);
 
-    // If the user is 'test1' and already an admin, ensure their role is 'founder'
-    if (adminSnap.exists() && user.displayName === 'test1' && adminSnap.data().role !== 'founder') {
-        try {
-            await updateDoc(adminRef, { role: 'founder' });
-            return { success: true, message: "'test1' kullanıcısının rolü Kurucu olarak güncellendi." };
-        } catch (error) {
-            console.error("Error updating test1 to founder: ", error);
-            return { success: false, message: "'test1' rolü güncellenirken bir hata oluştu." };
-        }
-    }
-    
     if (adminSnap.exists()) {
+        // If the user is 'test1' and their role isn't founder, update it.
+        if (user.displayName === 'test1' && adminSnap.data().role !== 'founder') {
+            try {
+                await updateDoc(adminRef, { role: 'founder' });
+                return { success: true, message: "'test1' kullanıcısının rolü Kurucu olarak güncellendi." };
+            } catch (error) {
+                console.error("Error updating test1 to founder: ", error);
+                return { success: false, message: "'test1' rolü güncellenirken bir hata oluştu." };
+            }
+        }
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
     
