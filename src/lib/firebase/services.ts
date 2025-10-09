@@ -326,10 +326,15 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
     
-    // Check if this is the first admin, if so, make them a founder
+    // Check if this is the first admin or the user is 'test1', if so, make them a founder
     const adminsCollection = collection(db, "admins");
     const adminCountSnapshot = await getCountFromServer(adminsCollection);
     const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
+
+    let role: 'founder' | 'admin' = 'admin';
+    if (isAdminCollectionEmpty || user.displayName === 'test1') {
+        role = 'founder';
+    }
 
     try {
         await setDoc(adminRef, {
@@ -337,9 +342,9 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
             displayName: user.displayName,
             photoURL: user.photoURL,
             addedAt: serverTimestamp(),
-            role: isAdminCollectionEmpty ? 'founder' : 'admin',
+            role: role,
         });
-        const roleMessage = isAdminCollectionEmpty ? "Kurucu yönetici" : "Yönetici";
+        const roleMessage = role === 'founder' ? "Kurucu yönetici" : "Yönetici";
         return { success: true, message: `${email} başarıyla ${roleMessage} olarak atandı.` };
     } catch (error) {
         console.error("Error adding admin: ", error);
