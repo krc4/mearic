@@ -1,4 +1,5 @@
 
+
 "use client"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -8,6 +9,8 @@ import {
   Shield,
   UserPlus,
   Trash2,
+  Crown,
+  ShieldCheck,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -15,7 +18,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -33,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 
 const addAdminSchema = z.object({
   email: z.string().email({ message: "Lütfen geçerli bir e-posta adresi girin." }),
@@ -40,24 +43,31 @@ const addAdminSchema = z.object({
 
 type AddAdminFormValues = z.infer<typeof addAdminSchema>;
 
-const AdminList = ({ admins, onRemoveClick }: { admins: AdminUser[], onRemoveClick: (adminId: string) => void }) => {
+const AdminList = ({ admins, onRemoveClick }: { admins: AdminUser[], onRemoveClick: (admin: AdminUser) => void }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {admins.map((admin) => (
-            <Card key={admin.uid}>
+            <Card key={admin.uid} className={admin.role === 'founder' ? 'border-amber-400' : ''}>
                 <CardContent className="p-4 flex items-center gap-4">
                      <Avatar className="h-12 w-12">
                         <AvatarImage src={admin.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${admin.uid}`} />
                         <AvatarFallback>{admin.displayName ? admin.displayName.substring(0, 2).toUpperCase() : admin.email.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-grow">
-                        <p className="font-semibold">{admin.displayName || 'İsimsiz'}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">{admin.displayName || 'İsimsiz'}</p>
+                          {admin.role === 'founder' ? (
+                            <Badge className="bg-amber-400 text-amber-950 hover:bg-amber-400/90"><Crown className="w-3 h-3 mr-1"/>Kurucu</Badge>
+                          ) : (
+                            <Badge variant="secondary"><ShieldCheck className="w-3 h-3 mr-1"/>Yönetici</Badge>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">{admin.email}</p>
                          <p className="text-xs text-muted-foreground">
                             Eklendi: {admin.addedAt ? new Date(admin.addedAt.seconds * 1000).toLocaleDateString() : '-'}
                         </p>
                     </div>
-                     <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => onRemoveClick(admin.uid)}>
+                     <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => onRemoveClick(admin)}>
                         <Trash2 className="h-4 w-4" />
                      </Button>
                 </CardContent>
@@ -70,7 +80,7 @@ const AdminList = ({ admins, onRemoveClick }: { admins: AdminUser[], onRemoveCli
 export default function YoneticilerAdminPage() {
     const [admins, setAdmins] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
-    const [adminToRemove, setAdminToRemove] = useState<string | null>(null);
+    const [adminToRemove, setAdminToRemove] = useState<AdminUser | null>(null);
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const { toast } = useToast();
 
@@ -90,19 +100,27 @@ export default function YoneticilerAdminPage() {
         fetchAdmins();
     }, []);
 
-    const handleRemoveClick = (adminId: string) => {
-        setAdminToRemove(adminId);
+    const handleRemoveClick = (admin: AdminUser) => {
+        if (admin.role === 'founder') {
+            toast({
+                title: "İşlem Reddedildi",
+                description: "Kurucu yönetici sistemden kaldırılamaz.",
+                variant: "destructive",
+            });
+            return;
+        }
+        setAdminToRemove(admin);
         setIsAlertOpen(true);
     };
 
     const handleRemoveConfirm = async () => {
         if (adminToRemove) {
-            const success = await removeAdmin(adminToRemove);
+            const { success, message } = await removeAdmin(adminToRemove.uid);
             if (success) {
-                setAdmins(admins.filter(a => a.uid !== adminToRemove));
-                toast({ title: "Başarılı!", description: "Yönetici başarıyla kaldırıldı." });
+                setAdmins(admins.filter(a => a.uid !== adminToRemove.uid));
+                toast({ title: "Başarılı!", description: message });
             } else {
-                 toast({ title: "Hata!", description: "Yönetici kaldırılırken bir sorun oluştu.", variant: "destructive" });
+                 toast({ title: "Hata!", description: message, variant: "destructive" });
             }
             setAdminToRemove(null);
         }
@@ -126,7 +144,7 @@ export default function YoneticilerAdminPage() {
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Shield className="h-6 w-6" />
-          Yöneticiler
+          Yönetici Yetkilendirme
         </h1>
       </div>
 
@@ -137,7 +155,7 @@ export default function YoneticilerAdminPage() {
             Yeni Yönetici Ekle
           </CardTitle>
           <CardDescription>
-            Sisteme kayıtlı bir kullanıcıyı e-posta adresi ile yönetici olarak atayın.
+            Sisteme kayıtlı bir kullanıcıyı e-posta adresi ile 'Yönetici' rolünde atayın. İlk eklenen yönetici otomatik olarak 'Kurucu' olur.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -170,7 +188,7 @@ export default function YoneticilerAdminPage() {
         <CardHeader>
           <CardTitle>Mevcut Yöneticiler</CardTitle>
           <CardDescription>
-            Sistemdeki tüm yöneticilerin listesi.
+            Sistemdeki tüm yöneticilerin listesi ve rolleri.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -188,7 +206,7 @@ export default function YoneticilerAdminPage() {
         isOpen={isAlertOpen}
         onOpenChange={setIsAlertOpen}
         onConfirm={handleRemoveConfirm}
-        title="Yöneticiyi Kaldırmak İstediğinizden Emin misiniz?"
+        title={`'${adminToRemove?.displayName || adminToRemove?.email}' yönetici yetkilerini kaldırmak istediğinizden emin misiniz?`}
         description="Bu işlem kullanıcıyı sistemden silmez, sadece yönetici yetkilerini kaldırır. Bu işlem geri alınamaz."
         confirmText="Evet, Yetkilerini Kaldır"
       />

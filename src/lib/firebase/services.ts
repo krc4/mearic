@@ -1,4 +1,5 @@
 
+
 import { db } from './config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer, limit, startAfter } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
@@ -324,6 +325,11 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     if (adminSnap.exists()) {
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
+    
+    // Check if this is the first admin, if so, make them a founder
+    const adminsCollection = collection(db, "admins");
+    const adminCountSnapshot = await getCountFromServer(adminsCollection);
+    const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
 
     try {
         await setDoc(adminRef, {
@@ -331,22 +337,34 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
             displayName: user.displayName,
             photoURL: user.photoURL,
             addedAt: serverTimestamp(),
+            role: isAdminCollectionEmpty ? 'founder' : 'admin',
         });
-        return { success: true, message: `${email} başarıyla yönetici olarak atandı.` };
+        const roleMessage = isAdminCollectionEmpty ? "Kurucu yönetici" : "Yönetici";
+        return { success: true, message: `${email} başarıyla ${roleMessage} olarak atandı.` };
     } catch (error) {
         console.error("Error adding admin: ", error);
         return { success: false, message: "Yönetici eklenirken bir sunucu hatası oluştu." };
     }
 };
 
-export const removeAdmin = async (uid: string): Promise<boolean> => {
+export const removeAdmin = async (uid: string): Promise<{ success: boolean; message: string }> => {
     try {
         const adminRef = doc(db, "admins", uid);
+        const adminSnap = await getDoc(adminRef);
+
+        if (!adminSnap.exists()) {
+            return { success: false, message: "Yönetici bulunamadı." };
+        }
+
+        if (adminSnap.data().role === 'founder') {
+            return { success: false, message: "Kurucu yönetici kaldırılamaz." };
+        }
+
         await deleteDoc(adminRef);
-        return true;
+        return { success: true, message: "Yönetici başarıyla kaldırıldı." };
     } catch (error) {
         console.error("Error removing admin: ", error);
-        return false;
+        return { success: false, message: "Yönetici kaldırılırken bir hata oluştu." };
     }
 }
 
