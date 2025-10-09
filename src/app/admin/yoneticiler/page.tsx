@@ -155,7 +155,7 @@ export default function YoneticilerAdminPage() {
             Yeni Yönetici Ekle
           </CardTitle>
           <CardDescription>
-            Sisteme kayıtlı bir kullanıcıyı e-posta adresi ile 'Yönetici' rolünde atayın. İlk eklenen yönetici otomatik olarak 'Kurucu' olur.
+            Sisteme kayıtlı bir kullanıcıyı e-posta adresi ile 'Yönetici' rolünde atayın. 'test1' adlı kullanıcı her zaman 'Kurucu' olur.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -188,7 +188,7 @@ export default function YoneticilerAdminPage() {
         <CardHeader>
           <CardTitle>Mevcut Yöneticiler</CardTitle>
           <CardDescription>
-            Sistemdeki tüm yöneticilerin listesi ve rolleri.
+            Sistemdeki tüm yöneticilerin listesi ve rolleri. Kurucu yönetici altın bir çerçeve ile vurgulanmıştır.
           </CardDescription>
         </CardHeader>
         <CardContent>

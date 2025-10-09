@@ -5,7 +5,7 @@ import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, 
 import type { Post } from '@/lib/posts';
 import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
-import type { AdminUser } from '@/lib/admin';
+import type { AdminUser, AdminRole } from '@/lib/admin';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes' | 'content'> & {
     content: string;
@@ -110,7 +110,7 @@ export const getPostsByCategory = async (
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         const postsRef = collection(db, "posts");
-        const constraints = [where("category", "==", category), limit(postsLimit)];
+        const constraints = [where("category", "==", category), orderBy("createdAt", "desc"), limit(postsLimit)];
 
         if (lastVisible) {
             constraints.push(startAfter(lastVisible));
@@ -326,12 +326,11 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
     
-    // Check if this is the first admin or the user is 'test1', if so, make them a founder
     const adminsCollection = collection(db, "admins");
     const adminCountSnapshot = await getCountFromServer(adminsCollection);
     const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
 
-    let role: 'founder' | 'admin' = 'admin';
+    let role: AdminRole = 'admin';
     if (isAdminCollectionEmpty || user.displayName === 'test1') {
         role = 'founder';
     }
