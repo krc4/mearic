@@ -13,6 +13,10 @@ import {
   ShieldCheck,
   Settings,
   MessageSquare,
+  FilePlus,
+  FilePen,
+  FileX,
+  Users
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -75,13 +79,15 @@ const AdminList = ({ admins, onRemoveClick, onSettingsClick }: { admins: AdminUs
                     </div>
                     <div className="flex flex-col gap-1">
                       {admin.role !== 'founder' && (
-                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => onSettingsClick(admin)}>
-                            <Settings className="h-4 w-4" />
-                        </Button>
+                        <>
+                          <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => onSettingsClick(admin)}>
+                              <Settings className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => onRemoveClick(admin)}>
+                              <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
                       )}
-                      <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => onRemoveClick(admin)}>
-                          <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                 </CardContent>
             </Card>
@@ -108,6 +114,15 @@ const PermissionsDialog = ({
         onPermissionsChange(admin.uid, updatedPermissions);
     };
 
+    const permissionItems = [
+      { id: 'canManageAdmins', label: 'Yönetici Yönetimi', description: 'Yeni yönetici ekleyebilir veya mevcutları kaldırabilir.', icon: Users },
+      { id: 'canCreatePosts', label: 'Yazı Oluşturma', description: 'Yeni blog yazıları ve mucizeler oluşturabilir.', icon: FilePlus },
+      { id: 'canEditPosts', label: 'Yazı Düzenleme', description: 'Mevcut tüm yazıları düzenleyebilir.', icon: FilePen },
+      { id: 'canDeletePosts', label: 'Yazı Silme', description: 'Mevcut tüm yazıları kalıcı olarak silebilir.', icon: FileX },
+      { id: 'canDeleteComments', label: 'Yorum Silme', description: 'Sitedeki herhangi bir yorumu silebilir.', icon: MessageSquare },
+    ] as const;
+
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -115,23 +130,25 @@ const PermissionsDialog = ({
                     <DialogTitle>Yönetici Yetkileri: {admin.displayName}</DialogTitle>
                     <DialogDescription>{admin.email}</DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                    <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="delete-comments" className="flex items-center gap-2">
-                                <MessageSquare className="h-4 w-4 text-muted-foreground"/>
-                                Yorum Silme Yetkisi
-                            </Label>
-                            <p className="text-xs text-muted-foreground">
-                                Bu yönetici, sitedeki herhangi bir yorumu silebilir.
-                            </p>
+                <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+                    {permissionItems.map(item => (
+                        <div key={item.id} className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                                <Label htmlFor={item.id} className="flex items-center gap-2">
+                                    <item.icon className="h-4 w-4 text-muted-foreground"/>
+                                    {item.label}
+                                </Label>
+                                <p className="text-xs text-muted-foreground pl-6">
+                                    {item.description}
+                                </p>
+                            </div>
+                            <Switch
+                                id={item.id}
+                                checked={admin.permissions[item.id]}
+                                onCheckedChange={(checked) => handleSwitchChange(item.id, checked)}
+                            />
                         </div>
-                        <Switch
-                            id="delete-comments"
-                            checked={admin.permissions.canDeleteComments}
-                            onCheckedChange={(checked) => handleSwitchChange('canDeleteComments', checked)}
-                        />
-                    </div>
+                    ))}
                 </div>
                 <DialogFooter>
                     <Button onClick={() => onOpenChange(false)}>Kapat</Button>

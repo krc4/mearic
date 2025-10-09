@@ -6,6 +6,7 @@ import type { Post } from '@/lib/posts';
 import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
 import type { AdminUser, AdminRole, AdminPermissions } from '@/lib/admin';
+import type { SiteUser } from '@/lib/users';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes' | 'content'> & {
     content: string;
@@ -105,7 +106,7 @@ const serializePost = (doc: any): Post => {
 
 export const getPostsByCategory = async (
     category: string,
-    postsLimit: number = 1000, // Increased limit for admin pages
+    postsLimit: number = 1000,
     lastVisible: any = null
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
@@ -307,8 +308,13 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
         
         const admins = querySnapshot.docs.map(docSnap => {
             const data = docSnap.data();
-            // Ensure every admin has a permissions object
-            const permissions = data.permissions || { canDeleteComments: false };
+            const permissions = data.permissions || {
+                canDeleteComments: false,
+                canCreatePosts: false,
+                canEditPosts: false,
+                canDeletePosts: false,
+                canManageAdmins: false,
+            };
             const admin: AdminUser = {
                 uid: docSnap.id,
                 email: data.email,
@@ -321,6 +327,14 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
             // Force 'test1' to always be a founder in the returned data
             if (admin.displayName === 'test1') {
                 admin.role = 'founder';
+                // Also ensure founder has all permissions
+                admin.permissions = {
+                    canDeleteComments: true,
+                    canCreatePosts: true,
+                    canEditPosts: true,
+                    canDeletePosts: true,
+                    canManageAdmins: true,
+                };
             }
             return admin;
         });
@@ -332,6 +346,22 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
     }
 }
 
+const defaultAdminPermissions: AdminPermissions = {
+    canDeleteComments: false,
+    canCreatePosts: false,
+    canEditPosts: false,
+    canDeletePosts: false,
+    canManageAdmins: false,
+};
+
+const founderPermissions: AdminPermissions = {
+    canDeleteComments: true,
+    canCreatePosts: true,
+    canEditPosts: true,
+    canDeletePosts: true,
+    canManageAdmins: true,
+};
+
 export const addAdmin = async (email: string): Promise<{ success: boolean; message: string }> => {
     const user = await findUserByEmail(email);
     if (!user) {
@@ -342,11 +372,10 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     const adminSnap = await getDoc(adminRef);
 
     if (adminSnap.exists()) {
-        // If the user is 'test1' and their role isn't founder, update it.
         if (user.displayName === 'test1' && adminSnap.data().role !== 'founder') {
             try {
-                await updateDoc(adminRef, { role: 'founder' });
-                return { success: true, message: "'test1' kullanıcısının rolü Kurucu olarak güncellendi." };
+                await updateDoc(adminRef, { role: 'founder', permissions: founderPermissions });
+                return { success: true, message: "'test1' kullanıcısının rolü Kurucu olarak güncellendi ve tüm yetkiler verildi." };
             } catch (error) {
                 console.error("Error updating test1 to founder: ", error);
                 return { success: false, message: "'test1' rolü güncellenirken bir hata oluştu." };
@@ -360,8 +389,11 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
 
     let role: AdminRole = 'admin';
+    let permissions = defaultAdminPermissions;
+
     if (isAdminCollectionEmpty || user.displayName === 'test1') {
         role = 'founder';
+        permissions = founderPermissions;
     }
 
     try {
@@ -371,9 +403,7 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
             photoURL: user.photoURL,
             addedAt: serverTimestamp(),
             role: role,
-            permissions: {
-                canDeleteComments: role === 'founder' ? true : false,
-            }
+            permissions: permissions
         });
         const roleMessage = role === 'founder' ? "Kurucu yönetici" : "Yönetici";
         return { success: true, message: `${email} başarıyla ${roleMessage} olarak atandı.` };
@@ -418,23 +448,21 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
 }
 
 export const getAdminPermissions = async (uid: string): Promise<AdminPermissions> => {
-    const defaultPermissions: AdminPermissions = { canDeleteComments: false };
     try {
-        if (!uid) return defaultPermissions;
+        if (!uid) return defaultAdminPermissions;
         const adminRef = doc(db, "admins", uid);
         const adminSnap = await getDoc(adminRef);
         if (adminSnap.exists()) {
             const data = adminSnap.data();
-            // Founders always have all permissions
             if (data.role === 'founder') {
-                return { canDeleteComments: true };
+                return founderPermissions;
             }
-            return { ...defaultPermissions, ...data.permissions };
+            return { ...defaultAdminPermissions, ...data.permissions };
         }
-        return defaultPermissions;
+        return defaultAdminPermissions;
     } catch (error) {
         console.error("Error checking admin permissions: ", error);
-        return defaultPermissions;
+        return defaultAdminPermissions;
     }
 };
 
@@ -449,5 +477,64 @@ export const updateAdminPermissions = async (uid: string, permissions: Partial<A
     } catch (error) {
         console.error("Error updating admin permissions: ", error);
         return { success: false, message: "Yetkiler güncellenirken bir hata oluştu." };
+    }
+};
+
+// Site User Management
+export const getUsers = async (
+    userLimit: number = 10,
+    lastVisible: any = null
+): Promise<{ users: SiteUser[], lastVisible: any }> => {
+    try {
+        const usersRef = collection(db, "users");
+        let constraints = [orderBy("createdAt", "desc"), limit(userLimit)];
+
+        if (lastVisible) {
+            constraints.push(startAfter(lastVisible));
+        }
+
+        const q = query(usersRef, ...constraints);
+        const querySnapshot = await getDocs(q);
+
+        const users = querySnapshot.docs.map(docSnap => {
+            const data = docSnap.data();
+            const createdAt = data.createdAt;
+            return {
+                uid: docSnap.id,
+                email: data.email,
+                displayName: data.displayName,
+                photoURL: data.photoURL,
+                createdAt: createdAt instanceof Timestamp ? createdAt.toDate().toISOString() : new Date().toISOString(),
+            } as SiteUser;
+        });
+
+        const newLastVisible = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null;
+
+        return { users, lastVisible: newLastVisible };
+    } catch (error) {
+        console.error("Error getting users: ", error);
+        return { users: [], lastVisible: null };
+    }
+};
+
+export const deleteUserByAdmin = async (uid: string): Promise<{ success: boolean, message: string }> => {
+    try {
+        // First, check if the user to be deleted is an admin
+        const isAdminUser = await isAdmin(uid);
+        if (isAdminUser) {
+            return { success: false, message: "Yöneticiler bu panelden silinemez. Lütfen önce yönetici yetkilerini kaldırın." };
+        }
+
+        const userRef = doc(db, "users", uid);
+        await deleteDoc(userRef);
+
+        // Deleting from Firebase Auth requires a Cloud Function for security reasons.
+        // This part is a placeholder for a real implementation.
+        console.log(`User with UID: ${uid} deleted from Firestore. Auth deletion should be handled by a backend function.`);
+
+        return { success: true, message: "Kullanıcı başarıyla silindi." };
+    } catch (error) {
+        console.error("Error deleting user: ", error);
+        return { success: false, message: "Kullanıcı silinirken bir hata oluştu." };
     }
 };

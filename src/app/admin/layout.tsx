@@ -126,7 +126,7 @@ function AdminSidebar() {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Kullanıcılar">
-                <Link href="#">
+                <Link href="/admin/kullanicilar">
                   <Users />
                   <span>Kullanıcılar</span>
                 </Link>
