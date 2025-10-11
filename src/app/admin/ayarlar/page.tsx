@@ -38,10 +38,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 
 const featuredCardSchema = z.object({
-  title: z.string().min(1, "Başlık gerekli"),
-  description: z.string().min(1, "Açıklama gerekli"),
-  image: z.string().url("Geçerli bir URL olmalı"),
-  link: z.string().min(1, "Link gerekli"),
+  title: z.string(),
+  description: z.string(),
+  image: z.string().url("Geçerli bir URL olmalı veya boş bırakılmalı.").or(z.literal("")),
+  link: z.string(),
 });
 
 const homepageSettingsSchema = z.object({
