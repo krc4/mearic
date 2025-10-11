@@ -124,12 +124,14 @@ export default function Home() {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                <ScrollAnimationWrapper>
                   <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={settings.kuranMucizeleri.card1.image}
-                        alt={settings.kuranMucizeleri.card1.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {settings.kuranMucizeleri.card1.image && (
+                        <Image
+                            src={settings.kuranMucizeleri.card1.image}
+                            alt={settings.kuranMucizeleri.card1.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
                       <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
@@ -157,12 +159,14 @@ export default function Home() {
                 </ScrollAnimationWrapper>
                 <ScrollAnimationWrapper delay={0.2}>
                    <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={settings.kuranMucizeleri.card2.image}
-                        alt={settings.kuranMucizeleri.card2.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {settings.kuranMucizeleri.card2.image && (
+                        <Image
+                            src={settings.kuranMucizeleri.card2.image}
+                            alt={settings.kuranMucizeleri.card2.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                         <div>
@@ -218,12 +222,14 @@ export default function Home() {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <ScrollAnimationWrapper>
                   <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={settings.hadisMucizeleri.card1.image}
-                        alt={settings.hadisMucizeleri.card1.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {settings.hadisMucizeleri.card1.image && (
+                        <Image
+                            src={settings.hadisMucizeleri.card1.image}
+                            alt={settings.hadisMucizeleri.card1.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                         <div>
@@ -250,12 +256,14 @@ export default function Home() {
                 </ScrollAnimationWrapper>
                 <ScrollAnimationWrapper delay={0.2}>
                    <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={settings.hadisMucizeleri.card2.image}
-                        alt={settings.hadisMucizeleri.card2.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {settings.hadisMucizeleri.card2.image && (
+                        <Image
+                            src={settings.hadisMucizeleri.card2.image}
+                            alt={settings.hadisMucizeleri.card2.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                         <div>
@@ -311,12 +319,14 @@ export default function Home() {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <ScrollAnimationWrapper>
                   <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={settings.islamiBloglar.card1.image}
-                        alt={settings.islamiBloglar.card1.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {settings.islamiBloglar.card1.image && (
+                        <Image
+                            src={settings.islamiBloglar.card1.image}
+                            alt={settings.islamiBloglar.card1.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                         <div>
@@ -343,12 +353,14 @@ export default function Home() {
                 </ScrollAnimationWrapper>
                 <ScrollAnimationWrapper delay={0.2}>
                    <article className="group relative mx-auto w-full max-w-2xl h-full overflow-hidden rounded-2xl border border-border/30 bg-background/70 shadow-2xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/10 dark:border-border/60 dark:bg-background/50 dark:shadow-white/5">
-                      <Image
-                        src={settings.islamiBloglar.card2.image}
-                        alt={settings.islamiBloglar.card2.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {settings.islamiBloglar.card2.image && (
+                        <Image
+                            src={settings.islamiBloglar.card2.image}
+                            alt={settings.islamiBloglar.card2.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                       <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-7">
                         <div>
@@ -404,12 +416,14 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Hero kart (sol üst) */}
                 <div className="md:col-span-2 md:row-span-2 group relative isolate flex aspect-[16/10] overflow-hidden rounded-3xl border border-border/30 bg-background/70 shadow-2xl backdrop-blur-md transition-all duration-500 hover:shadow-[0_0_60px_-15px_hsl(var(--accent)/.7)] dark:border-border/50">
-                  <Image
-                    src={settings.populerKonular.mainCard.image}
-                    alt={settings.populerKonular.mainCard.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                  {settings.populerKonular.mainCard.image && (
+                    <Image
+                        src={settings.populerKonular.mainCard.image}
+                        alt={settings.populerKonular.mainCard.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   {/* Arapça kalligrafi overlay (sol alt) */}
                   <div className="absolute bottom-4 left-4 text-8xl font-kufi text-white/10 select-none">
@@ -445,12 +459,14 @@ export default function Home() {
 
                 {/* Kart-2 */}
                 <div className="group relative isolate flex aspect-square overflow-hidden rounded-3xl border border-border/30 bg-background/70 shadow-xl backdrop-blur-md transition-all duration-500 hover:shadow-[0_0_50px_-15px_hsl(var(--accent)/.5)] dark:border-border/50">
-                  <Image
-                    src={settings.populerKonular.sideCard1.image}
-                    alt={settings.populerKonular.sideCard1.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                  {settings.populerKonular.sideCard1.image && (
+                    <Image
+                        src={settings.populerKonular.sideCard1.image}
+                        alt={settings.populerKonular.sideCard1.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                   <div className="relative z-10 flex flex-col justify-end p-5">
                     <h4 className="text-xl font-semibold text-white">
@@ -467,12 +483,14 @@ export default function Home() {
 
                 {/* Kart-3 */}
                 <div className="group relative isolate flex aspect-square overflow-hidden rounded-3xl border border-border/30 bg-background/70 shadow-xl backdrop-blur-md transition-all duration-500 hover:shadow-[0_0_50px_-15px_hsl(var(--accent)/.5)] dark:border-border/50">
-                  <Image
-                    src={settings.populerKonular.sideCard2.image}
-                    alt={settings.populerKonular.sideCard2.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                  {settings.populerKonular.sideCard2.image && (
+                    <Image
+                        src={settings.populerKonular.sideCard2.image}
+                        alt={settings.populerKonular.sideCard2.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                   <div className="relative z-10 flex flex-col justify-end p-5">
                     <h4 className="text-xl font-semibold text-white">
