@@ -7,6 +7,7 @@ import type { Comment } from '@/lib/comments';
 import { CommentPayload } from '@/lib/comments';
 import type { AdminUser, AdminRole, AdminPermissions } from '@/lib/admin';
 import type { SiteUser } from '@/lib/users';
+import type { HomepageSettings } from '@/lib/settings';
 
 export type PostPayload = Omit<Post, 'id' | 'slug' | 'views' | 'createdAt' | 'likes' | 'content'> & {
     content: string;
@@ -613,5 +614,35 @@ export const deleteUserByAdmin = async (uid: string): Promise<{ success: boolean
     } catch (error) {
         console.error("Error deleting user: ", error);
         return { success: false, message: "Kullanıcı silinirken bir hata oluştu." };
+    }
+};
+
+// Homepage Settings
+export const getHomepageSettings = async (): Promise<HomepageSettings | null> => {
+    try {
+        const settingsRef = doc(db, "settings", "homepage");
+        const docSnap = await getDoc(settingsRef);
+
+        if (docSnap.exists()) {
+            return docSnap.data() as HomepageSettings;
+        } else {
+            // Return default settings if document doesn't exist
+            console.log("No homepage settings found, returning default.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting homepage settings: ", error);
+        return null;
+    }
+};
+
+export const updateHomepageSettings = async (settings: HomepageSettings): Promise<{ success: boolean, message: string }> => {
+    try {
+        const settingsRef = doc(db, "settings", "homepage");
+        await setDoc(settingsRef, settings, { merge: true });
+        return { success: true, message: "Ana sayfa ayarları başarıyla güncellendi." };
+    } catch (error) {
+        console.error("Error updating homepage settings: ", error);
+        return { success: false, message: "Ayarlar güncellenirken bir hata oluştu." };
     }
 };

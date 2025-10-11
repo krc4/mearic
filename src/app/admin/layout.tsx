@@ -143,7 +143,7 @@ function AdminSidebar() {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Ayarlar">
-                <Link href="#">
+                <Link href="/admin/ayarlar">
                   <Settings />
                   <span>Ayarlar</span>
                 </Link>
