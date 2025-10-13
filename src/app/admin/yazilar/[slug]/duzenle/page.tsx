@@ -30,12 +30,14 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function EditPostPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,14 @@ export default function EditPostPage() {
   }, [slug]);
 
   const handlePublish = async () => {
-    if (!post) return;
+    if (!post || !user) {
+         toast({
+          title: "Hata!",
+          description: "Bu işlemi yapmak için giriş yapmalısınız.",
+          variant: "destructive"
+       });
+        return;
+    };
 
     const updatedPayload: Partial<PostPayload> = {
         title,
@@ -80,7 +89,7 @@ export default function EditPostPage() {
         readTime
     };
 
-    const success = await updatePost(post.id, updatedPayload);
+    const { success, message } = await updatePost(post.id, user.uid, updatedPayload);
 
     if (success) {
       toast({
@@ -99,7 +108,7 @@ export default function EditPostPage() {
     } else {
        toast({
           title: "Hata!",
-          description: "Yazı güncellenirken bir sorun oluştu.",
+          description: message,
           variant: "destructive"
        });
     }

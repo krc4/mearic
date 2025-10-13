@@ -205,13 +205,24 @@ export const toggleLikePost = async (postId: string, liked: boolean): Promise<nu
 };
 
 
-export const updatePost = async (postId: string, payload: Partial<PostPayload>) => {
+export const updatePost = async (postId: string, userId: string, payload: Partial<PostPayload>): Promise<{ success: boolean; message: string; }> => {
     try {
         const postRef = doc(db, "posts", postId);
+        const postSnap = await getDoc(postRef);
         
+        if (!postSnap.exists()) {
+             return { success: false, message: "Yazı bulunamadı." };
+        }
+        
+        const isUserAdmin = await isAdmin(userId);
+        const postData = postSnap.data();
+
+        if (postData.authorId !== userId && !isUserAdmin) {
+            return { success: false, message: "Bu yazıyı düzenleme yetkiniz yok." };
+        }
+
         const updatePayload: Partial<Post> = { ...payload };
 
-        // Only update the slug if the title has actually changed.
         if (payload.title) {
             updatePayload.slug = payload.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
         }
@@ -219,22 +230,37 @@ export const updatePost = async (postId: string, payload: Partial<PostPayload>) 
         await updateDoc(postRef, updatePayload);
 
         console.log("Document with ID: ", postId, " successfully updated!");
-        return true;
+        return { success: true, message: "Yazı başarıyla güncellendi." };
     } catch (e) {
         console.error("Error updating document: ", e);
-        return false;
+        return { success: false, message: "Yazı güncellenirken bir hata oluştu." };
     }
 };
 
 
-export const deletePost = async (postId: string) => {
+export const deletePost = async (postId: string, userId: string): Promise<{ success: boolean, message: string }> => {
     try {
-        await deleteDoc(doc(db, "posts", postId));
+        const postRef = doc(db, "posts", postId);
+        const postSnap = await getDoc(postRef);
+
+        if (!postSnap.exists()) {
+            return { success: false, message: "Yazı bulunamadı." };
+        }
+
+        const isUserAdmin = await isAdmin(userId);
+        const postData = postSnap.data();
+
+        if (postData.authorId !== userId && !isUserAdmin) {
+            return { success: false, message: "Bu yazıyı silme yetkiniz yok." };
+        }
+        
+        await deleteDoc(postRef);
+        
         console.log("Document with ID: ", postId, " successfully deleted!");
-        return true;
+        return { success: true, message: "Yazı başarıyla silindi." };
     } catch (e) {
         console.error("Error deleting document: ", e);
-        return false;
+        return { success: false, message: "Yazı silinirken bir hata oluştu." };
     }
 }
 
@@ -449,8 +475,6 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
         
         const admins = querySnapshot.docs.map(docSnap => {
             const data = docSnap.data();
-            // The permissions are read directly from the database.
-            // No special client-side logic is needed for the founder.
             const admin: AdminUser = {
                 uid: docSnap.id,
                 email: data.email,
@@ -499,7 +523,6 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
     
-    // Check if the admins collection is empty to assign the first user as 'founder'
     const adminsCollection = collection(db, "admins");
     const adminCountSnapshot = await getCountFromServer(adminsCollection);
     const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
@@ -507,7 +530,6 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     let role: AdminRole = 'admin';
     let permissions = defaultAdminPermissions;
 
-    // The very first admin added to the system becomes the founder
     if (isAdminCollectionEmpty) {
         role = 'founder';
         permissions = founderPermissions;
@@ -685,4 +707,3 @@ export const updateHomepageSettings = async (settings: HomepageSettings): Promis
         return { success: false, message: "Ayarlar güncellenirken bir hata oluştu." };
     }
 };
-

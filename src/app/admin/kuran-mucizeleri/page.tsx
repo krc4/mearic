@@ -37,6 +37,7 @@ import { getPostsByCategory, deletePost } from "@/lib/firebase/services"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
 
 const PostTable = ({ posts, loading, onDeleteClick }: { posts: Post[], loading: boolean, onDeleteClick: (postId: string) => void }) => {
     if (loading) {
@@ -102,6 +103,7 @@ export default function KuranMucizeleriAdminPage() {
     const [postToDelete, setPostToDelete] = useState<string | null>(null);
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -124,15 +126,17 @@ export default function KuranMucizeleriAdminPage() {
     };
 
     const handleDeleteConfirm = async () => {
-        if (postToDelete) {
-            const success = await deletePost(postToDelete);
+        if (postToDelete && user) {
+            const { success, message } = await deletePost(postToDelete, user.uid);
             if (success) {
                 setPosts(posts.filter(p => p.id !== postToDelete));
                 toast({ title: "Başarılı!", description: "Yazı başarıyla silindi." });
             } else {
-                toast({ title: "Hata!", description: "Yazı silinirken bir sorun oluştu.", variant: "destructive" });
+                toast({ title: "Hata!", description: message, variant: "destructive" });
             }
             setPostToDelete(null);
+        } else {
+            toast({ title: "Hata!", description: "Bu işlemi yapmak için giriş yapmalısınız.", variant: "destructive" });
         }
         setIsAlertOpen(false);
     };
