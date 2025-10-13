@@ -59,9 +59,34 @@ export const getUserDoc = async (uid: string) => {
     return userSnap.exists() ? userSnap.data() : null;
 };
 
-export const updateUserDoc = async (uid: string, data: object) => {
+export const updateUserDoc = async (uid: string, data: { [key: string]: any }): Promise<{ success: boolean, message: string }> => {
     const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, data);
+
+    if (data.displayName) {
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.displayNameLastChanged) {
+                const lastChanged = (userData.displayNameLastChanged as Timestamp).toDate();
+                const now = new Date();
+                const diffHours = (now.getTime() - lastChanged.getTime()) / (1000 * 60 * 60);
+                if (diffHours < 24) {
+                    const hoursLeft = Math.ceil(24 - diffHours);
+                    return { success: false, message: `Kullanıcı adınızı tekrar değiştirmek için yaklaşık ${hoursLeft} saat beklemelisiniz.` };
+                }
+            }
+             // If check passes, add the timestamp to the data to be updated
+            data.displayNameLastChanged = serverTimestamp();
+        }
+    }
+    
+    try {
+        await updateDoc(userRef, data);
+        return { success: true, message: "Profil başarıyla güncellendi." };
+    } catch (error) {
+        console.error("Error updating user doc:", error);
+        return { success: false, message: "Profil güncellenirken bir hata oluştu." };
+    }
 };
 
 
@@ -380,7 +405,6 @@ export const getPostTitle = async (postId: string): Promise<{title: string, slug
 export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> => {
     try {
         const reportedCommentsRef = collection(db, 'reportedComments');
-        // No orderBy here to avoid needing an index. Sorting is done in the client.
         const q = query(reportedCommentsRef);
         const querySnapshot = await getDocs(q);
 
@@ -403,7 +427,7 @@ export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> =
         }
         
         // Sort comments by reportedAt timestamp in descending order (newest first)
-        comments.sort((a, b) => {
+        comments.sort((a: any, b: any) => {
             const timeA = (a as any).reportedAt?.seconds || 0;
             const timeB = (b as any).reportedAt?.seconds || 0;
             return timeB - timeA;

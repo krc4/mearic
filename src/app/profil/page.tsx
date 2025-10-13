@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { auth, db } from "@/lib/firebase/config";
 import { onAuthStateChanged, User, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "firebase/auth";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,7 +33,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { KeyRound, User as UserIcon, ShieldAlert, Trash2, LogOut, LayoutDashboard, Image as ImageIcon, ChevronLeft } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import NextImage from "next/image";
-import { isAdmin, getUserDoc, updateUserDoc } from "@/lib/firebase/services";
+import { isAdmin, updateUserDoc } from "@/lib/firebase/services";
 
 const profileSchema = z.object({
     displayName: z.string()
@@ -65,8 +64,6 @@ export default function ProfilePage() {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [canChangeUsername, setCanChangeUsername] = useState(false);
-  const [timeUntilNextChange, setTimeUntilNextChange] = useState("");
   const router = useRouter();
   const { toast } = useToast();
 
@@ -76,26 +73,6 @@ export default function ProfilePage() {
         setUser(currentUser);
         const adminStatus = await isAdmin(currentUser.uid);
         setIsUserAdmin(adminStatus);
-        
-        const userDocData = await getUserDoc(currentUser.uid);
-        if (userDocData && userDocData.displayNameLastChanged) {
-          const lastChanged = userDocData.displayNameLastChanged.toDate();
-          const now = new Date();
-          const diff = now.getTime() - lastChanged.getTime();
-          const hoursPassed = diff / (1000 * 60 * 60);
-          
-          if (hoursPassed < 24) {
-            setCanChangeUsername(false);
-            const hoursLeft = 24 - hoursPassed;
-            const minutesLeft = (hoursLeft % 1) * 60;
-            setTimeUntilNextChange(`${Math.floor(hoursLeft)} saat ${Math.floor(minutesLeft)} dakika sonra`);
-          } else {
-            setCanChangeUsername(true);
-          }
-        } else {
-            setCanChangeUsername(true);
-        }
-
       } else {
         router.push("/giris");
       }
@@ -130,17 +107,20 @@ export default function ProfilePage() {
   const watchedPhotoURL = photoForm.watch("photoURL");
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
-    if (!user || !canChangeUsername) return;
+    if (!user) return;
     try {
-        await updateProfile(user, { displayName: data.displayName });
-        await updateUserDoc(user.uid, { 
+        const { success, message } = await updateUserDoc(user.uid, { 
             displayName: data.displayName,
-            displayNameLastChanged: serverTimestamp() 
         });
-        toast({ title: "Başarılı!", description: "Kullanıcı adınız güncellendi." });
-        setUser({ ...user, displayName: data.displayName });
-        setCanChangeUsername(false); // Immediately block until page reloads or state updates
-        router.refresh();
+
+        if (success) {
+            await updateProfile(user, { displayName: data.displayName });
+            toast({ title: "Başarılı!", description: "Kullanıcı adınız güncellendi." });
+            setUser({ ...user, displayName: data.displayName });
+            router.refresh();
+        } else {
+            toast({ title: "Hata!", description: message, variant: "destructive" });
+        }
     } catch(error) {
         console.error(error);
         toast({ title: "Hata!", description: "Kullanıcı adı güncellenirken bir sorun oluştu.", variant: "destructive" });
@@ -150,11 +130,15 @@ export default function ProfilePage() {
   const onPhotoSubmit = async (data: PhotoFormValues) => {
     if (!user) return;
     try {
-        await updateProfile(user, { photoURL: data.photoURL });
-        await updateUserDoc(user.uid, { photoURL: data.photoURL });
-        toast({ title: "Başarılı!", description: "Profil fotoğrafınız güncellendi." });
-        setUser({...user, photoURL: data.photoURL }); // Force a re-render to show the new avatar
-        router.refresh();
+        const { success, message } = await updateUserDoc(user.uid, { photoURL: data.photoURL });
+        if(success) {
+            await updateProfile(user, { photoURL: data.photoURL });
+            toast({ title: "Başarılı!", description: "Profil fotoğrafınız güncellendi." });
+            setUser({...user, photoURL: data.photoURL }); // Force a re-render to show the new avatar
+            router.refresh();
+        } else {
+             toast({ title: "Hata!", description: message, variant: "destructive" });
+        }
     } catch(error) {
         console.error(error);
         toast({ title: "Hata!", description: "Fotoğraf güncellenirken bir sorun oluştu.", variant: "destructive" });
@@ -253,7 +237,7 @@ export default function ProfilePage() {
                 <CardHeader>
                 <CardTitle className="flex items-center gap-2"><UserIcon/> Kullanıcı Adı</CardTitle>
                 <CardDescription>
-                    Kullanıcı adınızı günde bir kez değiştirebilirsiniz. Sadece harf, rakam ve alt çizgi (_) kullanın.
+                    Kullanıcı adınızı 24 saatte bir değiştirebilirsiniz. Sadece harf, rakam ve alt çizgi (_) kullanın.
                 </CardDescription>
                 </CardHeader>
                 <Form {...profileForm}>
@@ -274,14 +258,12 @@ export default function ProfilePage() {
                             />
                         </CardContent>
                         <CardFooter className="border-t px-6 py-4 flex justify-between items-center">
-                            <Button type="submit" disabled={!canChangeUsername || profileForm.formState.isSubmitting}>
+                            <p className="text-sm text-muted-foreground">
+                                Değişiklik sunucu tarafından doğrulanacaktır.
+                            </p>
+                            <Button type="submit" disabled={profileForm.formState.isSubmitting}>
                                 {profileForm.formState.isSubmitting ? 'Kaydediliyor...' : 'Kullanıcı Adını Kaydet'}
                             </Button>
-                             {!canChangeUsername && (
-                                <p className="text-sm text-destructive">
-                                    Tekrar değiştirmek için beklemeniz gerekiyor: {timeUntilNextChange}
-                                </p>
-                            )}
                         </CardFooter>
                     </form>
                 </Form>
