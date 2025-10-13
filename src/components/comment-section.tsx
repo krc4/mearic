@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { MessageCircle, Send, MoreVertical, ShieldCheck, Trash2, Star, Flag } from "lucide-react"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { addComment, getCommentsForPost, getAdminPermissions, deleteComment, reportComment, CommentPayload } from "@/lib/firebase/services"
+import { addComment, getCommentsForPost, isAdmin, deleteComment, reportComment, CommentPayload } from "@/lib/firebase/services"
 import type { Comment } from "@/lib/comments"
 import { Skeleton } from "./ui/skeleton"
 import Link from "next/link"
@@ -26,12 +26,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog"
 import { motion } from "framer-motion"
-import { AdminPermissions } from "@/lib/admin"
 
 
-const CommentItem = ({ comment, currentUserId, canDelete, onDeleteClick, onReportClick }: { comment: Comment, currentUserId: string | null, canDelete: boolean, onDeleteClick: (commentId: string) => void, onReportClick: (commentId: string) => void }) => {
+const CommentItem = ({ comment, currentUserId, isCurrentUserAdmin, onDeleteClick, onReportClick }: { comment: Comment, currentUserId: string | null, isCurrentUserAdmin: boolean, onDeleteClick: (commentId: string) => void, onReportClick: (commentId: string) => void }) => {
     const isOwner = comment.userId === currentUserId;
-    const showDelete = canDelete || isOwner;
+    const showDelete = isOwner || isCurrentUserAdmin;
 
     return (
     <motion.div
@@ -127,7 +126,7 @@ interface CommentSectionProps {
 export function CommentSection({ postId, onCommentCountChange }: CommentSectionProps) {
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
-    const [permissions, setPermissions] = useState<AdminPermissions>({ canDeleteComments: false, canCreatePosts: false, canEditPosts: false, canDeletePosts: false, canManageAdmins: false });
+    const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
@@ -140,10 +139,10 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
-                const adminPerms = await getAdminPermissions(currentUser.uid);
-                setPermissions(adminPerms);
+                const adminStatus = await isAdmin(currentUser.uid);
+                setIsCurrentUserAdmin(adminStatus);
             } else {
-                setPermissions({ canDeleteComments: false, canCreatePosts: false, canEditPosts: false, canDeletePosts: false, canManageAdmins: false });
+                setIsCurrentUserAdmin(false);
             }
             setAuthLoading(false);
         });
@@ -174,15 +173,13 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
             return;
         }
 
-        const isCurrentUserAdmin = await getAdminPermissions(user.uid);
-
         const commentData: CommentPayload = {
             postId,
             userId: user.uid,
             username: user.displayName || "Anonim",
             photoURL: user.photoURL || "",
             text: newComment,
-            isAdmin: Object.values(isCurrentUserAdmin).some(p => p), 
+            isAdmin: isCurrentUserAdmin, 
             isReported: false,
         };
 
@@ -302,7 +299,7 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
                                 key={comment.id} 
                                 comment={comment} 
                                 currentUserId={user?.uid || null}
-                                canDelete={permissions.canDeleteComments} 
+                                isCurrentUserAdmin={isCurrentUserAdmin} 
                                 onDeleteClick={handleDeleteClick}
                                 onReportClick={handleReportClick}
                             />
@@ -325,3 +322,5 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
         </section>
     )
 }
+
+    
