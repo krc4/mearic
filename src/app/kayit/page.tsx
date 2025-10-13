@@ -90,12 +90,19 @@ export default function RegisterPage() {
       router.push('/');
     } catch (error: any) {
         console.error("Firebase registration error:", error);
-        let description = "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.";
+        let description = "Kayıt sırasında bir hata oluştu. Lütfen bilgilerinizi kontrol edip tekrar deneyin.";
+        
+        // GENERIC ERROR MESSAGE to prevent user enumeration
         if (error.code === 'auth/email-already-in-use') {
-            description = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta ile deneyin veya giriş yapın."
+            description = "Kayıt işlemi başarısız oldu. Lütfen girdiğiniz bilgileri kontrol edin veya farklı bir e-posta adresi deneyin."
         } else if (error.code === 'auth/configuration-not-found') {
             description = "Firebase yapılandırması bulunamadı veya e-posta/şifre ile kimlik doğrulama etkin değil. Lütfen yönetici ile iletişime geçin."
+        } else if (error.code === 'auth/invalid-email') {
+             description = "Girdiğiniz e-posta adresi geçersiz. Lütfen kontrol edip tekrar deneyin."
+        } else if (error.code === 'auth/weak-password') {
+            description = "Şifreniz yeterince güçlü değil. Lütfen en az 6 karakter kullanın."
         }
+
         toast({
             title: "Kayıt Hatası",
             description,
