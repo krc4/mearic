@@ -380,13 +380,13 @@ export const getPostTitle = async (postId: string): Promise<{title: string, slug
 export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> => {
     try {
         const reportedCommentsRef = collection(db, 'reportedComments');
+        // No orderBy here to avoid needing an index. Sorting is done in the client.
         const q = query(reportedCommentsRef);
         const querySnapshot = await getDocs(q);
 
         const comments: CommentWithPostInfo[] = [];
 
         for (const docSnap of querySnapshot.docs) {
-            // The data in 'reportedComments' should have the original comment data
             const comment = docSnap.data() as Comment;
             const originalPostId = docSnap.data().originalPostId;
             const postInfo = await getPostTitle(originalPostId);
@@ -395,15 +395,19 @@ export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> =
                  comments.push({
                     ...comment,
                     id: docSnap.id,
-                    postId: originalPostId, // Use the original post ID
+                    postId: originalPostId,
                     postTitle: postInfo.title,
                     postSlug: postInfo.slug
                 });
             }
         }
         
-        // The timestamp to sort by is now `reportedAt`
-        comments.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        // Sort comments by reportedAt timestamp in descending order (newest first)
+        comments.sort((a, b) => {
+            const timeA = (a as any).reportedAt?.seconds || 0;
+            const timeB = (b as any).reportedAt?.seconds || 0;
+            return timeB - timeA;
+        });
 
         return comments;
     } catch (error) {
@@ -430,6 +434,10 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
                 canDeletePosts: data.permissions?.canDeletePosts || false,
                 canManageAdmins: data.permissions?.canManageAdmins || false,
             };
+             if (data.role === 'founder') {
+                // Ensure founder always has all permissions, overriding DB state
+                Object.keys(permissions).forEach(k => (permissions as any)[k] = true);
+            }
             const admin: AdminUser = {
                 uid: docSnap.id,
                 email: data.email,
@@ -439,18 +447,6 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
                 role: data.role,
                 permissions: permissions,
             };
-            // Force 'test1' to always be a founder in the returned data
-            if (admin.displayName === 'test1') {
-                admin.role = 'founder';
-                // Also ensure founder has all permissions
-                admin.permissions = {
-                    canDeleteComments: true,
-                    canCreatePosts: true,
-                    canEditPosts: true,
-                    canDeletePosts: true,
-                    canManageAdmins: true,
-                };
-            }
             return admin;
         });
         
@@ -462,9 +458,9 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
 }
 
 const defaultAdminPermissions: AdminPermissions = {
-    canDeleteComments: false,
-    canCreatePosts: false,
-    canEditPosts: false,
+    canDeleteComments: true,
+    canCreatePosts: true,
+    canEditPosts: true,
     canDeletePosts: false,
     canManageAdmins: false,
 };
@@ -487,18 +483,10 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     const adminSnap = await getDoc(adminRef);
 
     if (adminSnap.exists()) {
-        if (user.displayName === 'test1' && adminSnap.data().role !== 'founder') {
-            try {
-                await updateDoc(adminRef, { role: 'founder', permissions: founderPermissions });
-                return { success: true, message: "'test1' kullanıcısının rolü Kurucu olarak güncellendi ve tüm yetkiler verildi." };
-            } catch (error) {
-                console.error("Error updating test1 to founder: ", error);
-                return { success: false, message: "'test1' rolü güncellenirken bir hata oluştu." };
-            }
-        }
         return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
     }
     
+    // Check if the admins collection is empty to assign the first user as 'founder'
     const adminsCollection = collection(db, "admins");
     const adminCountSnapshot = await getCountFromServer(adminsCollection);
     const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
@@ -506,7 +494,8 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     let role: AdminRole = 'admin';
     let permissions = defaultAdminPermissions;
 
-    if (isAdminCollectionEmpty || user.displayName === 'test1') {
+    // The very first admin added to the system becomes the founder
+    if (isAdminCollectionEmpty) {
         role = 'founder';
         permissions = founderPermissions;
     }
