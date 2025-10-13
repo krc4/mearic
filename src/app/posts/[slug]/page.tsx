@@ -27,6 +27,7 @@ import styles from "@/app/page.module.css";
 import { motion } from "framer-motion";
 import { CommentSection } from "@/components/comment-section";
 import { ShieldCheck } from "lucide-react";
+import DOMPurify from "dompurify";
 
 
 export default function PostPage() {
@@ -41,6 +42,7 @@ export default function PostPage() {
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
+  const [sanitizedContent, setSanitizedContent] = useState("");
 
 
   useEffect(() => {
@@ -55,6 +57,11 @@ export default function PostPage() {
          if (fetchedPost.authorId) {
             const adminStatus = await isAdmin(fetchedPost.authorId);
             setIsAuthorAdmin(adminStatus);
+        }
+
+        // Sanitize HTML content before setting it
+        if (typeof window !== 'undefined') {
+          setSanitizedContent(DOMPurify.sanitize(fetchedPost.content));
         }
 
         // Unique view logic using sessionStorage
@@ -260,7 +267,7 @@ export default function PostPage() {
                             {/* Article Content */}
                              <article
                                 className={`prose prose-lg dark:prose-invert max-w-none ${styles.articleContent}`}
-                                dangerouslySetInnerHTML={{ __html: post.content }}
+                                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                             />
                         </CardContent>
                      </Card>
