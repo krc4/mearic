@@ -85,7 +85,7 @@ const ReportedCommentTable = ({
             </TableCell>
              <TableCell className="max-w-xs truncate">{comment.text}</TableCell>
              <TableCell className="hidden md:table-cell">
-                <Link href={`/posts/${comment.postSlug}`} className="hover:underline text-blue-500" target="_blank">
+                <Link href={`/posts/${comment.postSlug}`} className="hover:underline text-blue-500" target="_blank" rel="noopener noreferrer">
                     {comment.postTitle}
                 </Link>
              </TableCell>
