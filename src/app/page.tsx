@@ -545,27 +545,15 @@ export default function Home() {
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     <Button asChild variant="outline" className="rounded-full">
-                        <a href="#" target="_blank" rel="noopener noreferrer">
+                        <a href="https://www.instagram.com/mecmaul.bahreyn/" target="_blank" rel="noopener noreferrer">
                             <Instagram className="mr-2 h-4 w-4"/>
                             Instagram
                         </a>
                     </Button>
-                    <Button asChild variant="outline" className="rounded-full">
-                        <a href="#" target="_blank" rel="noopener noreferrer">
-                            <Twitter className="mr-2 h-4 w-4"/>
-                            Twitter
-                        </a>
-                    </Button>
                      <Button asChild variant="outline" className="rounded-full">
-                        <a href="#" target="_blank" rel="noopener noreferrer">
+                        <a href="https://www.youtube.com/@mecmaulbahreyn/videos" target="_blank" rel="noopener noreferrer">
                             <Youtube className="mr-2 h-4 w-4"/>
                             YouTube
-                        </a>
-                    </Button>
-                     <Button asChild variant="outline" className="rounded-full">
-                        <a href="#" target="_blank" rel="noopener noreferrer">
-                            <Facebook className="mr-2 h-4 w-4"/>
-                            Facebook
                         </a>
                     </Button>
                   </div>
