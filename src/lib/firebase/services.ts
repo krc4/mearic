@@ -405,8 +405,7 @@ export const getPostTitle = async (postId: string): Promise<{title: string, slug
 export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> => {
     try {
         const reportedCommentsRef = collection(db, 'reportedComments');
-        const q = query(reportedCommentsRef);
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(reportedCommentsRef);
 
         const comments: CommentWithPostInfo[] = [];
 
@@ -426,10 +425,9 @@ export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> =
             }
         }
         
-        // Sort comments by reportedAt timestamp in descending order (newest first)
         comments.sort((a: any, b: any) => {
-            const timeA = (a as any).reportedAt?.seconds || 0;
-            const timeB = (b as any).reportedAt?.seconds || 0;
+            const timeA = (a as any).createdAt?.seconds || 0;
+            const timeB = (b as any).createdAt?.seconds || 0;
             return timeB - timeA;
         });
 
@@ -451,17 +449,8 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
         
         const admins = querySnapshot.docs.map(docSnap => {
             const data = docSnap.data();
-            const permissions: AdminPermissions = {
-                canDeleteComments: data.permissions?.canDeleteComments || false,
-                canCreatePosts: data.permissions?.canCreatePosts || false,
-                canEditPosts: data.permissions?.canEditPosts || false,
-                canDeletePosts: data.permissions?.canDeletePosts || false,
-                canManageAdmins: data.permissions?.canManageAdmins || false,
-            };
-             if (data.role === 'founder') {
-                // Ensure founder always has all permissions, overriding DB state
-                Object.keys(permissions).forEach(k => (permissions as any)[k] = true);
-            }
+            // The permissions are read directly from the database.
+            // No special client-side logic is needed for the founder.
             const admin: AdminUser = {
                 uid: docSnap.id,
                 email: data.email,
@@ -469,7 +458,7 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
                 photoURL: data.photoURL,
                 addedAt: data.addedAt,
                 role: data.role,
-                permissions: permissions,
+                permissions: data.permissions,
             };
             return admin;
         });
