@@ -15,8 +15,13 @@ import {
   PenSquare,
   Shield,
   ShieldAlert,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
+import { isAdmin } from '@/lib/firebase/services';
 
 import {
   Sidebar,
@@ -224,6 +229,40 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+  const [loading, setLoading] = React.useState(true);
+  const [isAuthorized, setIsAuthorized] = React.useState(false);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const adminStatus = await isAdmin(user.uid);
+        if (adminStatus) {
+          setIsAuthorized(true);
+        } else {
+          router.push('/'); // Redirect non-admins to home
+        }
+      } else {
+        router.push('/giris'); // Redirect non-logged-in users to login
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null; // or a specific "Unauthorized" component
+  }
 
   return (
     <SidebarProvider>
