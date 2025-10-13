@@ -294,6 +294,12 @@ export const deleteComment = async (postId: string, commentId: string): Promise<
     try {
         const commentRef = doc(db, 'posts', postId, 'comments', commentId);
         await deleteDoc(commentRef);
+        // Also delete from the central reported comments collection if it exists
+        const reportedCommentRef = doc(db, 'reportedComments', commentId);
+        const reportedSnap = await getDoc(reportedCommentRef);
+        if (reportedSnap.exists()) {
+            await deleteDoc(reportedCommentRef);
+        }
         return true;
     } catch (error) {
         console.error('Error deleting comment: ', error);
@@ -304,7 +310,26 @@ export const deleteComment = async (postId: string, commentId: string): Promise<
 export const reportComment = async (postId: string, commentId: string): Promise<boolean> => {
     try {
         const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+        const commentSnap = await getDoc(commentRef);
+
+        if (!commentSnap.exists()) {
+             throw new Error("Comment not found");
+        }
+
+        const commentData = commentSnap.data() as Comment;
+        
+        // Mark the original comment as reported
         await updateDoc(commentRef, { isReported: true });
+
+        // Add the comment to the central reportedComments collection
+        const reportedCommentRef = doc(db, 'reportedComments', commentId);
+        await setDoc(reportedCommentRef, {
+            ...commentData,
+            id: commentId, // Ensure the original comment ID is stored
+            originalPostId: postId, // Store the original post ID for context
+            reportedAt: serverTimestamp()
+        });
+
         return true;
     } catch (error) {
         console.error('Error reporting comment: ', error);
@@ -314,8 +339,14 @@ export const reportComment = async (postId: string, commentId: string): Promise<
 
 export const unreportComment = async (postId: string, commentId: string): Promise<boolean> => {
     try {
+        // Unmark the original comment
         const commentRef = doc(db, 'posts', postId, 'comments', commentId);
         await updateDoc(commentRef, { isReported: false });
+
+        // Remove from the central reported comments collection
+        const reportedCommentRef = doc(db, 'reportedComments', commentId);
+        await deleteDoc(reportedCommentRef);
+        
         return true;
     } catch (error) {
         console.error('Error un-reporting comment: ', error);
@@ -348,28 +379,31 @@ export const getPostTitle = async (postId: string): Promise<{title: string, slug
 
 export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> => {
     try {
-        const commentsGroupRef = collectionGroup(db, 'comments');
-        const q = query(commentsGroupRef, where('isReported', '==', true));
+        const reportedCommentsRef = collection(db, 'reportedComments');
+        const q = query(reportedCommentsRef);
         const querySnapshot = await getDocs(q);
 
         const comments: CommentWithPostInfo[] = [];
 
         for (const docSnap of querySnapshot.docs) {
+            // The data in 'reportedComments' should have the original comment data
             const comment = docSnap.data() as Comment;
-            const postInfo = await getPostTitle(comment.postId);
+            const originalPostId = docSnap.data().originalPostId;
+            const postInfo = await getPostTitle(originalPostId);
             
             if (postInfo) {
                  comments.push({
-                    id: docSnap.id,
                     ...comment,
+                    id: docSnap.id,
+                    postId: originalPostId, // Use the original post ID
                     postTitle: postInfo.title,
                     postSlug: postInfo.slug
                 });
             }
         }
-
-        // Sort comments by date descending, in code.
-        comments.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+        
+        // The timestamp to sort by is now `reportedAt`
+        comments.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
         return comments;
     } catch (error) {

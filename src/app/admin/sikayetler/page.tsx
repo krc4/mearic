@@ -90,7 +90,7 @@ const ReportedCommentTable = ({
                 </Link>
              </TableCell>
             <TableCell className="hidden md:table-cell">
-              {new Date(comment.createdAt.seconds * 1000).toLocaleDateString('tr-TR')}
+              {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString('tr-TR') : ''}
             </TableCell>
             <TableCell>
               <DropdownMenu>
