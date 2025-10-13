@@ -189,7 +189,7 @@ export function CategoryClientPage({
     const url = `${window.location.origin}/posts/${postSlug}`;
     if (navigator.share) {
         try {
-            await navigator.share({ title: postTitle, url });
+            await navigator.share({ title: postTitle, text: postTitle, url });
         } catch (error) {
             console.error('Error sharing:', error);
             navigator.clipboard.writeText(url);
@@ -386,3 +386,5 @@ export function CategoryClientPage({
     </>
   );
 }
+
+    
