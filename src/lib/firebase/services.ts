@@ -349,7 +349,7 @@ export const getPostTitle = async (postId: string): Promise<{title: string, slug
 export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> => {
     try {
         const commentsGroupRef = collectionGroup(db, 'comments');
-        const q = query(commentsGroupRef, where('isReported', '==', true), orderBy('createdAt', 'desc'));
+        const q = query(commentsGroupRef, where('isReported', '==', true));
         const querySnapshot = await getDocs(q);
 
         const comments: CommentWithPostInfo[] = [];
@@ -367,6 +367,9 @@ export const getAllReportedComments = async (): Promise<CommentWithPostInfo[]> =
                 });
             }
         }
+
+        // Sort comments by date descending, in code.
+        comments.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
 
         return comments;
     } catch (error) {
@@ -646,3 +649,4 @@ export const updateHomepageSettings = async (settings: HomepageSettings): Promis
         return { success: false, message: "Ayarlar güncellenirken bir hata oluştu." };
     }
 };
+
