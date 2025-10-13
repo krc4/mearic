@@ -219,6 +219,7 @@ export default function NewPostPage() {
                                     alt="Resim Önizlemesi" 
                                     fill 
                                     className="object-cover"
+                                    onError={(e) => e.currentTarget.style.display = 'none'}
                                 />
                             </div>
                         )}
