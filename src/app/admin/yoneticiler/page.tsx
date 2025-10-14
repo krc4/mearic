@@ -45,6 +45,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { useAuth } from "@/hooks/use-auth"
 
 
 const addAdminSchema = z.object({
@@ -99,19 +100,21 @@ const AdminList = ({ admins, onRemoveClick, onSettingsClick }: { admins: AdminUs
 const PermissionsDialog = ({ 
     isOpen, 
     onOpenChange, 
-    admin, 
+    admin,
+    requestingAdmin,
     onPermissionsChange 
 }: { 
     isOpen: boolean, 
     onOpenChange: (open: boolean) => void, 
-    admin: AdminUser | null, 
-    onPermissionsChange: (uid: string, permissions: AdminPermissions) => void 
+    admin: AdminUser | null,
+    requestingAdmin: import('firebase/auth').User | null,
+    onPermissionsChange: (requestingAdminUid: string, targetUid: string, permissions: AdminPermissions) => void 
 }) => {
-    if (!admin) return null;
+    if (!admin || !requestingAdmin) return null;
 
     const handleSwitchChange = (permission: keyof AdminPermissions, value: boolean) => {
         const updatedPermissions = { ...admin.permissions, [permission]: value };
-        onPermissionsChange(admin.uid, updatedPermissions);
+        onPermissionsChange(requestingAdmin.uid, admin.uid, updatedPermissions);
     };
 
     const permissionItems = [
@@ -167,6 +170,7 @@ export default function YoneticilerAdminPage() {
     const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
     const { toast } = useToast();
+    const { user: requestingAdmin } = useAuth();
 
     const form = useForm<AddAdminFormValues>({
         resolver: zodResolver(addAdminSchema),
@@ -198,8 +202,8 @@ export default function YoneticilerAdminPage() {
     };
 
     const handleRemoveConfirm = async () => {
-        if (adminToRemove) {
-            const { success, message } = await removeAdmin(adminToRemove.uid);
+        if (adminToRemove && requestingAdmin) {
+            const { success, message } = await removeAdmin(requestingAdmin.uid, adminToRemove.uid);
             if (success) {
                 setAdmins(admins.filter(a => a.uid !== adminToRemove.uid));
                 toast({ title: "Başarılı!", description: message });
@@ -212,7 +216,11 @@ export default function YoneticilerAdminPage() {
     };
 
     const onSubmit = async (data: AddAdminFormValues) => {
-        const { success, message } = await addAdmin(data.email);
+        if (!requestingAdmin) {
+            toast({ title: "Hata!", description: "Bu işlemi yapmak için giriş yapmalısınız.", variant: "destructive" });
+            return;
+        }
+        const { success, message } = await addAdmin(requestingAdmin.uid, data.email);
         if (success) {
             toast({ title: "Başarılı!", description: message });
             form.reset();
@@ -227,16 +235,16 @@ export default function YoneticilerAdminPage() {
         setIsPermissionsDialogOpen(true);
     };
     
-    const handlePermissionsChange = async (uid: string, permissions: AdminPermissions) => {
+    const handlePermissionsChange = async (requestingAdminUid: string, targetUid: string, permissions: AdminPermissions) => {
         // Optimistic UI update
         setAdmins(currentAdmins => 
             currentAdmins.map(admin => 
-                admin.uid === uid ? { ...admin, permissions } : admin
+                admin.uid === targetUid ? { ...admin, permissions } : admin
             )
         );
         setSelectedAdmin(prev => prev ? { ...prev, permissions } : null);
 
-        const { success, message } = await updateAdminPermissions(uid, permissions);
+        const { success, message } = await updateAdminPermissions(requestingAdminUid, targetUid, permissions);
         if (success) {
             toast({ title: "Başarılı!", description: message });
         } else {
@@ -322,6 +330,7 @@ export default function YoneticilerAdminPage() {
         isOpen={isPermissionsDialogOpen}
         onOpenChange={setIsPermissionsDialogOpen}
         admin={selectedAdmin}
+        requestingAdmin={requestingAdmin}
         onPermissionsChange={handlePermissionsChange}
       />
     </>

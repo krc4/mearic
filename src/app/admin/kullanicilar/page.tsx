@@ -40,6 +40,7 @@ import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog"
 import { useToast } from "@/hooks/use-toast";
 import type { SiteUser } from '@/lib/users';
 import { getUsers, deleteUserByAdmin } from '@/lib/firebase/services';
+import { useAuth } from '@/hooks/use-auth';
 
 const UserTable = ({ users, onDeleteClick }: { users: SiteUser[]; onDeleteClick: (user: SiteUser) => void }) => {
   return (
@@ -101,6 +102,7 @@ export default function KullanicilarAdminPage() {
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const { toast } = useToast();
+  const { user: adminUser } = useAuth();
 
   useEffect(() => {
     const fetchAllUsers = async () => {
@@ -130,8 +132,8 @@ export default function KullanicilarAdminPage() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!userToDelete) return;
-    const { success, message } = await deleteUserByAdmin(userToDelete.uid);
+    if (!userToDelete || !adminUser) return;
+    const { success, message } = await deleteUserByAdmin(adminUser.uid, userToDelete.uid);
     if (success) {
       setAllUsers(prev => prev.filter(u => u.uid !== userToDelete.uid));
       toast({ title: "Başarılı!", description: message });

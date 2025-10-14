@@ -1,5 +1,6 @@
 
 
+
 import { db } from './config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, doc, deleteDoc, getDoc, updateDoc, orderBy, setDoc, increment, getCountFromServer, limit, startAfter, collectionGroup } from 'firebase/firestore';
 import type { Post } from '@/lib/posts';
@@ -116,8 +117,13 @@ export const updateUserDoc = async (uid: string, data: { [key: string]: any }): 
 };
 
 
-export const addPost = async (post: PostPayload) => {
+export const addPost = async (post: PostPayload): Promise<{ success: boolean; message: string; postId: string | null; }> => {
     try {
+        const isUserAdmin = await isAdmin(post.authorId);
+        if (!isUserAdmin) {
+            return { success: false, message: "Yazı oluşturma yetkiniz yok.", postId: null };
+        }
+
         const docRef = await addDoc(collection(db, "posts"), {
             ...post,
             slug: post.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
@@ -126,10 +132,10 @@ export const addPost = async (post: PostPayload) => {
             createdAt: serverTimestamp()
         });
         console.log("Document written with ID: ", docRef.id);
-        return docRef.id;
+        return { success: true, message: "Yazı başarıyla eklendi.", postId: docRef.id };
     } catch (e) {
         console.error("Error adding document: ", e);
-        return null;
+        return { success: false, message: "Yazı eklenirken bir hata oluştu.", postId: null };
     }
 };
 
@@ -244,10 +250,10 @@ export const updatePost = async (postId: string, userId: string, payload: Partia
              return { success: false, message: "Yazı bulunamadı." };
         }
         
-        const isUserAdmin = await isAdmin(userId);
+        const perms = await getAdminPermissions(userId);
         const postData = postSnap.data();
 
-        if (postData.authorId !== userId && !isUserAdmin) {
+        if (postData.authorId !== userId && !perms.canEditPosts) {
             return { success: false, message: "Bu yazıyı düzenleme yetkiniz yok." };
         }
 
@@ -277,10 +283,10 @@ export const deletePost = async (postId: string, userId: string): Promise<{ succ
             return { success: false, message: "Yazı bulunamadı." };
         }
 
-        const isUserAdmin = await isAdmin(userId);
+        const perms = await getAdminPermissions(userId);
         const postData = postSnap.data();
 
-        if (postData.authorId !== userId && !isUserAdmin) {
+        if (postData.authorId !== userId && !perms.canDeletePosts) {
             return { success: false, message: "Bu yazıyı silme yetkiniz yok." };
         }
         
@@ -371,9 +377,21 @@ export const getCommentCount = async (postId: string): Promise<number> => {
 };
 
 
-export const deleteComment = async (postId: string, commentId: string): Promise<boolean> => {
+export const deleteComment = async (requestingUserId: string, postId: string, commentId: string): Promise<boolean> => {
     try {
         const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+        const commentSnap = await getDoc(commentRef);
+        if (!commentSnap.exists()) return true; // Already deleted
+
+        const perms = await getAdminPermissions(requestingUserId);
+        const commentData = commentSnap.data();
+
+        // Allow deletion if the user is the owner of the comment OR has canDeleteComments permission
+        if (commentData.userId !== requestingUserId && !perms.canDeleteComments) {
+            console.warn("Unauthorized attempt to delete comment by user:", requestingUserId);
+            return false;
+        }
+
         await deleteDoc(commentRef);
         // Also delete from the central reported comments collection if it exists
         const reportedCommentRef = doc(db, 'reportedComments', commentId);
@@ -540,7 +558,12 @@ const founderPermissions: AdminPermissions = {
     canManageAdmins: true,
 };
 
-export const addAdmin = async (email: string): Promise<{ success: boolean; message: string }> => {
+export const addAdmin = async (requestingAdminUid: string, email: string): Promise<{ success: boolean; message: string }> => {
+    const perms = await getAdminPermissions(requestingAdminUid);
+    if (!perms.canManageAdmins) {
+        return { success: false, message: "Yönetici ekleme yetkiniz yok." };
+    }
+
     const user = await findUserByEmail(email);
     if (!user) {
         return { success: false, message: "Bu e-posta adresine sahip bir kullanıcı bulunamadı." };
@@ -582,9 +605,14 @@ export const addAdmin = async (email: string): Promise<{ success: boolean; messa
     }
 };
 
-export const removeAdmin = async (uid: string): Promise<{ success: boolean; message: string }> => {
+export const removeAdmin = async (requestingAdminUid: string, targetUid: string): Promise<{ success: boolean; message: string }> => {
     try {
-        const adminRef = doc(db, "admins", uid);
+        const perms = await getAdminPermissions(requestingAdminUid);
+        if (!perms.canManageAdmins) {
+            return { success: false, message: "Yönetici kaldırma yetkiniz yok." };
+        }
+
+        const adminRef = doc(db, "admins", targetUid);
         const adminSnap = await getDoc(adminRef);
 
         if (!adminSnap.exists()) {
@@ -628,7 +656,14 @@ export const getAdminPermissions = async (uid: string): Promise<AdminPermissions
             }
             return { ...defaultAdminPermissions, ...data.permissions };
         }
-        return defaultAdminPermissions;
+        // Return default (non-admin) permissions if user is not in the admins collection
+        return { 
+            canDeleteComments: false,
+            canCreatePosts: false,
+            canEditPosts: false,
+            canDeletePosts: false,
+            canManageAdmins: false 
+        };
     } catch (error) {
         console.error("Error checking admin permissions: ", error);
         return defaultAdminPermissions;
@@ -636,9 +671,14 @@ export const getAdminPermissions = async (uid: string): Promise<AdminPermissions
 };
 
 
-export const updateAdminPermissions = async (uid: string, permissions: Partial<AdminPermissions>): Promise<{ success: boolean; message: string }> => {
+export const updateAdminPermissions = async (requestingAdminUid: string, targetUid: string, permissions: Partial<AdminPermissions>): Promise<{ success: boolean; message: string }> => {
     try {
-        const adminRef = doc(db, "admins", uid);
+        const perms = await getAdminPermissions(requestingAdminUid);
+        if (!perms.canManageAdmins) {
+            return { success: false, message: "Yönetici yetkilerini düzenleme izniniz yok." };
+        }
+
+        const adminRef = doc(db, "admins", targetUid);
         await updateDoc(adminRef, {
             permissions: permissions
         });
@@ -686,20 +726,25 @@ export const getUsers = async (
     }
 };
 
-export const deleteUserByAdmin = async (uid: string): Promise<{ success: boolean, message: string }> => {
+export const deleteUserByAdmin = async (adminUid: string, targetUserUid: string): Promise<{ success: boolean, message: string }> => {
     try {
+        const isAdminUser = await isAdmin(adminUid);
+        if (!isAdminUser) {
+            return { success: false, message: "Bu işlemi yapma yetkiniz yok." };
+        }
+
         // First, check if the user to be deleted is an admin
-        const isAdminUser = await isAdmin(uid);
-        if (isAdminUser) {
+        const isTargetAdmin = await isAdmin(targetUserUid);
+        if (isTargetAdmin) {
             return { success: false, message: "Yöneticiler bu panelden silinemez. Lütfen önce yönetici yetkilerini kaldırın." };
         }
 
-        const userRef = doc(db, "users", uid);
+        const userRef = doc(db, "users", targetUserUid);
         await deleteDoc(userRef);
 
         // Deleting from Firebase Auth requires a Cloud Function for security reasons.
         // This part is a placeholder for a real implementation.
-        console.log(`User with UID: ${uid} deleted from Firestore. Auth deletion should be handled by a backend function.`);
+        console.log(`User with UID: ${targetUserUid} deleted from Firestore. Auth deletion should be handled by a backend function.`);
 
         return { success: true, message: "Kullanıcı başarıyla silindi." };
     } catch (error) {
@@ -727,8 +772,13 @@ export const getHomepageSettings = async (): Promise<HomepageSettings | null> =>
     }
 };
 
-export const updateHomepageSettings = async (settings: HomepageSettings): Promise<{ success: boolean, message: string }> => {
+export const updateHomepageSettings = async (adminUid: string, settings: HomepageSettings): Promise<{ success: boolean, message: string }> => {
     try {
+        const isUserAdmin = await isAdmin(adminUid);
+        if (!isUserAdmin) {
+            return { success: false, message: "Ayarları güncelleme yetkiniz yok." };
+        }
+
         const settingsRef = doc(db, "settings", "homepage");
         await setDoc(settingsRef, settings, { merge: true });
         return { success: true, message: "Ana sayfa ayarları başarıyla güncellendi." };

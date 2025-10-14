@@ -28,6 +28,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { addPost, type PostPayload } from "@/lib/firebase/services"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function NewPostPage() {
   const [imageUrl, setImageUrl] = useState("");
@@ -39,12 +40,22 @@ export default function NewPostPage() {
 
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handlePublish = async () => {
     if (!title || !category || !imageUrl || !description || !content) {
         toast({
             title: "Eksik Alanlar",
             description: "Lütfen tüm alanları doldurun.",
+            variant: "destructive",
+        });
+        return;
+    }
+    
+    if (!user) {
+        toast({
+            title: "Yetkilendirme Hatası",
+            description: "Yazı yayınlamak için giriş yapmış olmalısınız.",
             variant: "destructive",
         });
         return;
@@ -57,15 +68,15 @@ export default function NewPostPage() {
         readTime: Number(readTime),
         description,
         content,
-        author: "Mearic Ekibi",
-        authorId: "system-admin",
-        authorPhotoURL: "https://github.com/shadcn.png" 
+        author: user.displayName || "Mearic Ekibi",
+        authorId: user.uid,
+        authorPhotoURL: user.photoURL || "https://github.com/shadcn.png" 
     };
 
     try {
-        const postId = await addPost(newPost);
+        const { success, message, postId } = await addPost(newPost);
 
-        if (postId) {
+        if (success && postId) {
             toast({
                 title: "Yazı Başarıyla Yayınlandı!",
                 description: "Yeni yazınız oluşturuldu ve yayınlandı.",
@@ -79,7 +90,7 @@ export default function NewPostPage() {
         } else {
              toast({
                 title: "Hata",
-                description: "Yazı yayınlanırken bir sorun oluştu.",
+                description: message,
                 variant: "destructive",
             });
         }
