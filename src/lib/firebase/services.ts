@@ -75,13 +75,23 @@ export const updateUserDoc = async (uid: string, data: { [key: string]: any }): 
                     return { success: false, message: `Kullanıcı adınızı tekrar değiştirmek için yaklaşık ${hoursLeft} saat beklemelisiniz.` };
                 }
             }
-             // If check passes, add the timestamp to the data to be updated
             data.displayNameLastChanged = serverTimestamp();
         }
     }
     
     try {
         await updateDoc(userRef, data);
+
+        // Also update the admin document if the user is an admin
+        const adminRef = doc(db, 'admins', uid);
+        const adminSnap = await getDoc(adminRef);
+        if (adminSnap.exists()) {
+            await updateDoc(adminRef, {
+                displayName: data.displayName || adminSnap.data().displayName,
+                photoURL: data.photoURL || adminSnap.data().photoURL
+            });
+        }
+
         return { success: true, message: "Profil başarıyla güncellendi." };
     } catch (error) {
         console.error("Error updating user doc:", error);
@@ -400,7 +410,7 @@ export const unreportComment = async (postId: string, commentId: string): Promis
         
         return true;
     } catch (error) {
-        console.error('Error un-reporting comment: ', error);
+        console.error("Error un-reporting comment: ", error);
         return false;
     }
 };
@@ -707,3 +717,4 @@ export const updateHomepageSettings = async (settings: HomepageSettings): Promis
         return { success: false, message: "Ayarlar güncellenirken bir hata oluştu." };
     }
 };
+
