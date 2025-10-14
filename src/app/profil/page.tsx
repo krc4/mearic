@@ -64,6 +64,7 @@ export default function ProfilePage() {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPasswordUser, setIsPasswordUser] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -73,6 +74,13 @@ export default function ProfilePage() {
         setUser(currentUser);
         const adminStatus = await isAdmin(currentUser.uid);
         setIsUserAdmin(adminStatus);
+        
+        // Check if user has a password provider
+        const passwordProvider = currentUser.providerData.some(
+            (provider) => provider.providerId === "password"
+        );
+        setIsPasswordUser(passwordProvider);
+
       } else {
         router.push("/giris");
       }
@@ -161,19 +169,33 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = async (password?: string) => {
     if (!user) return;
+    setIsDeleteDialogOpen(false);
+
     try {
+        if (isPasswordUser) {
+            if (!password || !user.email) {
+                toast({ title: "Hata!", description: "Hesap silme işlemi için şifre gereklidir.", variant: "destructive" });
+                return;
+            }
+            const credential = EmailAuthProvider.credential(user.email, password);
+            await reauthenticateWithCredential(user, credential);
+        }
+
         await deleteUser(user);
-        toast({ title: "Hesap Silindi", description: "Hesabınız kalıcı olarak silindi." });
+        toast({ title: "Hesap Silindi", description: "Hesabınız kalıcı olarak silindi. Sizi tekrar aramızda görmeyi umuyoruz." });
         router.push("/");
+
     } catch (error) {
         console.error(error);
-        toast({ title: "Hata!", description: "Hesap silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.", variant: "destructive" });
-    } finally {
-        setIsDeleteDialogOpen(false);
+        toast({ 
+            title: "Hata!", 
+            description: "Hesap silinirken bir hata oluştu. Şifrenizi yanlış girmiş olabilirsiniz veya oturumunuz zaman aşımına uğramış olabilir. Lütfen tekrar deneyin.", 
+            variant: "destructive" 
+        });
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -318,64 +340,67 @@ export default function ProfilePage() {
           </Card>
 
           {/* Change Password Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><KeyRound/> Şifre Değiştir</CardTitle>
-              <CardDescription>
-                Güvenliğiniz için güçlü bir şifre seçin.
-              </CardDescription>
-            </CardHeader>
-            <Form {...passwordForm}>
-                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={passwordForm.control}
-                            name="currentPassword"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Mevcut Şifre</FormLabel>
-                                <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={passwordForm.control}
-                            name="newPassword"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Yeni Şifre</FormLabel>
-                                <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={passwordForm.control}
-                            name="confirmPassword"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Yeni Şifre (Tekrar)</FormLabel>
-                                <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                    <CardFooter className="border-t px-6 py-4">
-                        <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
-                            {passwordForm.formState.isSubmitting ? 'Değiştiriliyor...' : 'Şifreyi Değiştir'}
-                        </Button>
-                    </CardFooter>
-                </form>
-            </Form>
-          </Card>
+          {isPasswordUser && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><KeyRound/> Şifre Değiştir</CardTitle>
+                <CardDescription>
+                  Güvenliğiniz için güçlü bir şifre seçin.
+                </CardDescription>
+              </CardHeader>
+              <Form {...passwordForm}>
+                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
+                      <CardContent className="space-y-4">
+                          <FormField
+                              control={passwordForm.control}
+                              name="currentPassword"
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Mevcut Şifre</FormLabel>
+                                  <FormControl>
+                                  <Input type="password" placeholder="••••••••" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={passwordForm.control}
+                              name="newPassword"
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Yeni Şifre</FormLabel>
+                                  <FormControl>
+                                  <Input type="password" placeholder="••••••••" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={passwordForm.control}
+                              name="confirmPassword"
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Yeni Şifre (Tekrar)</FormLabel>
+                                  <FormControl>
+                                  <Input type="password" placeholder="••••••••" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                      </CardContent>
+                      <CardFooter className="border-t px-6 py-4">
+                          <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+                              {passwordForm.formState.isSubmitting ? 'Değiştiriliyor...' : 'Şifreyi Değiştir'}
+                          </Button>
+                      </CardFooter>
+                  </form>
+              </Form>
+            </Card>
+          )}
+
            {/* Delete Account Card */}
            <Card className="border-destructive/50">
             <CardHeader>
@@ -403,8 +428,12 @@ export default function ProfilePage() {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteAccount}
         title="Hesabınızı Silmek Üzere misiniz?"
-        description="Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinizden emin misiniz?"
+        description={isPasswordUser 
+            ? "Bu işlem geri alınamaz ve tüm verilerinizi kalıcı olarak silecektir. Devam etmek için şifrenizi girmeniz gerekmektedir."
+            : "Bu işlem geri alınamaz ve tüm verilerinizi kalıcı olarak silecektir. Devam etmek istediğinizden emin misiniz?"
+        }
         confirmText="Evet, Hesabımı Sil"
+        requiresPassword={isPasswordUser}
       />
     </>
   );
