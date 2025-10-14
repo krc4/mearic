@@ -197,6 +197,7 @@ function AdminLayoutComponent({
   children: React.ReactNode;
 }) {
   const { isMobile, openMobile, setOpenMobile } = useSidebar();
+  const { isAuthorized } = useAdminAuth();
 
   if (isMobile) {
     return (
@@ -223,13 +224,8 @@ function AdminLayoutComponent({
   );
 }
 
-
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-
+// Custom hook for authorization logic
+const useAdminAuth = () => {
   const [loading, setLoading] = React.useState(true);
   const [isAuthorized, setIsAuthorized] = React.useState(false);
   const router = useRouter();
@@ -252,6 +248,17 @@ export default function AdminLayout({
     return () => unsubscribe();
   }, [router]);
 
+  return { loading, isAuthorized };
+};
+
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { loading, isAuthorized } = useAdminAuth();
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -260,8 +267,12 @@ export default function AdminLayout({
     );
   }
 
+  // Do not render children until authorization is confirmed.
+  // This prevents content flickering.
   if (!isAuthorized) {
-    return null; // or a specific "Unauthorized" component
+    // A loader is shown during the initial check, so returning null here
+    // is safe as the redirection will have already been initiated.
+    return null;
   }
 
   return (
@@ -283,3 +294,5 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
+
+    
