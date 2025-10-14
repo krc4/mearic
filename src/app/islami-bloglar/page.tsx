@@ -21,6 +21,7 @@ export default async function IslamiBloglarPage() {
           pageDescription="İslam'ı anlama ve yaşama yolculuğunuzda size rehber olacak yazılar."
           headerImage="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop"
           headerImageHint="islamic calligraphy art"
+          category="İslami Bloglar"
         />
 
         <footer className="relative overflow-hidden py-20">

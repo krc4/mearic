@@ -41,8 +41,6 @@ export const ensureUserDocument = async (user: import('firebase/auth').User) => 
         try {
             await setDoc(userRef, {
                 email: user.email,
-                // Do NOT trust displayName or photoURL from the user object on initial creation.
-                // These should be set via a validated update process.
                 displayName: "Kullanıcı", 
                 photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
                 createdAt: serverTimestamp(),
@@ -54,6 +52,7 @@ export const ensureUserDocument = async (user: import('firebase/auth').User) => 
         }
     }
 };
+
 
 export const getUserDoc = async (uid: string) => {
     const userRef = doc(db, 'users', uid);
@@ -159,12 +158,16 @@ const serializePost = (doc: any): Post => {
 
 export const getPostsByCategory = async (
     category: string,
-    postsLimit: number = 1000,
+    postsLimit: number = 9,
     lastVisible: any = null
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         const postsRef = collection(db, "posts");
-        let constraints = [where("category", "==", category), limit(postsLimit)];
+        let constraints = [
+            where("category", "==", category), 
+            orderBy("createdAt", "desc"),
+            limit(postsLimit)
+        ];
 
         if (lastVisible) {
             constraints.push(startAfter(lastVisible));

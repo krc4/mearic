@@ -21,6 +21,7 @@ export default async function HadisMucizeleriPage() {
           pageDescription="Peygamber Efendimiz'in (S.A.V) 1400 yıl önce bildirdiği bilimsel ve tıbbi gerçekleri keşfedin."
           headerImage="/hadis-mucizeleri.png"
           headerImageHint="hadith desert"
+          category="Hadis Mucizeleri"
         />
         
         <footer className="relative overflow-hidden py-20">

@@ -28,6 +28,7 @@ interface CategoryClientPageProps {
     pageDescription: string;
     headerImage: string;
     headerImageHint: string;
+    category: "Kuran Mucizeleri" | "Hadis Mucizeleri" | "İslami Bloglar";
 }
 
 const containerVariants = {
@@ -54,7 +55,8 @@ export function CategoryClientPage({
   pageTitle,
   pageDescription,
   headerImage,
-  headerImageHint
+  headerImageHint,
+  category
 }: CategoryClientPageProps) {
   const { toast } = useToast();
   const [filter, setFilter] = useState<"trending" | "latest">("trending");
@@ -77,6 +79,16 @@ export function CategoryClientPage({
       setLikedPosts(liked);
     }
   }, [posts]);
+
+  useEffect(() => {
+    // When the initialPosts prop changes (e.g., from a server-side render on navigation),
+    // reset the state of the component to reflect the new category's data.
+    setPosts(initialPosts);
+    setHasMore(initialPosts.length >= 9);
+    setLastVisiblePost(null); // Reset pagination cursor
+    setSearchTerm(""); // Reset search term
+    setFilter("trending"); // Reset filter to default
+  }, [initialPosts]);
   
   // This memoizes the final list of posts to be rendered.
   // It re-calculates only when posts, filter, or searchTerm change.
@@ -93,8 +105,7 @@ export function CategoryClientPage({
     
     // Then, sort the filtered posts
     if (filter === "latest") {
-      // The default order from Firebase is already 'latest'
-      return tempPosts;
+      return tempPosts.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
     }
     
     if (filter === "trending") {
@@ -109,8 +120,9 @@ export function CategoryClientPage({
     if (!hasMore || loadingMore) return;
 
     setLoadingMore(true);
-    // Assuming the category is the same for all initial posts
-    const category = initialPosts[0]?.category;
+    
+    // The category is now passed as a prop, ensuring it's the correct one for the page.
+    // We don't need to guess it from the initial posts.
     if (!category) {
         setLoadingMore(false);
         return;
@@ -386,5 +398,3 @@ export function CategoryClientPage({
     </>
   );
 }
-
-    

@@ -20,6 +20,7 @@ export default async function KuranMucizeleriPage() {
           pageDescription="1400 yıl önce bildirilmiş bilimsel, sayısal ve edebi mucizeleri keşfet."
           headerImage="/kuran-mucizeleri.png"
           headerImageHint="quran book"
+          category="Kuran Mucizeleri"
         />
 
         <footer className="relative overflow-hidden py-20">
