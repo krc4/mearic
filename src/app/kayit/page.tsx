@@ -28,8 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
 import { auth } from "@/lib/firebase/config"; 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { ensureUserDocument } from "@/lib/firebase/services";
 
 const registerSchema = z.object({
   username: z.string()
@@ -72,15 +71,8 @@ export default function RegisterPage() {
             photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`
          });
 
-         // Create a document in the 'users' collection in Firestore
-         const userRef = doc(db, "users", user.uid);
-         await setDoc(userRef, {
-            email: user.email,
-            displayName: data.username, // Save the username here as well
-            photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
-            createdAt: serverTimestamp(),
-            displayNameLastChanged: null
-         });
+         // Create a document in the 'users' collection in Firestore using the centralized function
+         await ensureUserDocument(user);
       }
       
       toast({
