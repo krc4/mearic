@@ -28,7 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import { LogIn, ArrowRight } from "lucide-react";
 import { auth } from "@/lib/firebase/config"; // Import auth from the centralized config
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { ensureUserDocument } from "@/lib/firebase/services";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Lütfen geçerli bir e-posta adresi girin." }),
@@ -52,7 +51,6 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-        await ensureUserDocument(userCredential.user); // Ensure user doc exists
         toast({
             title: "Giriş Başarılı!",
             description: `Hoş geldiniz, ${userCredential.user.displayName || userCredential.user.email}! Ana sayfaya yönlendiriliyorsunuz.`,
