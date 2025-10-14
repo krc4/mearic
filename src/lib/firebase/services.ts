@@ -41,8 +41,10 @@ export const ensureUserDocument = async (user: import('firebase/auth').User) => 
         try {
             await setDoc(userRef, {
                 email: user.email,
-                displayName: user.displayName,
-                photoURL: user.photoURL,
+                // Do NOT trust displayName or photoURL from the user object on initial creation.
+                // These should be set via a validated update process.
+                displayName: "Kullanıcı", 
+                photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
                 createdAt: serverTimestamp(),
                 displayNameLastChanged: null,
             });
@@ -61,11 +63,13 @@ export const getUserDoc = async (uid: string) => {
 
 export const updateUserDoc = async (uid: string, data: { [key: string]: any }): Promise<{ success: boolean, message: string }> => {
     const userRef = doc(db, 'users', uid);
+    const updateData: { [key: string]: any } = {};
 
     if (data.displayName) {
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
             const userData = userSnap.data();
+            // Server-side check for displayName change cooldown
             if (userData.displayNameLastChanged) {
                 const lastChanged = (userData.displayNameLastChanged as Timestamp).toDate();
                 const now = new Date();
@@ -75,21 +79,34 @@ export const updateUserDoc = async (uid: string, data: { [key: string]: any }): 
                     return { success: false, message: `Kullanıcı adınızı tekrar değiştirmek için yaklaşık ${hoursLeft} saat beklemelisiniz.` };
                 }
             }
-            data.displayNameLastChanged = serverTimestamp();
+            updateData.displayName = data.displayName;
+            updateData.displayNameLastChanged = serverTimestamp();
+        } else {
+             return { success: false, message: "Kullanıcı profili bulunamadı." };
         }
     }
     
+    if (data.photoURL) {
+        updateData.photoURL = data.photoURL;
+    }
+    
+    if (Object.keys(updateData).length === 0) {
+        return { success: true, message: "Güncellenecek bir bilgi yok." };
+    }
+
     try {
-        await updateDoc(userRef, data);
+        await updateDoc(userRef, updateData);
 
         // Also update the admin document if the user is an admin
         const adminRef = doc(db, 'admins', uid);
         const adminSnap = await getDoc(adminRef);
         if (adminSnap.exists()) {
-            await updateDoc(adminRef, {
-                displayName: data.displayName || adminSnap.data().displayName,
-                photoURL: data.photoURL || adminSnap.data().photoURL
-            });
+            const adminUpdate: { [key: string]: any } = {};
+            if(updateData.displayName) adminUpdate.displayName = updateData.displayName;
+            if(updateData.photoURL) adminUpdate.photoURL = updateData.photoURL;
+            if(Object.keys(adminUpdate).length > 0) {
+                await updateDoc(adminRef, adminUpdate);
+            }
         }
 
         return { success: true, message: "Profil başarıyla güncellendi." };
@@ -717,4 +734,3 @@ export const updateHomepageSettings = async (settings: HomepageSettings): Promis
         return { success: false, message: "Ayarlar güncellenirken bir hata oluştu." };
     }
 };
-

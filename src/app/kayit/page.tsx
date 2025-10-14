@@ -28,7 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UserPlus, ArrowRight } from "lucide-react";
 import { auth } from "@/lib/firebase/config"; 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ensureUserDocument } from "@/lib/firebase/services";
+import { ensureUserDocument, updateUserDoc } from "@/lib/firebase/services";
 
 const registerSchema = z.object({
   username: z.string()
@@ -65,14 +65,17 @@ export default function RegisterPage() {
       const user = userCredential.user;
 
       if (user) {
-         // Set the display name for the user in Firebase Auth
+         // Step 1: Update the user's profile in Firebase Auth (client-side info)
          await updateProfile(user, {
             displayName: data.username,
             photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`
          });
 
-         // Create a document in the 'users' collection in Firestore using the centralized function
+         // Step 2: Ensure a document exists in Firestore (our source of truth)
          await ensureUserDocument(user);
+
+         // Step 3: Securely update the Firestore document with the validated username
+         await updateUserDoc(user.uid, { displayName: data.username });
       }
       
       toast({
