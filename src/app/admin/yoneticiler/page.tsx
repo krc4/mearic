@@ -113,7 +113,8 @@ const PermissionsDialog = ({
     if (!admin || !requestingAdmin) return null;
 
     const handleSwitchChange = (permission: keyof AdminPermissions, value: boolean) => {
-        const updatedPermissions = { ...admin.permissions, [permission]: value };
+        const currentPermissions = admin.permissions || {};
+        const updatedPermissions = { ...currentPermissions, [permission]: value };
         onPermissionsChange(requestingAdmin.uid, admin.uid, updatedPermissions);
     };
 
@@ -147,7 +148,7 @@ const PermissionsDialog = ({
                             </div>
                             <Switch
                                 id={item.id}
-                                checked={admin.permissions[item.id]}
+                                checked={admin.permissions?.[item.id] ?? false}
                                 onCheckedChange={(checked) => handleSwitchChange(item.id, checked)}
                             />
                         </div>
@@ -170,7 +171,7 @@ export default function YoneticilerAdminPage() {
     const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
     const { toast } = useToast();
-    const { user: requestingAdmin } = useAuth();
+    const { user: requestingAdmin, permissions: requestingAdminPermissions } = useAuth();
 
     const form = useForm<AddAdminFormValues>({
         resolver: zodResolver(addAdminSchema),
@@ -189,6 +190,10 @@ export default function YoneticilerAdminPage() {
     }, []);
 
     const handleRemoveClick = (admin: AdminUser) => {
+        if (!requestingAdminPermissions?.canManageAdmins) {
+            toast({ title: "Yetki Hatası", description: "Yönetici kaldırma yetkiniz yok.", variant: "destructive" });
+            return;
+        }
         if (admin.role === 'founder') {
             toast({
                 title: "İşlem Reddedildi",
@@ -231,6 +236,10 @@ export default function YoneticilerAdminPage() {
     }
 
     const handleSettingsClick = (admin: AdminUser) => {
+        if (!requestingAdminPermissions?.canManageAdmins) {
+            toast({ title: "Yetki Hatası", description: "Yönetici yetkilerini düzenleme izniniz yok.", variant: "destructive" });
+            return;
+        }
         setSelectedAdmin(admin);
         setIsPermissionsDialogOpen(true);
     };
@@ -284,9 +293,9 @@ export default function YoneticilerAdminPage() {
                             <FormItem>
                                 <div className="flex gap-2">
                                     <FormControl>
-                                        <Input placeholder="ornek@mail.com" {...field} />
+                                        <Input placeholder="ornek@mail.com" {...field} disabled={!requestingAdminPermissions?.canManageAdmins} />
                                     </FormControl>
-                                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                                    <Button type="submit" disabled={form.formState.isSubmitting || !requestingAdminPermissions?.canManageAdmins}>
                                         {form.formState.isSubmitting ? 'Ekleniyor...' : 'Yönetici Yap'}
                                     </Button>
                                 </div>
@@ -336,3 +345,5 @@ export default function YoneticilerAdminPage() {
     </>
   )
 }
+
+    
