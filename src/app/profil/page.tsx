@@ -163,9 +163,12 @@ export default function ProfilePage() {
       await updatePassword(user, data.newPassword);
       toast({ title: "Başarılı!", description: "Şifreniz başarıyla değiştirildi." });
       passwordForm.reset();
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Hata!", description: "Şifre değiştirilirken bir hata oluştu. Lütfen mevcut şifrenizi kontrol edin.", variant: "destructive" });
+    } catch (error: any) {
+      let description = "Şifre değiştirilirken bir hata oluştu. Lütfen tekrar deneyin.";
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+          description = "Mevcut şifreniz yanlış. Lütfen kontrol edip tekrar deneyin.";
+      }
+      toast({ title: "Hata!", description, variant: "destructive" });
     }
   };
 
@@ -187,11 +190,14 @@ export default function ProfilePage() {
         toast({ title: "Hesap Silindi", description: "Hesabınız kalıcı olarak silindi. Sizi tekrar aramızda görmeyi umuyoruz." });
         router.push("/");
 
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        let description = "Hesap silinirken bir hata oluştu. Lütfen tekrar deneyin.";
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+             description = "Şifrenizi yanlış girdiniz. Lütfen kontrol edip tekrar deneyin.";
+        }
         toast({ 
             title: "Hata!", 
-            description: "Hesap silinirken bir hata oluştu. Şifrenizi yanlış girmiş olabilirsiniz veya oturumunuz zaman aşımına uğramış olabilir. Lütfen tekrar deneyin.", 
+            description: description, 
             variant: "destructive" 
         });
     }
@@ -438,3 +444,5 @@ export default function ProfilePage() {
     </>
   );
 }
+
+    

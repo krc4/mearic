@@ -12,7 +12,7 @@ import {
 import { buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface DeleteConfirmationDialogProps {
   isOpen: boolean;
@@ -34,6 +34,12 @@ export function DeleteConfirmationDialog({
   requiresPassword = false
 }: DeleteConfirmationDialogProps) {
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) {
+      setPassword('');
+    }
+  }, [isOpen]);
 
   const handleConfirm = () => {
     onConfirm(requiresPassword ? password : undefined);
@@ -74,3 +80,5 @@ export function DeleteConfirmationDialog({
     </AlertDialog>
   );
 }
+
+    
