@@ -6,6 +6,14 @@ import {
   ChevronLeft,
   Upload,
 } from "lucide-react"
+import mammoth from "mammoth"
+import * as pdfjs from "pdfjs-dist"
+
+// Set worker source for pdfjs
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
+
 
 import { Button } from "@/components/ui/button"
 import {
@@ -105,34 +113,62 @@ export default function NewPostPage() {
     }
   }
   
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === "text/plain") {
-      const reader = new FileReader();
+    if (!file) return;
+
+    const reader = new FileReader();
+    const fileType = file.type;
+
+    if (fileType === "text/plain") {
       reader.onload = (event) => {
         const fileContent = event.target?.result as string;
         setContent(fileContent);
-         toast({
-          title: "İçerik Yüklendi",
-          description: "Metin dosyası başarıyla editöre aktarıldı.",
-        });
+        toast({ title: "İçerik Yüklendi", description: "Metin dosyası başarıyla editöre aktarıldı." });
       };
-      reader.onerror = () => {
-         toast({
-          title: "Dosya Okuma Hatası",
-          description: "Metin dosyası okunurken bir hata oluştu.",
-          variant: "destructive",
-        });
-      }
       reader.readAsText(file);
+    } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") { // .docx
+      reader.onload = async (event) => {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        try {
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          setContent(result.value);
+          toast({ title: "İçerik Yüklendi", description: "Word dosyası başarıyla editöre aktarıldı." });
+        } catch (error) {
+          console.error("Error converting docx to html", error);
+          toast({ title: "Word Dosyası Hatası", description: "Dosya dönüştürülürken bir hata oluştu.", variant: "destructive" });
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (fileType === "application/pdf") {
+      reader.onload = async (event) => {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        try {
+          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+          let fullText = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => 'str' in item ? item.str : '').join(" ");
+            fullText += pageText + "\n\n";
+          }
+          setContent(`<p>${fullText.replace(/\n/g, '</p><p>')}</p>`);
+          toast({ title: "İçerik Yüklendi", description: "PDF dosyası başarıyla editöre aktarıldı." });
+        } catch (error) {
+          console.error("Error reading pdf file", error);
+          toast({ title: "PDF Dosyası Hatası", description: "Dosya okunurken bir hata oluştu.", variant: "destructive" });
+        }
+      };
+      reader.readAsArrayBuffer(file);
     } else {
-        toast({
-          title: "Geçersiz Dosya Türü",
-          description: "Lütfen sadece .txt uzantılı bir metin dosyası seçin.",
-          variant: "destructive",
-        });
+      toast({
+        title: "Geçersiz Dosya Türü",
+        description: "Lütfen sadece .txt, .pdf, .doc veya .docx uzantılı bir dosya seçin.",
+        variant: "destructive",
+      });
     }
-     // Reset file input to allow uploading the same file again
+
+    // Reset file input to allow uploading the same file again
     e.target.value = '';
   };
 
@@ -171,7 +207,7 @@ export default function NewPostPage() {
             <CardHeader>
                 <CardTitle>Yazı Detayları</CardTitle>
                 <CardDescription>
-                Yazınızın başlığını ve içeriğini girin. Dilerseniz içerik için bir .txt dosyası yükleyebilirsiniz.
+                Yazınızın başlığını ve içeriğini girin. Dilerseniz içerik için bir dosya yükleyebilirsiniz.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -203,13 +239,13 @@ export default function NewPostPage() {
                             <Label htmlFor="content">İçerik</Label>
                             <Label htmlFor="file-upload" className="cursor-pointer text-sm font-medium text-primary hover:underline flex items-center gap-1">
                                 <Upload className="h-3 w-3"/>
-                                .txt Yükle
+                                Dosya Yükle (.txt, .pdf, .docx)
                             </Label>
                              <Input 
                                 id="file-upload" 
                                 type="file" 
                                 className="hidden"
-                                accept=".txt"
+                                accept=".txt,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                 onChange={handleFileChange}
                             />
                         </div>
@@ -294,5 +330,3 @@ export default function NewPostPage() {
     </div>
   )
 }
-
-    
