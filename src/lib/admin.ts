@@ -1,7 +1,7 @@
 
 import { Timestamp } from 'firebase/firestore';
 
-export type AdminRole = 'founder' | 'admin';
+export type AdminRole = 'admin';
 
 export interface AdminPermissions {
   canDeleteComments: boolean;

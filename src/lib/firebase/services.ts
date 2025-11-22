@@ -41,8 +41,8 @@ export const ensureUserDocument = async (user: import('firebase/auth').User) => 
         try {
             await setDoc(userRef, {
                 email: user.email,
-                displayName: "Kullanıcı", 
-                photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
+                displayName: user.displayName || "Kullanıcı", 
+                photoURL: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
                 createdAt: serverTimestamp(),
                 displayNameLastChanged: null,
             });
@@ -118,8 +118,8 @@ export const updateUserDoc = async (uid: string, data: { [key: string]: any }): 
 
 export const addPost = async (post: PostPayload): Promise<{ success: boolean; message: string; postId: string | null; }> => {
     try {
-        const isUserAdmin = await isAdmin(post.authorId);
-        if (!isUserAdmin) {
+        const perms = await getAdminPermissions(post.authorId);
+        if (!perms.canCreatePosts) {
             return { success: false, message: "Yazı oluşturma yetkiniz yok.", postId: null };
         }
 
@@ -168,7 +168,7 @@ export const getPostsByCategory = async (
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         const postsRef = collection(db, "posts");
-        let constraints = [
+        let constraints: any[] = [
             where("category", "==", category), 
             orderBy("createdAt", "desc"),
             limit(postsLimit)
@@ -242,9 +242,9 @@ export const toggleLikePost = async (postId: string, liked: boolean): Promise<nu
 
 export const updatePost = async (postId: string, userId: string, payload: Partial<PostPayload>): Promise<{ success: boolean; message: string; }> => {
     try {
-        const isUserAdmin = await isAdmin(userId);
-        if (!isUserAdmin) {
-            return { success: false, message: "Yazı güncelleme yetkiniz yok." };
+        const perms = await getAdminPermissions(userId);
+        if (!perms.canEditPosts) {
+            return { success: false, message: "Yazı düzenleme yetkiniz yok." };
         }
 
         const postRef = doc(db, "posts", postId);
@@ -252,13 +252,6 @@ export const updatePost = async (postId: string, userId: string, payload: Partia
         
         if (!postSnap.exists()) {
              return { success: false, message: "Yazı bulunamadı." };
-        }
-        
-        const perms = await getAdminPermissions(userId);
-        const postData = postSnap.data();
-
-        if (postData.authorId !== userId && !perms.canEditPosts) {
-            return { success: false, message: "Bu yazıyı düzenleme yetkiniz yok." };
         }
 
         const updatePayload: Partial<Post> = { ...payload };
@@ -280,9 +273,9 @@ export const updatePost = async (postId: string, userId: string, payload: Partia
 
 export const deletePost = async (postId: string, userId: string): Promise<{ success: boolean, message: string }> => {
     try {
-        const isUserAdmin = await isAdmin(userId);
-        if (!isUserAdmin) {
-            return { success: false, message: "Yazı silme yetkiniz yok." };
+        const perms = await getAdminPermissions(userId);
+        if (!perms.canDeletePosts) {
+            return { success: false, message: "Bu yazıyı silme yetkiniz yok." };
         }
 
         const postRef = doc(db, "posts", postId);
@@ -290,13 +283,6 @@ export const deletePost = async (postId: string, userId: string): Promise<{ succ
 
         if (!postSnap.exists()) {
             return { success: false, message: "Yazı bulunamadı." };
-        }
-
-        const perms = await getAdminPermissions(userId);
-        const postData = postSnap.data();
-
-        if (postData.authorId !== userId && !perms.canDeletePosts) {
-            return { success: false, message: "Bu yazıyı silme yetkiniz yok." };
         }
         
         await deleteDoc(postRef);
@@ -392,11 +378,12 @@ export const deleteComment = async (requestingUserId: string, postId: string, co
         const commentSnap = await getDoc(commentRef);
         if (!commentSnap.exists()) return true; // Already deleted
 
-        const isUserAdmin = await isAdmin(requestingUserId);
         const commentData = commentSnap.data();
+        
+        const perms = await getAdminPermissions(requestingUserId);
 
-        // Allow deletion if the user is the owner of the comment OR is an admin
-        if (commentData.userId !== requestingUserId && !isUserAdmin) {
+        // Allow deletion if the user is the owner OR is an admin with deletion rights
+        if (commentData.userId !== requestingUserId && !perms.canDeleteComments) {
             console.warn("Unauthorized attempt to delete comment by user:", requestingUserId);
             return false;
         }
@@ -551,15 +538,7 @@ export const getAdmins = async (): Promise<AdminUser[]> => {
     }
 }
 
-const defaultAdminPermissions: AdminPermissions = {
-    canDeleteComments: true,
-    canCreatePosts: true,
-    canEditPosts: true,
-    canDeletePosts: false,
-    canManageAdmins: false,
-};
-
-const founderPermissions: AdminPermissions = {
+const fullAdminPermissions: AdminPermissions = {
     canDeleteComments: true,
     canCreatePosts: true,
     canEditPosts: true,
@@ -568,49 +547,42 @@ const founderPermissions: AdminPermissions = {
 };
 
 export const addAdmin = async (requestingAdminUid: string, email: string): Promise<{ success: boolean; message: string }> => {
-    const adminsCollection = collection(db, "admins");
-    const adminCountSnapshot = await getCountFromServer(adminsCollection);
-    const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
-
-    // If the admins collection is empty, bypass the permission check for the first admin.
-    if (!isAdminCollectionEmpty) {
-        const perms = await getAdminPermissions(requestingAdminUid);
-        if (!perms.canManageAdmins) {
-            return { success: false, message: "Yönetici ekleme yetkiniz yok." };
-        }
-    }
-
-    const user = await findUserByEmail(email);
-    if (!user) {
-        return { success: false, message: "Bu e-posta adresine sahip bir kullanıcı bulunamadı." };
-    }
-
-    const adminRef = doc(db, "admins", user.uid);
-    const adminSnap = await getDoc(adminRef);
-
-    if (adminSnap.exists()) {
-        return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
-    }
-
-    let role: AdminRole = 'admin';
-    let permissions = defaultAdminPermissions;
-
-    if (isAdminCollectionEmpty) {
-        role = 'founder';
-        permissions = founderPermissions;
-    }
-
     try {
+        const adminsCollection = collection(db, "admins");
+        const adminCountSnapshot = await getCountFromServer(adminsCollection);
+        const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
+
+        // If the admins collection is NOT empty, verify the requesting user is an admin.
+        if (!isAdminCollectionEmpty) {
+            const perms = await getAdminPermissions(requestingAdminUid);
+            if (!perms.canManageAdmins) {
+                return { success: false, message: "Yönetici ekleme yetkiniz yok." };
+            }
+        }
+
+        const user = await findUserByEmail(email);
+        if (!user) {
+            return { success: false, message: "Bu e-posta adresine sahip bir kullanıcı bulunamadı." };
+        }
+
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnap = await getDoc(adminRef);
+        if (adminSnap.exists()) {
+            return { success: false, message: "Bu kullanıcı zaten bir yönetici." };
+        }
+        
         await setDoc(adminRef, {
             email: email,
             displayName: user.displayName,
             photoURL: user.photoURL,
             addedAt: serverTimestamp(),
-            role: role,
-            permissions: permissions
+            role: 'admin',
+            permissions: fullAdminPermissions
         });
-        const roleMessage = role === 'founder' ? "Kurucu yönetici" : "Yönetici";
+
+        const roleMessage = isAdminCollectionEmpty ? "İlk yönetici" : "Yönetici";
         return { success: true, message: `${email} başarıyla ${roleMessage} olarak atandı.` };
+
     } catch (error) {
         console.error("Error adding admin: ", error);
         return { success: false, message: "Yönetici eklenirken bir sunucu hatası oluştu." };
@@ -619,9 +591,13 @@ export const addAdmin = async (requestingAdminUid: string, email: string): Promi
 
 export const removeAdmin = async (requestingAdminUid: string, targetUid: string): Promise<{ success: boolean; message: string }> => {
     try {
-        const isUserAdmin = await isAdmin(requestingAdminUid);
-        if (!isUserAdmin) {
+        const perms = await getAdminPermissions(requestingAdminUid);
+        if (!perms.canManageAdmins) {
             return { success: false, message: "Yönetici kaldırma yetkiniz yok." };
+        }
+
+        if (requestingAdminUid === targetUid) {
+            return { success: false, message: "Kendi yönetici yetkilerinizi kaldıramazsınız." };
         }
 
         const adminRef = doc(db, "admins", targetUid);
@@ -629,10 +605,6 @@ export const removeAdmin = async (requestingAdminUid: string, targetUid: string)
 
         if (!adminSnap.exists()) {
             return { success: false, message: "Yönetici bulunamadı." };
-        }
-
-        if (adminSnap.data().role === 'founder') {
-            return { success: false, message: "Kurucu yönetici kaldırılamaz." };
         }
 
         await deleteDoc(adminRef);
@@ -656,52 +628,37 @@ export const isAdmin = async (uid: string | undefined): Promise<boolean> => {
     }
 }
 
-export const getAdminPermissions = async (uid: string): Promise<AdminPermissions> => {
+export const getAdminPermissions = async (uid: string | undefined): Promise<AdminPermissions> => {
+    const defaultNonAdminPerms = { 
+        canDeleteComments: false,
+        canCreatePosts: false,
+        canEditPosts: false,
+        canDeletePosts: false,
+        canManageAdmins: false 
+    };
+
     try {
-        if (!uid) return { 
-            canDeleteComments: false,
-            canCreatePosts: false,
-            canEditPosts: false,
-            canDeletePosts: false,
-            canManageAdmins: false 
-        };
+        if (!uid) return defaultNonAdminPerms;
+        
         const adminRef = doc(db, "admins", uid);
         const adminSnap = await getDoc(adminRef);
+        
         if (adminSnap.exists()) {
             const data = adminSnap.data();
-            if (data.role === 'founder') {
-                return founderPermissions;
-            }
-            return { ...defaultAdminPermissions, ...data.permissions };
+            // Return the full permissions, ensuring all keys are present.
+            return { ...fullAdminPermissions, ...data.permissions };
         }
-        // Return default (non-admin) permissions if user is not in the admins collection
-        return { 
-            canDeleteComments: false,
-            canCreatePosts: false,
-            canEditPosts: false,
-            canDeletePosts: false,
-            canManageAdmins: false 
-        };
+
+        return defaultNonAdminPerms;
     } catch (error) {
         console.error("Error checking admin permissions: ", error);
-        return { 
-            canDeleteComments: false,
-            canCreatePosts: false,
-            canEditPosts: false,
-            canDeletePosts: false,
-            canManageAdmins: false 
-        };
+        return defaultNonAdminPerms;
     }
 };
 
 
 export const updateAdminPermissions = async (requestingAdminUid: string, targetUid: string, permissions: Partial<AdminPermissions>): Promise<{ success: boolean; message: string }> => {
     try {
-        const isUserAdmin = await isAdmin(requestingAdminUid);
-        if (!isUserAdmin) {
-            return { success: false, message: "Yönetici yetkilerini düzenleme izniniz yok." };
-        }
-        
         const perms = await getAdminPermissions(requestingAdminUid);
         if (!perms.canManageAdmins) {
             return { success: false, message: "Yönetici yetkilerini düzenleme izniniz yok." };
@@ -757,8 +714,8 @@ export const getUsers = async (
 
 export const deleteUserByAdmin = async (adminUid: string, targetUserUid: string): Promise<{ success: boolean, message: string }> => {
     try {
-        const isAdminUser = await isAdmin(adminUid);
-        if (!isAdminUser) {
+        const perms = await getAdminPermissions(adminUid);
+        if (!perms.canManageAdmins) { // Using canManageAdmins as a proxy for deleting users
             return { success: false, message: "Bu işlemi yapma yetkiniz yok." };
         }
 

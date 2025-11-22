@@ -9,7 +9,6 @@ import {
   Shield,
   UserPlus,
   Trash2,
-  Crown,
   ShieldCheck,
   Settings,
   MessageSquare,
@@ -54,11 +53,11 @@ const addAdminSchema = z.object({
 
 type AddAdminFormValues = z.infer<typeof addAdminSchema>;
 
-const AdminList = ({ admins, onRemoveClick, onSettingsClick }: { admins: AdminUser[], onRemoveClick: (admin: AdminUser) => void, onSettingsClick: (admin: AdminUser) => void }) => {
+const AdminList = ({ admins, onRemoveClick, onSettingsClick, requestingAdminUid }: { admins: AdminUser[], onRemoveClick: (admin: AdminUser) => void, onSettingsClick: (admin: AdminUser) => void, requestingAdminUid: string | null }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {admins.map((admin) => (
-            <Card key={admin.uid} className={admin.role === 'founder' ? 'border-amber-400' : ''}>
+            <Card key={admin.uid}>
                 <CardContent className="p-4 flex items-center gap-4">
                      <Avatar className="h-12 w-12">
                         <AvatarImage src={admin.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${admin.uid}`} />
@@ -67,11 +66,7 @@ const AdminList = ({ admins, onRemoveClick, onSettingsClick }: { admins: AdminUs
                     <div className="flex-grow">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold">{admin.displayName || 'İsimsiz'}</p>
-                          {admin.role === 'founder' ? (
-                            <Badge className="bg-amber-400 text-amber-950 hover:bg-amber-400/90"><Crown className="w-3 h-3 mr-1"/>Kurucu</Badge>
-                          ) : (
-                            <Badge variant="secondary"><ShieldCheck className="w-3 h-3 mr-1"/>Yönetici</Badge>
-                          )}
+                          <Badge variant="secondary"><ShieldCheck className="w-3 h-3 mr-1"/>Yönetici</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{admin.email}</p>
                          <p className="text-xs text-muted-foreground">
@@ -79,7 +74,8 @@ const AdminList = ({ admins, onRemoveClick, onSettingsClick }: { admins: AdminUs
                         </p>
                     </div>
                     <div className="flex flex-col gap-1">
-                      {admin.role !== 'founder' && (
+                      {/* Prevent admins from removing themselves */}
+                      {admin.uid !== requestingAdminUid && (
                         <>
                           <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => onSettingsClick(admin)}>
                               <Settings className="h-4 w-4" />
@@ -172,7 +168,7 @@ export default function YoneticilerAdminPage() {
     const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
     const [isFirstAdminSetup, setIsFirstAdminSetup] = useState(false);
     const { toast } = useToast();
-    const { user: requestingAdmin, permissions: requestingAdminPermissions } = useAuth();
+    const { user: requestingAdmin, permissions: requestingAdminPermissions, loading: authLoading } = useAuth();
 
     const form = useForm<AddAdminFormValues>({
         resolver: zodResolver(addAdminSchema),
@@ -192,20 +188,15 @@ export default function YoneticilerAdminPage() {
     };
 
     useEffect(() => {
-        fetchAdmins();
-    }, []);
+        // Wait for auth to finish loading before fetching admins
+        if (!authLoading) {
+            fetchAdmins();
+        }
+    }, [authLoading]);
 
     const handleRemoveClick = (admin: AdminUser) => {
         if (!requestingAdminPermissions?.canManageAdmins) {
             toast({ title: "Yetki Hatası", description: "Yönetici kaldırma yetkiniz yok.", variant: "destructive" });
-            return;
-        }
-        if (admin.role === 'founder') {
-            toast({
-                title: "İşlem Reddedildi",
-                description: "Kurucu yönetici sistemden kaldırılamaz.",
-                variant: "destructive",
-            });
             return;
         }
         setAdminToRemove(admin);
@@ -252,11 +243,10 @@ export default function YoneticilerAdminPage() {
     
     const handlePermissionsChange = async (requestingAdminUid: string, targetUid: string, permissions: AdminPermissions) => {
         // Optimistic UI update
-        setAdmins(currentAdmins => 
-            currentAdmins.map(admin => 
-                admin.uid === targetUid ? { ...admin, permissions } : admin
-            )
+        const newAdmins = admins.map(admin => 
+            admin.uid === targetUid ? { ...admin, permissions } : admin
         );
+        setAdmins(newAdmins);
         setSelectedAdmin(prev => prev ? { ...prev, permissions } : null);
 
         const { success, message } = await updateAdminPermissions(requestingAdminUid, targetUid, permissions);
@@ -269,6 +259,7 @@ export default function YoneticilerAdminPage() {
         }
     };
     
+    // An admin can manage if they have the permission OR if it's the very first admin being set up.
     const canManage = requestingAdminPermissions?.canManageAdmins || isFirstAdminSetup;
 
 
@@ -288,7 +279,7 @@ export default function YoneticilerAdminPage() {
             Yeni Yönetici Ekle
           </CardTitle>
           <CardDescription>
-            Sisteme kayıtlı bir kullanıcıyı e-posta adresi ile 'Yönetici' olarak atayın. Sisteme eklenen ilk yönetici otomatik olarak 'Kurucu' olur.
+            Sisteme kayıtlı bir kullanıcıyı e-posta adresi ile 'Yönetici' olarak atayın. Sistemdeki ilk yönetici tüm yetkilere sahip olur.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -301,13 +292,14 @@ export default function YoneticilerAdminPage() {
                             <FormItem>
                                 <div className="flex gap-2">
                                     <FormControl>
-                                        <Input placeholder="ornek@mail.com" {...field} disabled={!canManage} />
+                                        <Input placeholder="ornek@mail.com" {...field} disabled={!canManage && !authLoading} />
                                     </FormControl>
-                                    <Button type="submit" disabled={form.formState.isSubmitting || !canManage}>
+                                    <Button type="submit" disabled={form.formState.isSubmitting || (!canManage && !authLoading)}>
                                         {form.formState.isSubmitting ? 'Ekleniyor...' : 'Yönetici Yap'}
                                     </Button>
                                 </div>
                                 <FormMessage />
+                                {!canManage && !authLoading && <p className="text-sm text-destructive mt-2">Bu işlemi yapmak için yönetici ekleme yetkiniz yok.</p>}
                             </FormItem>
                         )}
                     />
@@ -321,7 +313,7 @@ export default function YoneticilerAdminPage() {
         <CardHeader>
           <CardTitle>Mevcut Yöneticiler</CardTitle>
           <CardDescription>
-            Sistemdeki tüm yöneticilerin listesi ve rolleri. Kurucu yönetici altın bir çerçeve ile vurgulanmıştır.
+            Sistemdeki tüm yöneticilerin listesi.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -331,7 +323,12 @@ export default function YoneticilerAdminPage() {
                     <Skeleton className="h-20 w-full" />
                 </div>
             ) : (
-                <AdminList admins={admins} onRemoveClick={handleRemoveClick} onSettingsClick={handleSettingsClick} />
+                <AdminList 
+                    admins={admins} 
+                    onRemoveClick={handleRemoveClick} 
+                    onSettingsClick={handleSettingsClick} 
+                    requestingAdminUid={requestingAdmin?.uid || null}
+                />
             )}
         </CardContent>
       </Card>
