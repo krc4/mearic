@@ -106,14 +106,14 @@ interface EditorProps {
   onUpdate: (html: string) => void;
 }
 
-export const Editor = ({ initialContent, onUpdate }: EditorProps) => {
+export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
   const editor = useEditor({
     extensions: [StarterKit.configure({
         heading: {
             levels: [1, 2, 3],
         }
     })],
-    content: initialContent || '<p>Yazı içeriğini buraya yazın...</p>',
+    content: initialContent,
     editorProps: {
         attributes: {
             class: "prose dark:prose-invert min-h-[400px] w-full max-w-none rounded-b-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -125,10 +125,10 @@ export const Editor = ({ initialContent, onUpdate }: EditorProps) => {
   });
 
   useEffect(() => {
-    if(editor && initialContent) {
-      editor.commands.setContent(initialContent);
+    if (editor && initialContent !== editor.getHTML()) {
+        editor.commands.setContent(initialContent, false); // `false` prevents the `onUpdate` callback from firing unnecessarily
     }
-  }, [editor, initialContent])
+  }, [initialContent, editor]);
 
   return (
     <div>
@@ -137,3 +137,5 @@ export const Editor = ({ initialContent, onUpdate }: EditorProps) => {
     </div>
   );
 };
+
+    

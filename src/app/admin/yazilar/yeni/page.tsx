@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   ChevronLeft,
+  Upload,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -24,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Editor } from "@/components/editor"
-import { useState } from "react"
+import { useState, ChangeEvent } from "react"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { addPost, type PostPayload } from "@/lib/firebase/services"
@@ -103,6 +104,38 @@ export default function NewPostPage() {
         });
     }
   }
+  
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "text/plain") {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileContent = event.target?.result as string;
+        setContent(fileContent);
+         toast({
+          title: "İçerik Yüklendi",
+          description: "Metin dosyası başarıyla editöre aktarıldı.",
+        });
+      };
+      reader.onerror = () => {
+         toast({
+          title: "Dosya Okuma Hatası",
+          description: "Metin dosyası okunurken bir hata oluştu.",
+          variant: "destructive",
+        });
+      }
+      reader.readAsText(file);
+    } else {
+        toast({
+          title: "Geçersiz Dosya Türü",
+          description: "Lütfen sadece .txt uzantılı bir metin dosyası seçin.",
+          variant: "destructive",
+        });
+    }
+     // Reset file input to allow uploading the same file again
+    e.target.value = '';
+  };
+
 
   const isUrlValid = (url: string) => {
     try {
@@ -126,7 +159,7 @@ export default function NewPostPage() {
           Yeni Yazı Oluştur
         </h1>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
-          <Button variant="outline" size="sm" onClick={handlePublish}>
+          <Button variant="outline" size="sm">
             Taslak Olarak Kaydet
           </Button>
           <Button size="sm" onClick={handlePublish}>Yayınla</Button>
@@ -138,7 +171,7 @@ export default function NewPostPage() {
             <CardHeader>
                 <CardTitle>Yazı Detayları</CardTitle>
                 <CardDescription>
-                Yazınızın başlığını ve içeriğini girin.
+                Yazınızın başlığını ve içeriğini girin. Dilerseniz içerik için bir .txt dosyası yükleyebilirsiniz.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -166,8 +199,21 @@ export default function NewPostPage() {
                         />
                     </div>
                     <div className="grid gap-3">
-                        <Label htmlFor="content">İçerik</Label>
-                        <Editor onUpdate={(html) => setContent(html)} />
+                        <div className="flex justify-between items-center">
+                            <Label htmlFor="content">İçerik</Label>
+                            <Label htmlFor="file-upload" className="cursor-pointer text-sm font-medium text-primary hover:underline flex items-center gap-1">
+                                <Upload className="h-3 w-3"/>
+                                .txt Yükle
+                            </Label>
+                             <Input 
+                                id="file-upload" 
+                                type="file" 
+                                className="hidden"
+                                accept=".txt"
+                                onChange={handleFileChange}
+                            />
+                        </div>
+                        <Editor initialContent={content} onUpdate={(html) => setContent(html)} />
                     </div>
                 </div>
             </CardContent>
@@ -240,7 +286,7 @@ export default function NewPostPage() {
         </div>
       </div>
        <div className="flex items-center justify-center gap-2 md:hidden">
-          <Button variant="outline" size="sm" onClick={handlePublish}>
+          <Button variant="outline" size="sm">
             Taslak Olarak Kaydet
           </Button>
           <Button size="sm" onClick={handlePublish}>Yayınla</Button>
@@ -248,3 +294,5 @@ export default function NewPostPage() {
     </div>
   )
 }
+
+    
