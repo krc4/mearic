@@ -148,7 +148,7 @@ const PermissionsDialog = ({
                             </div>
                             <Switch
                                 id={item.id}
-                                checked={admin.permissions?.[item.id] ?? false}
+                                checked={admin?.permissions?.[item.id] ?? false}
                                 onCheckedChange={(checked) => handleSwitchChange(item.id, checked)}
                             />
                         </div>
@@ -170,6 +170,7 @@ export default function YoneticilerAdminPage() {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
+    const [isFirstAdminSetup, setIsFirstAdminSetup] = useState(false);
     const { toast } = useToast();
     const { user: requestingAdmin, permissions: requestingAdminPermissions } = useAuth();
 
@@ -182,6 +183,11 @@ export default function YoneticilerAdminPage() {
         setLoading(true);
         const fetchedAdmins = await getAdmins();
         setAdmins(fetchedAdmins);
+        if (fetchedAdmins.length === 0) {
+            setIsFirstAdminSetup(true);
+        } else {
+            setIsFirstAdminSetup(false);
+        }
         setLoading(false);
     };
 
@@ -262,6 +268,8 @@ export default function YoneticilerAdminPage() {
             fetchAdmins(); 
         }
     };
+    
+    const canManage = requestingAdminPermissions?.canManageAdmins || isFirstAdminSetup;
 
 
   return (
@@ -293,9 +301,9 @@ export default function YoneticilerAdminPage() {
                             <FormItem>
                                 <div className="flex gap-2">
                                     <FormControl>
-                                        <Input placeholder="ornek@mail.com" {...field} disabled={!requestingAdminPermissions?.canManageAdmins} />
+                                        <Input placeholder="ornek@mail.com" {...field} disabled={!canManage} />
                                     </FormControl>
-                                    <Button type="submit" disabled={form.formState.isSubmitting || !requestingAdminPermissions?.canManageAdmins}>
+                                    <Button type="submit" disabled={form.formState.isSubmitting || !canManage}>
                                         {form.formState.isSubmitting ? 'Ekleniyor...' : 'Yönetici Yap'}
                                     </Button>
                                 </div>
@@ -345,5 +353,3 @@ export default function YoneticilerAdminPage() {
     </>
   )
 }
-
-    
