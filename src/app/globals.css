@@ -56,16 +56,204 @@
   body {
     @apply text-foreground;
     background-color: hsl(var(--background));
-    background-image: radial-gradient(circle at center, hsla(var(--foreground) / 0.08) 1px, transparent 1px),
-                      radial-gradient(circle at center, hsla(var(--foreground) / 0.08) 1px, transparent 1px);
-    background-size: 20px 20px;
-    background-position: 0 0, 10px 10px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /* This can be overridden by specific page styles if needed */
   }
 
-  .dark body {
-    background-image: radial-gradient(circle at center, hsla(var(--foreground) / 0.15) 1px, transparent 1px),
-                      radial-gradient(circle at center, hsla(var(--foreground) / 0.15) 1px, transparent 1px);
+  .landing-page-active {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
   }
+}
+
+/* Landing Page Specific Styles */
+.landing-h1 {
+    font-family: var(--font-cinzel), serif;
+    font-size: 5rem;
+    margin: 0;
+    font-weight: 800;
+    color: transparent;
+    background: linear-gradient(135deg, #ffffff 20%, #e0e0e0 50%, #a9a9a9 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    animation: fadeInUp 1.5s ease-out forwards 0.5s;
+    letter-spacing: 5px;
+}
+
+.landing-p {
+    font-family: var(--font-amiri), serif;
+    font-size: 1.5rem;
+    margin-top: 20px;
+    line-height: 1.6;
+    color: #cccccc;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    opacity: 0;
+    animation: fadeInUp 1.5s ease-out forwards 1.5s;
+}
+
+.landing-divider {
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    margin: 20px auto;
+    animation: expandWidth 1.5s ease-out forwards 1s;
+}
+
+.landing-btn-enter {
+    margin-top: 40px;
+    pointer-events: auto; /* Tıklanabilir */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-family: var(--font-cinzel), serif;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeInUp 1.5s ease-out forwards 2s;
+    backdrop-filter: blur(5px);
+}
+
+.landing-btn-enter:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    letter-spacing: 4px;
+}
+
+.landing-btn-enter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: 0.5s;
+}
+
+.landing-btn-enter:hover::before {
+    left: 100%;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes expandWidth {
+    from { width: 0; }
+    to { width: 60%; }
+}
+
+@media (max-width: 768px) {
+    .landing-h1 { font-size: 3rem; letter-spacing: 2px; }
+    .landing-p { font-size: 1.1rem; }
+    .landing-btn-enter { padding: 12px 30px; font-size: 1rem; }
+}
+
+
+.articleContent blockquote {
+    @apply relative p-4 my-4 border-l-4 border-primary bg-primary/10 rounded-r-lg overflow-hidden transition-all duration-500;
+  }
+  
+.articleContent blockquote::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image:
+      radial-gradient(circle, hsl(var(--primary) / 0.1) 1px, transparent 1.5px),
+      radial-gradient(circle, hsl(var(--primary) / 0.1) 1px, transparent 1.5px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    animation: rotate-bg 30s linear infinite;
+    z-index: 0;
+  }
+
+.articleContent blockquote:hover::before {
+      opacity: 0.5;
+      transform: scale(1);
+  }
+
+.articleContent blockquote > * {
+    @apply relative z-10;
+  }
+
+.articleContent blockquote p {
+    @apply text-lg italic font-medium leading-relaxed;
+  }
+  
+  @keyframes rotate-bg {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+
+/* --- Main Article Card Styles --- */
+
+@keyframes bg-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.mainArticleCardWrapper {
+  @apply relative p-1 rounded-xl;
+  background-image: linear-gradient(115deg, hsl(var(--primary)/0.2), hsl(var(--accent)), hsl(var(--primary)/0.2));
+  background-size: 200% 200%;
+  animation: bg-pan 10s linear infinite;
+}
+
+.mainArticleCard {
+  @apply relative rounded-lg overflow-hidden border-none shadow-2xl transition-transform duration-300 ease-in-out;
+  background: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transform-style: preserve-3d;
+}
+
+.mainArticleCardWrapper:hover .mainArticleCard {
+  transform: scale(1.02) rotateX(2deg) rotateY(-2deg);
+}
+
+.cardShine {
+  @apply absolute top-0 left-0 w-full h-full opacity-0 transition-opacity duration-500 rounded-lg;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  pointer-events: none;
+  transform: translateZ(10px);
+}
+
+.mainArticleCardWrapper:hover .cardShine {
+  opacity: 1;
+}
+
+.mainArticleCard > div {
+  transform: translateZ(20px);
 }

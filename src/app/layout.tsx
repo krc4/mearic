@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Noto_Kufi_Arabic } from 'next/font/google';
+import { Inter, Noto_Kufi_Arabic, Amiri, Cinzel } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -15,6 +15,20 @@ const notoKufiArabic = Noto_Kufi_Arabic({
   subsets: ['arabic'],
   variable: '--font-kufi',
 });
+
+const amiri = Amiri({
+  subsets: ['latin', 'arabic'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-amiri',
+});
+
+const cinzel = Cinzel({
+  subsets: ['latin'],
+  weight: ['400', '600', '800'],
+  variable: '--font-cinzel',
+});
+
 
 export const metadata: Metadata = {
   title: 'Mearic | İslami Blog & Kuran Mucizeleri',
@@ -33,7 +47,9 @@ export default function RootLayout({
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
           inter.variable,
-          notoKufiArabic.variable
+          notoKufiArabic.variable,
+          amiri.variable,
+          cinzel.variable
         )}
       >
         <ThemeProvider
