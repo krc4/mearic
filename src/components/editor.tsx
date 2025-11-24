@@ -17,7 +17,7 @@ import {
   Heading1,
   Heading2,
   Heading3,
-  Table,
+  Table as TableIcon,
   Square,
   ArrowUpToLine,
   ArrowDownToLine,
@@ -31,7 +31,10 @@ import {
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { useEffect } from 'react';
-import TableKit from '@tiptap/extension-table';
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
 
 
 const Toolbar = ({ editor }: { editor: EditorType | null }) => {
@@ -115,7 +118,7 @@ const Toolbar = ({ editor }: { editor: EditorType | null }) => {
             size="sm"
             onPressedChange={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
         >
-            <Table className="h-4 w-4" />
+            <TableIcon className="h-4 w-4" />
         </Toggle>
         {editor.can().deleteTable() && (
             <>
@@ -191,12 +194,16 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
             heading: {
                 levels: [1, 2, 3],
             },
-            table: false, // Disable StarterKit's table extension
+            // Disable StarterKit's table extension
+            table: false,
         }),
-        TableKit.configure({
+        // Use the official table extensions
+        Table.configure({
             resizable: true,
-            // You can add more table configuration here
         }),
+        TableRow,
+        TableHeader,
+        TableCell,
     ],
     content: initialContent,
     editorProps: {
