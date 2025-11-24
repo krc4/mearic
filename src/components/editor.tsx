@@ -190,7 +190,8 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
         StarterKit.configure({
             heading: {
                 levels: [1, 2, 3],
-            }
+            },
+            table: false, // Disable StarterKit's table extension
         }),
         TableKit.configure({
             resizable: true,
