@@ -35,6 +35,7 @@ import Table from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
+import { Markdown } from 'tiptap-markdown';
 
 
 const Toolbar = ({ editor }: { editor: EditorType | null }) => {
@@ -184,7 +185,7 @@ const Toolbar = ({ editor }: { editor: EditorType | null }) => {
 
 interface EditorProps {
   initialContent?: string;
-  onUpdate: (html: string) => void;
+  onUpdate: (content: string) => void;
 }
 
 export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
@@ -204,6 +205,24 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
         TableRow,
         TableHeader,
         TableCell,
+        Markdown.configure({
+            html: false, // Turn off HTML support in Markdown
+            tightLists: true,
+            tightListClass: "tight",
+            bulletList: {
+                keepMarks: true,
+                keepAttributes: false,
+            },
+            orderedList: {
+                keepMarks: true,
+                keepAttributes: false,
+            },
+            table: {
+                // This is a Tiptap-Markdown option to handle tables
+                // It works with the Table extension suite
+                // It ensures that when you get content, it is converted to Markdown tables
+            },
+        })
     ],
     content: initialContent,
     editorProps: {
@@ -212,13 +231,16 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
         }
     },
     onUpdate: ({ editor }) => {
-      onUpdate(editor.getHTML());
+      // Return content as Markdown instead of HTML
+      onUpdate(editor.storage.markdown.getMarkdown());
     },
   });
 
   useEffect(() => {
-    if (editor && initialContent !== editor.getHTML()) {
-        editor.commands.setContent(initialContent, false); // `false` prevents the `onUpdate` callback from firing unnecessarily
+    // When initialContent changes, update the editor's content.
+    // The `false` argument prevents the onUpdate callback from firing again.
+    if (editor && initialContent !== editor.storage.markdown.getMarkdown()) {
+        editor.commands.setContent(initialContent, false);
     }
   }, [initialContent, editor]);
 

@@ -28,6 +28,7 @@ import { motion } from "framer-motion";
 import { CommentSection } from "@/components/comment-section";
 import { ShieldCheck } from "lucide-react";
 import DOMPurify from "dompurify";
+import { marked } from "marked";
 
 
 export default function PostPage() {
@@ -59,9 +60,10 @@ export default function PostPage() {
             setIsAuthorAdmin(adminStatus);
         }
 
-        // Sanitize HTML content before setting it
+        // Convert Markdown to HTML and then sanitize
         if (typeof window !== 'undefined') {
-          setSanitizedContent(DOMPurify.sanitize(fetchedPost.content));
+          const rawHtml = await marked.parse(fetchedPost.content);
+          setSanitizedContent(DOMPurify.sanitize(rawHtml));
         }
 
         // Unique view logic using sessionStorage

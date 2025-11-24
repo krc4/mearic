@@ -198,12 +198,12 @@ export default function EditPostPage() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3">
-        <div className="grid auto-rows-max items-start gap-4 lg:col-span-2">
+        <div className="grid auto-rows-max items-start gap-4 lg:col-span-3">
             <Card>
             <CardHeader>
                 <CardTitle>Yazı Detayları</CardTitle>
                 <CardDescription>
-                Yazınızın başlığını ve içeriğini düzenleyin.
+                Yazınızın başlığını ve içeriğini düzenleyin. Editör Markdown formatını desteklemektedir.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -238,70 +238,72 @@ export default function EditPostPage() {
             </CardContent>
             </Card>
         </div>
-        <div className="grid auto-rows-max items-start gap-4 lg:col-span-1">
-            <Card>
-            <CardHeader>
-                <CardTitle>Kategori</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid gap-6">
-                <div className="grid gap-3">
-                    <Label htmlFor="category">Kategori</Label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger id="category" aria-label="Kategori Seç">
-                          <SelectValue placeholder="Kategori Seç" />
-                      </SelectTrigger>
-                      <SelectContent>
-                          <SelectItem value="Kuran Mucizeleri">Kuran Mucizeleri</SelectItem>
-                          <SelectItem value="Hadis Mucizeleri">Hadis Mucizeleri</SelectItem>
-                          <SelectItem value="İslami Bloglar">İslami Bloglar</SelectItem>
-                      </SelectContent>
-                    </Select>
-                </div>
-                 <div className="grid gap-3">
-                    <Label htmlFor="readTime">Okuma Süresi (dk)</Label>
-                    <Input
-                        id="readTime"
-                        type="number"
-                        className="w-full"
-                        value={readTime}
-                        onChange={(e) => setReadTime(Number(e.target.value))}
-                    />
-                 </div>
-                </div>
-            </CardContent>
-            </Card>
-            <Card>
+        <div className="grid auto-rows-max items-start gap-4 lg:col-span-3">
+            <div className="grid md:grid-cols-2 gap-4">
+                <Card>
                 <CardHeader>
-                    <CardTitle>Başlık Resmi</CardTitle>
-                    <CardDescription>
-                        Yazı için bir resim URL'si girin.
-                    </CardDescription>
+                    <CardTitle>Kategori</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    <div className="grid gap-6">
                     <div className="grid gap-3">
-                        <Label htmlFor="imageUrl">Resim URL'si</Label>
+                        <Label htmlFor="category">Kategori</Label>
+                        <Select value={category} onValueChange={setCategory}>
+                          <SelectTrigger id="category" aria-label="Kategori Seç">
+                              <SelectValue placeholder="Kategori Seç" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="Kuran Mucizeleri">Kuran Mucizeleri</SelectItem>
+                              <SelectItem value="Hadis Mucizeleri">Hadis Mucizeleri</SelectItem>
+                              <SelectItem value="İslami Bloglar">İslami Bloglar</SelectItem>
+                          </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="readTime">Okuma Süresi (dk)</Label>
                         <Input
-                            id="imageUrl"
-                            type="url"
-                            placeholder="https://ornek.com/resim.jpg"
-                            value={imageUrl}
-                            onChange={(e) => setImageUrl(e.target.value)}
+                            id="readTime"
+                            type="number"
+                            className="w-full"
+                            value={readTime}
+                            onChange={(e) => setReadTime(Number(e.target.value))}
                         />
-                         {isUrlValid(imageUrl) && (
-                            <div className="relative aspect-video w-full overflow-hidden rounded-md mt-2">
-                                <Image 
-                                    src={imageUrl} 
-                                    alt="Resim Önizlemesi" 
-                                    fill 
-                                    className="object-cover"
-                                    onError={(e) => e.currentTarget.style.display = 'none'}
-                                />
-                            </div>
-                        )}
+                    </div>
                     </div>
                 </CardContent>
-            </Card>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Başlık Resmi</CardTitle>
+                        <CardDescription>
+                            Yazı için bir resim URL'si girin.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-3">
+                            <Label htmlFor="imageUrl">Resim URL'si</Label>
+                            <Input
+                                id="imageUrl"
+                                type="url"
+                                placeholder="https://ornek.com/resim.jpg"
+                                value={imageUrl}
+                                onChange={(e) => setImageUrl(e.target.value)}
+                            />
+                            {isUrlValid(imageUrl) && (
+                                <div className="relative aspect-video w-full overflow-hidden rounded-md mt-2">
+                                    <Image 
+                                        src={imageUrl} 
+                                        alt="Resim Önizlemesi" 
+                                        fill 
+                                        className="object-cover"
+                                        onError={(e) => e.currentTarget.style.display = 'none'}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       </div>
        <div className="flex items-center justify-center gap-2 md:hidden">

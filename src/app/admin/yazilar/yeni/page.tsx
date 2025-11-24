@@ -38,6 +38,7 @@ import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { addPost, type PostPayload } from "@/lib/firebase/services"
 import { useAuth } from "@/hooks/use-auth"
+import { marked } from "marked";
 
 export default function NewPostPage() {
   const [imageUrl, setImageUrl] = useState("");
@@ -45,7 +46,7 @@ export default function NewPostPage() {
   const [category, setCategory] = useState('');
   const [readTime, setReadTime] = useState(5);
   const [description, setDescription] = useState('');
-  const [content, setContent] = useState('<p>Yazı içeriği buraya gelecek...</p>');
+  const [content, setContent] = useState('## Yazı içeriği buraya gelecek...');
 
   const router = useRouter();
   const { toast } = useToast();
@@ -76,7 +77,7 @@ export default function NewPostPage() {
         image: imageUrl,
         readTime: Number(readTime),
         description,
-        content,
+        content, // Content is already in Markdown format
         author: user.displayName || "Mearic Ekibi",
         authorId: user.uid,
         authorPhotoURL: user.photoURL || "https://github.com/shadcn.png" 
@@ -119,8 +120,15 @@ export default function NewPostPage() {
 
     const reader = new FileReader();
     const fileType = file.type;
+    
+    // Convert HTML to Markdown
+    const htmlToMarkdown = async (html: string) => {
+        const { TurndownService } = await import('turndown');
+        const turndownService = new TurndownService();
+        return turndownService.turndown(html);
+    };
 
-    if (fileType === "text/plain") {
+    if (fileType === "text/plain" || fileType === 'text/markdown') {
       reader.onload = (event) => {
         const fileContent = event.target?.result as string;
         setContent(fileContent);
@@ -132,7 +140,8 @@ export default function NewPostPage() {
         const arrayBuffer = event.target?.result as ArrayBuffer;
         try {
           const result = await mammoth.convertToHtml({ arrayBuffer });
-          setContent(result.value);
+          const markdownContent = await htmlToMarkdown(result.value);
+          setContent(markdownContent);
           toast({ title: "İçerik Yüklendi", description: "Word dosyası başarıyla editöre aktarıldı." });
         } catch (error) {
           console.error("Error converting docx to html", error);
@@ -152,7 +161,7 @@ export default function NewPostPage() {
             const pageText = textContent.items.map(item => 'str' in item ? item.str : '').join(" ");
             fullText += pageText + "\n\n";
           }
-          setContent(`<p>${fullText.replace(/\n/g, '</p><p>')}</p>`);
+          setContent(fullText); // PDF text is plain, so it's fine as Markdown
           toast({ title: "İçerik Yüklendi", description: "PDF dosyası başarıyla editöre aktarıldı." });
         } catch (error) {
           console.error("Error reading pdf file", error);
@@ -163,7 +172,7 @@ export default function NewPostPage() {
     } else {
       toast({
         title: "Geçersiz Dosya Türü",
-        description: "Lütfen sadece .txt, .pdf, .doc veya .docx uzantılı bir dosya seçin.",
+        description: "Lütfen sadece .txt, .md, .pdf, .doc veya .docx uzantılı bir dosya seçin.",
         variant: "destructive",
       });
     }
@@ -201,13 +210,13 @@ export default function NewPostPage() {
           <Button size="sm" onClick={handlePublish}>Yayınla</Button>
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-[1fr_250px]">
-        <div className="grid auto-rows-max items-start gap-4">
+      <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3">
+        <div className="grid auto-rows-max items-start gap-4 lg:col-span-3">
             <Card>
             <CardHeader>
                 <CardTitle>Yazı Detayları</CardTitle>
                 <CardDescription>
-                Yazınızın başlığını ve içeriğini girin. Dilerseniz içerik için bir dosya yükleyebilirsiniz.
+                Yazınızın başlığını ve içeriğini girin. Dilerseniz içerik için bir dosya yükleyebilirsiniz. Editör Markdown formatını desteklemektedir.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -239,86 +248,88 @@ export default function NewPostPage() {
                             <Label htmlFor="content">İçerik</Label>
                             <Label htmlFor="file-upload" className="cursor-pointer text-sm font-medium text-primary hover:underline flex items-center gap-1">
                                 <Upload className="h-3 w-3"/>
-                                Dosya Yükle (.txt, .pdf, .docx)
+                                Dosya Yükle (.txt, .md, .pdf, .docx)
                             </Label>
                              <Input 
                                 id="file-upload" 
                                 type="file" 
                                 className="hidden"
-                                accept=".txt,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                accept=".txt,.md,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                 onChange={handleFileChange}
                             />
                         </div>
-                        <Editor initialContent={content} onUpdate={(html) => setContent(html)} />
+                        <Editor initialContent={content} onUpdate={(md) => setContent(md)} />
                     </div>
                 </div>
             </CardContent>
             </Card>
         </div>
-        <div className="grid auto-rows-max items-start gap-4">
-            <Card>
-            <CardHeader>
-                <CardTitle>Kategori</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid gap-6">
-                    <div className="grid gap-3">
-                        <Label htmlFor="category">Kategori</Label>
-                        <Select onValueChange={setCategory}>
-                        <SelectTrigger id="category" aria-label="Kategori Seç">
-                            <SelectValue placeholder="Kategori Seç" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Kuran Mucizeleri">Kuran Mucizeleri</SelectItem>
-                            <SelectItem value="Hadis Mucizeleri">Hadis Mucizeleri</SelectItem>
-                            <SelectItem value="İslami Bloglar">İslami Bloglar</SelectItem>
-                        </SelectContent>
-                        </Select>
-                    </div>
-                     <div className="grid gap-3">
-                        <Label htmlFor="readTime">Okuma Süresi (dk)</Label>
-                        <Input
-                        id="readTime"
-                        type="number"
-                        className="w-full"
-                        value={readTime}
-                        onChange={(e) => setReadTime(Number(e.target.value))}
-                        />
-                    </div>
-                </div>
-            </CardContent>
-            </Card>
-            <Card>
+        <div className="grid auto-rows-max items-start gap-4 lg:col-span-3">
+            <div className="grid md:grid-cols-2 gap-4">
+                <Card>
                 <CardHeader>
-                    <CardTitle>Başlık Resmi</CardTitle>
-                     <CardDescription>
-                        Yazı için bir resim URL'si girin.
-                    </CardDescription>
+                    <CardTitle>Kategori</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid gap-3">
-                        <Label htmlFor="imageUrl">Resim URL'si</Label>
-                        <Input
-                            id="imageUrl"
-                            type="url"
-                            placeholder="https://ornek.com/resim.jpg"
-                            value={imageUrl}
-                            onChange={(e) => setImageUrl(e.target.value)}
-                        />
-                        {isUrlValid(imageUrl) && (
-                            <div className="relative aspect-video w-full overflow-hidden rounded-md mt-2">
-                                <Image 
-                                    src={imageUrl} 
-                                    alt="Resim Önizlemesi" 
-                                    fill 
-                                    className="object-cover"
-                                    onError={(e) => e.currentTarget.style.display = 'none'}
-                                />
-                            </div>
-                        )}
+                    <div className="grid gap-6">
+                        <div className="grid gap-3">
+                            <Label htmlFor="category">Kategori</Label>
+                            <Select onValueChange={setCategory}>
+                            <SelectTrigger id="category" aria-label="Kategori Seç">
+                                <SelectValue placeholder="Kategori Seç" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Kuran Mucizeleri">Kuran Mucizeleri</SelectItem>
+                                <SelectItem value="Hadis Mucizeleri">Hadis Mucizeleri</SelectItem>
+                                <SelectItem value="İslami Bloglar">İslami Bloglar</SelectItem>
+                            </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="readTime">Okuma Süresi (dk)</Label>
+                            <Input
+                            id="readTime"
+                            type="number"
+                            className="w-full"
+                            value={readTime}
+                            onChange={(e) => setReadTime(Number(e.target.value))}
+                            />
+                        </div>
                     </div>
                 </CardContent>
-            </Card>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Başlık Resmi</CardTitle>
+                        <CardDescription>
+                            Yazı için bir resim URL'si girin.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-3">
+                            <Label htmlFor="imageUrl">Resim URL'si</Label>
+                            <Input
+                                id="imageUrl"
+                                type="url"
+                                placeholder="https://ornek.com/resim.jpg"
+                                value={imageUrl}
+                                onChange={(e) => setImageUrl(e.target.value)}
+                            />
+                            {isUrlValid(imageUrl) && (
+                                <div className="relative aspect-video w-full overflow-hidden rounded-md mt-2">
+                                    <Image 
+                                        src={imageUrl} 
+                                        alt="Resim Önizlemesi" 
+                                        fill 
+                                        className="object-cover"
+                                        onError={(e) => e.currentTarget.style.display = 'none'}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       </div>
        <div className="flex items-center justify-center gap-2 md:hidden">
