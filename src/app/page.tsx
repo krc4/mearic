@@ -13,7 +13,12 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { ScrollAnimationWrapper } from '@/components/ScrollAnimationWrapper';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HeroBackground } from '@/components/hero-background';
+import dynamic from 'next/dynamic';
+
+const HeroBackground = dynamic(() => import('@/components/hero-background').then(mod => mod.HeroBackground), {
+  ssr: false,
+  loading: () => <Skeleton className="absolute inset-0 bg-black" />,
+});
 
 
 const SectionSkeleton = () => (
@@ -40,9 +45,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-center">
-            <Suspense fallback={<div className="absolute inset-0 bg-black" />}>
-                <HeroBackground />
-            </Suspense>
+            <HeroBackground />
             <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
