@@ -123,7 +123,7 @@ export default function NewPostPage() {
     
     // Convert HTML to Markdown
     const htmlToMarkdown = async (html: string) => {
-        const { TurndownService } = await import('turndown');
+        const { default: TurndownService } = await import('turndown');
         const turndownService = new TurndownService();
         return turndownService.turndown(html);
     };
