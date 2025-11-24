@@ -7,27 +7,14 @@ import {
   Bold,
   Italic,
   Strikethrough,
-  Code,
-  Pilcrow,
   List,
   ListOrdered,
   Quote,
   Minus,
-  WrapText,
   Heading1,
   Heading2,
   Heading3,
   Table as TableIcon,
-  Square,
-  ArrowUpToLine,
-  ArrowDownToLine,
-  ArrowLeftToLine,
-  ArrowRightToLine,
-  Trash2,
-  Combine,
-  Split,
-  Rows,
-  Columns
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { useEffect } from 'react';
@@ -121,64 +108,6 @@ const Toolbar = ({ editor }: { editor: EditorType | null }) => {
         >
             <TableIcon className="h-4 w-4" />
         </Toggle>
-        {editor.can().deleteTable() && (
-            <>
-                <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().addColumnBefore().run()}
-                >
-                    <ArrowLeftToLine className="h-4 w-4" title="Sola sütun ekle" />
-                </Toggle>
-                 <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().addColumnAfter().run()}
-                >
-                    <ArrowRightToLine className="h-4 w-4" title="Sağa sütun ekle" />
-                </Toggle>
-                 <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().deleteColumn().run()}
-                >
-                    <Columns className="h-4 w-4" title="Sütunu sil"/>
-                </Toggle>
-                 <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().addRowBefore().run()}
-                >
-                    <ArrowUpToLine className="h-4 w-4" title="Yukarı satır ekle"/>
-                </Toggle>
-                 <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().addRowAfter().run()}
-                >
-                    <ArrowDownToLine className="h-4 w-4" title="Aşağıya satır ekle"/>
-                </Toggle>
-                 <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().deleteRow().run()}
-                >
-                    <Rows className="h-4 w-4" title="Satırı sil"/>
-                </Toggle>
-                <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().mergeOrSplit().run()}
-                >
-                    <Combine className="h-4 w-4" title="Hücreleri birleştir/ayır"/>
-                </Toggle>
-                <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().toggleHeaderCell().run()}
-                >
-                    <Square className="h-4 w-4" title="Başlık hücresi yap"/>
-                </Toggle>
-                 <Toggle
-                    size="sm"
-                    onPressedChange={() => editor.chain().focus().deleteTable().run()}
-                >
-                    <Trash2 className="h-4 w-4 text-destructive" title="Tabloyu sil" />
-                </Toggle>
-            </>
-        )}
     </div>
   );
 };
@@ -195,7 +124,7 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
             heading: {
                 levels: [1, 2, 3],
             },
-            // Disable StarterKit's table extension
+            // Disable StarterKit's table extension to avoid conflicts
             table: false,
         }),
         // Use the official table extensions
@@ -206,22 +135,12 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
         TableHeader,
         TableCell,
         Markdown.configure({
-            html: false, // Turn off HTML support in Markdown
+            html: false, // Prevent rendering raw HTML for security
             tightLists: true,
-            tightListClass: "tight",
-            bulletList: {
-                keepMarks: true,
-                keepAttributes: false,
-            },
-            orderedList: {
-                keepMarks: true,
-                keepAttributes: false,
-            },
-            table: {
-                // This is a Tiptap-Markdown option to handle tables
-                // It works with the Table extension suite
-                // It ensures that when you get content, it is converted to Markdown tables
-            },
+            linkify: true,
+            breaks: true,
+            transformPastedText: true,
+            transformCopiedText: true,
         })
     ],
     content: initialContent,
