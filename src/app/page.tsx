@@ -100,7 +100,7 @@ export default function Home() {
                <ScrollAnimationWrapper>
                   <article className="group relative mx-auto w-full h-full overflow-hidden rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl">
                       <Image
-                          src="https://images.unsplash.com/photo-1593863435837-95b8a2455b55?q=80&w=2070&auto=format&fit=crop"
+                          src="https://picsum.photos/seed/1/600/800"
                           alt="Kuran Mucizeleri"
                           width={600}
                           height={800}
@@ -124,7 +124,7 @@ export default function Home() {
                 <ScrollAnimationWrapper delay={0.2}>
                    <article className="group relative mx-auto w-full h-full overflow-hidden rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl">
                       <Image
-                          src="https://images.unsplash.com/photo-1585128993422-b4a835593166?q=80&w=1974&auto=format&fit=crop"
+                          src="https://picsum.photos/seed/2/600/800"
                           alt="Hadis Mucizeleri"
                           width={600}
                           height={800}
@@ -148,7 +148,7 @@ export default function Home() {
                  <ScrollAnimationWrapper delay={0.4}>
                    <article className="group relative mx-auto w-full h-full overflow-hidden rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl">
                       <Image
-                          src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop"
+                          src="https://picsum.photos/seed/3/600/800"
                           alt="İslami Bloglar"
                           width={600}
                           height={800}
