@@ -26,8 +26,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
       const container = containerRef.current;
       if (!container) return;
 
-      document.body.classList.add('landing-page-active');
-
       // Scene setup
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x000000, 0.0015);
@@ -135,7 +133,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
         if (containerRef.current && renderer) {
             containerRef.current.removeChild(renderer.domElement);
         }
-        document.body.classList.remove('landing-page-active');
     };
   }, []);
 

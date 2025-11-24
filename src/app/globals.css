@@ -58,15 +58,6 @@
     background-color: hsl(var(--background));
     /* This can be overridden by specific page styles if needed */
   }
-
-  .landing-page-active {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #000;
-  }
 }
 
 /* Landing Page Specific Styles */
