@@ -1,4 +1,5 @@
 
+
 "use client";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
@@ -122,7 +123,6 @@ export function CategoryClientPage({
     setLoadingMore(true);
     
     // The category is now passed as a prop, ensuring it's the correct one for the page.
-    // We don't need to guess it from the initial posts.
     if (!category) {
         setLoadingMore(false);
         return;
@@ -288,87 +288,95 @@ export function CategoryClientPage({
         </div>
 
         <main className="container mx-auto flex-grow px-4 pb-12">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
-          >
-            {sortedAndFilteredPosts.map((post) => (
-                <motion.article
-                    key={post.id}
-                    variants={itemVariants}
-                    layout
-                    className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
-                    style={{ transformStyle: "preserve-3d" }}
-                >
-                    <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                        style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
-                        data-ai-hint="hadith miracle"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+           {sortedAndFilteredPosts.length > 0 ? (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+            >
+              {sortedAndFilteredPosts.map((post) => (
+                  <motion.article
+                      key={post.id}
+                      variants={itemVariants}
+                      layout
+                      className="group relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl"
+                      style={{ transformStyle: "preserve-3d" }}
+                  >
+                      <div
+                          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                          style={{ backgroundImage: `url(${post.image || 'https://placehold.co/600x800.png'})` }}
+                          data-ai-hint="hadith miracle"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                    <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
+                      <div className="absolute inset-0 rounded-3xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm bg-white/5" />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                        <Badge variant="secondary" className="mb-2">
-                            {post.category}
-                        </Badge>
-                        <h3 className="text-2xl font-bold text-white leading-tight">
-                            {post.title}
-                        </h3>
-                        <p className="mt-2 text-sm text-white/80 line-clamp-2">
-                            {post.description}
-                        </p>
+                      <div className="absolute bottom-0 left-0 right-0 p-6">
+                          <Badge variant="secondary" className="mb-2">
+                              {post.category}
+                          </Badge>
+                          <h3 className="text-2xl font-bold text-white leading-tight">
+                              {post.title}
+                          </h3>
+                          <p className="mt-2 text-sm text-white/80 line-clamp-2">
+                              {post.description}
+                          </p>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <span className="text-xs text-white/60 flex items-center gap-1">
-                                <Clock size={14} /> {post.readTime} dk
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    asChild
-                                    size="sm"
-                                    variant="ghost"
-                                    className="rounded-full text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
-                                >
-                                    <Link href={`/posts/${post.slug}`}>
-                                    Oku <ArrowUpRight className="h-4 w-4 ml-1" />
-                                    </Link>
-                                </Button>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="text-white hover:bg-white/10 rounded-full"
-                                    onClick={() => handleLikeToggle(post.id)}
-                                >
-                                    <motion.div
-                                    animate={
-                                        likedPosts.has(post.id)
-                                        ? { scale: [1, 1.4, 1] }
-                                        : { scale: 1 }
-                                    }
-                                    >
-                                    <Heart
-                                        className={`h-5 w-5 ${likedPosts.has(post.id) ? "text-red-500 fill-current" : ""}`}
-                                    />
-                                    </motion.div>
-                                </Button>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="text-white hover:bg-white/10 rounded-full"
-                                    onClick={() => handleShare(post.title, post.slug)}
-                                >
-                                    <Share2 size={16} />
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.article>
-            ))}
-          </motion.div>
+                          <div className="mt-4 flex items-center justify-between">
+                              <span className="text-xs text-white/60 flex items-center gap-1">
+                                  <Clock size={14} /> {post.readTime} dk
+                              </span>
+                              <div className="flex items-center gap-2">
+                                  <Button
+                                      asChild
+                                      size="sm"
+                                      variant="ghost"
+                                      className="rounded-full text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                                  >
+                                      <Link href={`/posts/${post.slug}`}>
+                                      Oku <ArrowUpRight className="h-4 w-4 ml-1" />
+                                      </Link>
+                                  </Button>
+                                  <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="text-white hover:bg-white/10 rounded-full"
+                                      onClick={() => handleLikeToggle(post.id)}
+                                  >
+                                      <motion.div
+                                      animate={
+                                          likedPosts.has(post.id)
+                                          ? { scale: [1, 1.4, 1] }
+                                          : { scale: 1 }
+                                      }
+                                      >
+                                      <Heart
+                                          className={`h-5 w-5 ${likedPosts.has(post.id) ? "text-red-500 fill-current" : ""}`}
+                                      />
+                                      </motion.div>
+                                  </Button>
+                                  <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="text-white hover:bg-white/10 rounded-full"
+                                      onClick={() => handleShare(post.title, post.slug)}
+                                  >
+                                      <Share2 size={16} />
+                                  </Button>
+                              </div>
+                          </div>
+                      </div>
+                  </motion.article>
+              ))}
+            </motion.div>
+             ) : (
+                !loadingMore && (
+                <div className="text-center py-20">
+                    <p className="text-lg text-muted-foreground">Bu kategoride veya aramanızla eşleşen yazı bulunamadı.</p>
+                </div>
+                )
+            )}
           
           <AnimatePresence>
             {loadingMore && (
@@ -398,3 +406,6 @@ export function CategoryClientPage({
     </>
   );
 }
+
+
+    

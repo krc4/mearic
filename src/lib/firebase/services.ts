@@ -41,8 +41,8 @@ export const ensureUserDocument = async (user: import('firebase/auth').User) => 
         try {
             await setDoc(userRef, {
                 email: user.email,
-                displayName: user.displayName || "Kullanıcı", 
-                photoURL: user.photoURL || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
+                displayName: "Kullanıcı", 
+                photoURL: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`,
                 createdAt: serverTimestamp(),
                 displayNameLastChanged: null,
             });
@@ -554,8 +554,8 @@ export const addAdmin = async (requestingAdminUid: string, email: string): Promi
 
         // If the admins collection is NOT empty, verify the requesting user is an admin.
         if (!isAdminCollectionEmpty) {
-            const perms = await getAdminPermissions(requestingAdminUid);
-            if (!perms.canManageAdmins) {
+            const isRequesterAdmin = await isAdmin(requestingAdminUid);
+            if (!isRequesterAdmin) {
                 return { success: false, message: "Yönetici ekleme yetkiniz yok." };
             }
         }
@@ -580,8 +580,7 @@ export const addAdmin = async (requestingAdminUid: string, email: string): Promi
             permissions: fullAdminPermissions
         });
 
-        const roleMessage = isAdminCollectionEmpty ? "İlk yönetici" : "Yönetici";
-        return { success: true, message: `${email} başarıyla ${roleMessage} olarak atandı.` };
+        return { success: true, message: `${email} başarıyla yönetici olarak atandı.` };
 
     } catch (error) {
         console.error("Error adding admin: ", error);
@@ -773,3 +772,6 @@ export const updateHomepageSettings = async (adminUid: string, settings: Homepag
         return { success: false, message: "Ayarlar güncellenirken bir hata oluştu." };
     }
 };
+
+
+    
