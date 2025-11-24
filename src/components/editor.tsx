@@ -16,10 +16,23 @@ import {
   WrapText,
   Heading1,
   Heading2,
-  Heading3
+  Heading3,
+  Table,
+  Square,
+  ArrowUpToLine,
+  ArrowDownToLine,
+  ArrowLeftToLine,
+  ArrowRightToLine,
+  Trash2,
+  Combine,
+  Split,
+  Rows,
+  Columns
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { useEffect } from 'react';
+import TableKit from '@tiptap/extension-table';
+
 
 const Toolbar = ({ editor }: { editor: EditorType | null }) => {
   if (!editor) {
@@ -97,6 +110,71 @@ const Toolbar = ({ editor }: { editor: EditorType | null }) => {
       >
         <Minus className="h-4 w-4" />
       </Toggle>
+      <span className="border-l border-input h-6 mx-1"></span>
+        <Toggle
+            size="sm"
+            onPressedChange={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+        >
+            <Table className="h-4 w-4" />
+        </Toggle>
+        {editor.can().deleteTable() && (
+            <>
+                <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().addColumnBefore().run()}
+                >
+                    <ArrowLeftToLine className="h-4 w-4" title="Sola sütun ekle" />
+                </Toggle>
+                 <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().addColumnAfter().run()}
+                >
+                    <ArrowRightToLine className="h-4 w-4" title="Sağa sütun ekle" />
+                </Toggle>
+                 <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().deleteColumn().run()}
+                >
+                    <Columns className="h-4 w-4" title="Sütunu sil"/>
+                </Toggle>
+                 <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().addRowBefore().run()}
+                >
+                    <ArrowUpToLine className="h-4 w-4" title="Yukarı satır ekle"/>
+                </Toggle>
+                 <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().addRowAfter().run()}
+                >
+                    <ArrowDownToLine className="h-4 w-4" title="Aşağıya satır ekle"/>
+                </Toggle>
+                 <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().deleteRow().run()}
+                >
+                    <Rows className="h-4 w-4" title="Satırı sil"/>
+                </Toggle>
+                <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().mergeOrSplit().run()}
+                >
+                    <Combine className="h-4 w-4" title="Hücreleri birleştir/ayır"/>
+                </Toggle>
+                <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().toggleHeaderCell().run()}
+                >
+                    <Square className="h-4 w-4" title="Başlık hücresi yap"/>
+                </Toggle>
+                 <Toggle
+                    size="sm"
+                    onPressedChange={() => editor.chain().focus().deleteTable().run()}
+                >
+                    <Trash2 className="h-4 w-4 text-destructive" title="Tabloyu sil" />
+                </Toggle>
+            </>
+        )}
     </div>
   );
 };
@@ -108,11 +186,17 @@ interface EditorProps {
 
 export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
   const editor = useEditor({
-    extensions: [StarterKit.configure({
-        heading: {
-            levels: [1, 2, 3],
-        }
-    })],
+    extensions: [
+        StarterKit.configure({
+            heading: {
+                levels: [1, 2, 3],
+            }
+        }),
+        TableKit.configure({
+            resizable: true,
+            // You can add more table configuration here
+        }),
+    ],
     content: initialContent,
     editorProps: {
         attributes: {
@@ -137,5 +221,3 @@ export const Editor = ({ initialContent = '', onUpdate }: EditorProps) => {
     </div>
   );
 };
-
-    
