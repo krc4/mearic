@@ -106,7 +106,12 @@ export function CategoryClientPage({
     
     // Then, sort the filtered posts
     if (filter === "latest") {
-      return tempPosts.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+      // Ensure createdAt is a comparable value (Date object) before sorting
+      return tempPosts.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+        return dateB - dateA;
+      });
     }
     
     if (filter === "trending") {

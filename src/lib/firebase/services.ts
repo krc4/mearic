@@ -153,7 +153,7 @@ const serializePost = (doc: any): Post => {
         description: data.description,
         views: data.views || 0,
         likes: data.likes || 0,
-        createdAt: createdAt instanceof Timestamp ? createdAt.toDate().toISOString() : createdAt,
+        createdAt: createdAt instanceof Timestamp ? createdAt.toDate().toISOString() : new Date().toISOString(),
         author: data.author,
         authorId: data.authorId,
         authorPhotoURL: data.authorPhotoURL,
@@ -168,9 +168,10 @@ export const getPostsByCategory = async (
 ): Promise<{ posts: Post[], lastVisible: any }> => {
     try {
         const postsRef = collection(db, "posts");
+        // The orderBy clause has been removed to avoid needing a composite index.
+        // Sorting will be handled client-side.
         let constraints: any[] = [
-            where("category", "==", category), 
-            orderBy("createdAt", "desc"),
+            where("category", "==", category),
             limit(postsLimit)
         ];
 
@@ -552,10 +553,10 @@ export const addAdmin = async (requestingAdminUid: string, email: string): Promi
         const adminCountSnapshot = await getCountFromServer(adminsCollection);
         const isAdminCollectionEmpty = adminCountSnapshot.data().count === 0;
 
-        // If the admins collection is NOT empty, verify the requesting user is an admin.
+        // If the admins collection is NOT empty, verify the requesting user is an admin with rights.
         if (!isAdminCollectionEmpty) {
-            const isRequesterAdmin = await isAdmin(requestingAdminUid);
-            if (!isRequesterAdmin) {
+            const perms = await getAdminPermissions(requestingAdminUid);
+            if (!perms.canManageAdmins) {
                 return { success: false, message: "Yönetici ekleme yetkiniz yok." };
             }
         }
